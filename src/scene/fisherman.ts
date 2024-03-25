@@ -28,7 +28,7 @@ export let fishermanState: 'IDLE' | 'CASTING' | 'FISHING' = 'IDLE';
 export async function setupFishermanAsync() {
   const loader = new GLTFLoader();
 
-  const loaded = await loader.loadAsync('/assets/models/fisherman.glb');
+  const loaded = await loader.loadAsync('/models/fisherman.glb');
 
   fisherman = loaded.scene as Group;
 

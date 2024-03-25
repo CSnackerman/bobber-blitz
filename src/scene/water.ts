@@ -5,12 +5,9 @@ import sceneRoot from './scene';
 export const water = new Water(new PlaneGeometry(3000, 3000), {
   textureWidth: 512,
   textureHeight: 512,
-  waterNormals: new TextureLoader().load(
-    'assets/textures/waternormals.jpg',
-    (texture) => {
-      texture.wrapS = texture.wrapT = RepeatWrapping;
-    }
-  ),
+  waterNormals: new TextureLoader().load('/waternormals.jpg', (texture) => {
+    texture.wrapS = texture.wrapT = RepeatWrapping;
+  }),
   sunDirection: new Vector3(),
   sunColor: 0x00007f,
   waterColor: 0x001e0f,
