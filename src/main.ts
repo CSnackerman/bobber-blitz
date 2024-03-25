@@ -15,10 +15,18 @@ import { updateDebug } from './scene/debug';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupCastHandler } from './controls/cast';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
+import { initFirebase } from './core/firebase';
 
-await loadModels();
-init();
-run();
+main().catch((e: Error) => {
+  console.error(e);
+});
+
+async function main() {
+  initFirebase();
+  await loadModels();
+  init();
+  run();
+}
 
 async function loadModels() {
   await Promise.all([

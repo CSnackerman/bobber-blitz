@@ -9,7 +9,7 @@ let bobber: Group;
 export async function setupBobberAsync() {
   const gltfLoader = new GLTFLoader();
 
-  const gltf = await gltfLoader.loadAsync('assets/models/bobber.glb');
+  const gltf = await gltfLoader.loadAsync('/assets/models/bobber.glb');
 
   bobber = gltf.scene;
 

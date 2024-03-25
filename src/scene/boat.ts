@@ -8,7 +8,7 @@ let boat: Object3D<Object3DEventMap>;
 export async function setupBoatAsync() {
   const loader = new GLTFLoader();
 
-  const gltfLoaded = await loader.loadAsync('assets/models/boat.glb');
+  const gltfLoaded = await loader.loadAsync('/assets/models/boat.glb');
 
   boat = gltfLoaded.scene;
 
