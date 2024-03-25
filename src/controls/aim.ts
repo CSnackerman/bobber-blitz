@@ -1,0 +1,41 @@
+import {
+  Mesh,
+  MeshStandardMaterial,
+  Raycaster,
+  TorusGeometry,
+  Vector3,
+} from 'three';
+import { pointer } from '../events/pointer';
+import sceneRoot from '../scene/scene';
+import { water } from '../scene/water';
+import { camera } from '../scene/camera';
+import { degToRad } from 'three/src/math/MathUtils.js';
+
+export const aimPoint = new Vector3();
+export let isAimingAtWater: boolean;
+
+const raycaster = new Raycaster();
+raycaster.params.Points.threshold = 0.1;
+
+const reticle = new Mesh(
+  new TorusGeometry(3, 0.3).rotateX(degToRad(90)),
+  new MeshStandardMaterial({ color: 'red', transparent: true, opacity: 0.8 })
+);
+
+sceneRoot.add(reticle);
+
+export function postitionReticle() {
+  raycaster.setFromCamera(pointer, camera);
+  const intersection = raycaster.intersectObject(water, false);
+
+  if (intersection.length) {
+    const info = intersection[0];
+    reticle.position.copy(info.point);
+    aimPoint.copy(info.point);
+    isAimingAtWater = true;
+    // renderer.domElement.style.cursor = 'none';
+  } else {
+    isAimingAtWater = false;
+    // renderer.domElement.style.cursor = 'default';
+  }
+}
