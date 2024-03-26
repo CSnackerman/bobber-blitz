@@ -58,7 +58,19 @@ export function hideBobber() {
   bobber.visible = false;
 }
 
-export function plunkBobber() {
+function plunkBobber() {
   plunkAnimAction.reset();
-  plunkAnimAction.play().repetitions = 1;
+  plunkAnimAction.play().repetitions = 3;
+}
+
+let plunkTimerId: NodeJS.Timeout;
+
+export function setPlunkTimer() {
+  clearTimeout(plunkTimerId);
+  const min = 5000;
+  const max = 11000;
+  plunkTimerId = setTimeout(
+    () => plunkBobber(),
+    Math.random() * (max - min) + min
+  );
 }

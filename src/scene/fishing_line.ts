@@ -6,7 +6,11 @@ import { getTopBobberPoint } from './bobber';
 let fishingLine: Line;
 
 export function setupFishingLine() {
-  const mat = new LineBasicMaterial({ color: '#a9d665' });
+  const mat = new LineBasicMaterial({
+    color: '#a9d665',
+    transparent: true,
+    opacity: 0.3,
+  });
 
   const geometry = new BufferGeometry().setFromPoints([
     new Vector3(0, 0, 0),
