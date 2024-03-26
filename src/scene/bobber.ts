@@ -1,10 +1,19 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import sceneRoot from './scene';
-import { Group, Vector3 } from 'three';
-import { getElapsedTime } from '../core/time';
+import {
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  Group,
+  Vector3,
+} from 'three';
+import { delta, getElapsedTime } from '../core/time';
 import { castPoint } from '../controls/cast';
 
 let bobber: Group;
+
+let bobberMixer: AnimationMixer;
+let plunkAnimAction: AnimationAction;
 
 export async function setupBobberAsync() {
   const gltfLoader = new GLTFLoader();
@@ -18,6 +27,12 @@ export async function setupBobberAsync() {
   bobber.visible = false;
 
   sceneRoot.add(bobber);
+
+  // setup animation
+  bobberMixer = new AnimationMixer(bobber);
+  const animations = gltf.animations;
+  const clip = AnimationClip.findByName(animations, 'plunk');
+  plunkAnimAction = bobberMixer.clipAction(clip);
 }
 
 export function getTopBobberPoint(): Vector3 {
@@ -27,6 +42,7 @@ export function getTopBobberPoint(): Vector3 {
 }
 
 export function updateBobber() {
+  bobberMixer.update(delta);
   bobber.position.y = Math.sin(getElapsedTime() * 3.0) * 0.4; // side-to-side
 }
 
@@ -40,4 +56,9 @@ export function showBobber() {
 
 export function hideBobber() {
   bobber.visible = false;
+}
+
+export function plunkBobber() {
+  plunkAnimAction.reset();
+  plunkAnimAction.play().repetitions = 1;
 }

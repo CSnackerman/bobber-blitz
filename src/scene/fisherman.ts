@@ -15,6 +15,7 @@ import {
   getTopBobberPoint,
   hideBobber,
   plopBobber,
+  plunkBobber,
   showBobber,
 } from './bobber';
 
@@ -44,6 +45,9 @@ export async function setupFishermanAsync() {
   fishermanMixer.addEventListener('finished', () => {
     fishermanState = 'FISHING';
     showBobber();
+    setTimeout(() => {
+      plunkBobber();
+    }, 5000);
   });
   const animations = loaded.animations;
   const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
