@@ -1,35 +1,39 @@
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import sceneRoot from "./scene";
-import { AnimationAction, AnimationClip, AnimationMixer, Group } from "three";
-import { delta } from "../core/time";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import sceneRoot from './scene';
+import { AnimationAction, AnimationClip, AnimationMixer, Group } from 'three';
+import { delta } from '../core/time';
+import { getRandomFloat, getRandomInt } from '../util/random';
 
 let fish: Group;
 
 let fishMixer: AnimationMixer;
 let flopAction: AnimationAction;
+let flopPlaybackSpeed = 2.5;
 
 export async function setupFishAsync() {
   const gltfLoader = new GLTFLoader();
 
-  const gltf = await gltfLoader.loadAsync("/models/fish.glb");
+  const gltf = await gltfLoader.loadAsync('/models/fish.glb');
 
   fish = gltf.scene;
 
-  fish.scale.set(2, 2, 2);
-  fish.position.x = 50;
-  fish.visible = false;
+  fish.scale.set(10, 10, 10);
+  fish.position.y = 50;
+  // fish.visible = false;
 
   sceneRoot.add(fish);
 
   // setup animation
   fishMixer = new AnimationMixer(fish);
   const animations = gltf.animations;
-  const clip = AnimationClip.findByName(animations, "flop");
+  const clip = AnimationClip.findByName(animations, 'flop');
   flopAction = fishMixer.clipAction(clip);
+
+  flopRandomly();
 }
 
 export function updateFish() {
-  fishMixer.update(delta);
+  fishMixer.update(delta * flopPlaybackSpeed);
 }
 
 export function showFish() {
@@ -40,19 +44,48 @@ export function hideFish() {
   fish.visible = false;
 }
 
-function flopFish() {
-  flopAction.reset();
-  flopAction.play().repetitions = 10;
+function setFlopPlaybackSpeed(s: number) {
+  if (s <= 0) {
+    console.info(
+      `Warn: flopPlaybackSpeed cannot be negative. Value unchanged. (${flopPlaybackSpeed})`
+    );
+    return;
+  }
+  flopPlaybackSpeed = s;
 }
 
-let plunkTimerId: NodeJS.Timeout;
+let flopTimeoutId: NodeJS.Timeout;
+export function flopRandomly() {
+  const minSessions = 3;
+  const maxSessions = 10;
+  let nFlopSessions = getRandomInt(minSessions, maxSessions);
 
-export function setFlopInterval() {
-  clearTimeout(plunkTimerId);
-  const min = 5000;
-  const max = 11000;
-  plunkTimerId = setTimeout(
-    () => flopFish(),
-    Math.random() * (max - min) + min
-  );
+  function getNextFlopTime(): number {
+    const minDelay = 200;
+    const maxDelay = 2000;
+    return getRandomInt(minDelay, maxDelay);
+  }
+
+  function flopRecursively() {
+    setFlopPlaybackSpeed(getRandomFloat(0.5, 3));
+    flopFish(getRandomInt(1, 7));
+
+    if (nFlopSessions < 1) {
+      clearTimeout(flopTimeoutId);
+      return;
+    }
+    nFlopSessions--;
+
+    flopTimeoutId = setTimeout(() => {
+      flopFish(getRandomInt(1, 7));
+      flopRecursively();
+    }, getNextFlopTime());
+  }
+
+  flopRecursively();
+}
+
+function flopFish(flopCount: number) {
+  flopAction.reset();
+  flopAction.play().repetitions = flopCount;
 }

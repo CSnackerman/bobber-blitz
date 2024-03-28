@@ -15,6 +15,7 @@ import { updateDebug } from './scene/debug';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupCastHandler } from './controls/cast';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
+import { setupFishAsync, updateFish } from './scene/fish';
 // import { initFirebase } from './core/firebase';
 
 main().catch((e: Error) => {
@@ -33,6 +34,7 @@ async function loadModels() {
     setupBoatAsync(),
     setupFishermanAsync(),
     setupBobberAsync(),
+    setupFishAsync(),
   ]);
 }
 
@@ -57,6 +59,7 @@ function run() {
   updateBoat();
   updateFisherman();
   updateBobber();
+  updateFish();
   postitionReticle();
 
   updateDebug();

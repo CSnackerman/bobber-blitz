@@ -9,6 +9,7 @@ import {
 } from 'three';
 import { delta, getElapsedTime } from '../core/time';
 import { castPoint } from '../controls/cast';
+import { getRandomInt } from '../util/random';
 
 let bobber: Group;
 
@@ -69,8 +70,5 @@ export function setPlunkTimer() {
   clearTimeout(plunkTimerId);
   const min = 5000;
   const max = 11000;
-  plunkTimerId = setTimeout(
-    () => plunkBobber(),
-    Math.random() * (max - min) + min
-  );
+  plunkTimerId = setTimeout(plunkBobber, getRandomInt(min, max));
 }
