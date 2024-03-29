@@ -1,6 +1,7 @@
 import { WebGLRenderer, ACESFilmicToneMapping } from 'three';
 
 export const renderer = new WebGLRenderer({
+  canvas: document.getElementById('c') as HTMLCanvasElement,
   antialias:
     navigator.userAgent.includes('Windows') ||
     navigator.userAgent.includes('Mac') ||
@@ -8,9 +9,7 @@ export const renderer = new WebGLRenderer({
 });
 
 export function setupRenderer() {
-  renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.5;
-  document.body.appendChild(renderer.domElement);
+  renderer.toneMappingExposure = 1;
 }
