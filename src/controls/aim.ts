@@ -24,6 +24,14 @@ const reticle = new Mesh(
 
 sceneRoot.add(reticle);
 
+export function showReticle() {
+  reticle.visible = true;
+}
+
+export function hideReticle() {
+  reticle.visible = false;
+}
+
 export function postitionReticle() {
   raycaster.setFromCamera(pointer, camera);
   const intersection = raycaster.intersectObject(water, false);
@@ -33,9 +41,7 @@ export function postitionReticle() {
     reticle.position.copy(info.point);
     aimPoint.copy(info.point);
     isAimingAtWater = true;
-    // renderer.domElement.style.cursor = 'none';
   } else {
     isAimingAtWater = false;
-    // renderer.domElement.style.cursor = 'default';
   }
 }

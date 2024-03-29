@@ -10,6 +10,8 @@ import {
 import { delta, getElapsedTime } from '../core/time';
 import { castPoint } from '../controls/cast';
 import { getRandomInt } from '../util/random';
+import { setFishermanState_FISH_ON, setFishermanState_IDLE } from './fisherman';
+import { camera } from './camera';
 
 let bobber: Group;
 
@@ -60,8 +62,14 @@ export function hideBobber() {
 }
 
 function plunkBobber() {
+  setFishermanState_FISH_ON();
   plunkAnimAction.reset();
   plunkAnimAction.play().repetitions = 3;
+
+  // on animation finished
+  const onFinished = setFishermanState_IDLE;
+  if (!bobberMixer.hasEventListener('finished', onFinished))
+    bobberMixer.addEventListener('finished', onFinished);
 }
 
 let plunkTimerId: NodeJS.Timeout;
@@ -71,4 +79,17 @@ export function setPlunkTimer() {
   const min = 5000;
   const max = 11000;
   plunkTimerId = setTimeout(plunkBobber, getRandomInt(min, max));
+}
+
+export function getBobberScreenCoords() {
+  const worldPosition = new Vector3();
+  bobber.getWorldPosition(worldPosition);
+
+  worldPosition.project(camera);
+
+  return new Vector3(
+    ((worldPosition.x + 1) / 2) * window.innerWidth,
+    ((-worldPosition.y + 1) / 2) * window.innerHeight,
+    1
+  );
 }

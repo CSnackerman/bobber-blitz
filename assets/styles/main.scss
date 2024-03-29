@@ -11,3 +11,33 @@ body {
   background-color: rgb(69, 0, 0);
   overflow: clip;
 }
+
+#fish_on {
+  visibility: hidden;
+  position: fixed;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  color: orangered;
+
+  @keyframes glimmer {
+    from {
+      filter: hue-rotate(0deg);
+    }
+    to {
+      filter: hue-rotate(360deg);
+    }
+  }
+
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.5);
+    }
+  }
+
+  animation: glimmer 1.5s linear infinite alternate,
+    pulse 300ms linear infinite alternate;
+}

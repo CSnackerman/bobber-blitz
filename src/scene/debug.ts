@@ -19,6 +19,7 @@ let prevFishermanState: string = '';
 export function updateDebug() {
   updateTrackingOrbs();
 
+  // state
   if (fishermanState != prevFishermanState) {
     console.log('fishermanState:', fishermanState);
   }

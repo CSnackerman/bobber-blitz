@@ -25,7 +25,7 @@ export function setupFishingLine() {
 }
 
 export function updateFishingLine() {
-  if (fishermanState === 'FISHING') {
+  if (fishermanState !== 'IDLE' && fishermanState !== 'CASTING') {
     fishingLine.visible = true;
     fishingLine.geometry.setFromPoints([
       getFishingLineAnchorPoint(),

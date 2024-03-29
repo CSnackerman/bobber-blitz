@@ -16,6 +16,7 @@ import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupCastHandler } from './controls/cast';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { setupFishAsync, updateFish } from './scene/fish';
+import { setupUI, updateUI } from './ui/ui';
 // import { initFirebase } from './core/firebase';
 
 main().catch((e: Error) => {
@@ -48,6 +49,7 @@ function init() {
   setupSky();
   setupWater();
   setupLights();
+  setupUI();
 }
 
 function run() {
@@ -61,6 +63,7 @@ function run() {
   updateBobber();
   updateFish();
   postitionReticle();
+  updateUI();
 
   updateDebug();
 
