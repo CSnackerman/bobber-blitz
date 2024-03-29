@@ -25,9 +25,17 @@ let fisherman: Group;
 let fishermanMixer: AnimationMixer;
 let castAnimAction: AnimationAction;
 
-type FishermanState = 'IDLE' | 'CASTING' | 'FISHING' | 'FISH_ON' | 'REELING';
+export type FishermanState =
+  | 'IDLE'
+  | 'CASTING'
+  | 'FISHING'
+  | 'FISH_ON'
+  | 'REELING';
 
 export let fishermanState: FishermanState = 'IDLE';
+export function getFishermanState() {
+  return fishermanState;
+}
 export function setFishermanState(state: FishermanState) {
   fishermanState = state;
 }

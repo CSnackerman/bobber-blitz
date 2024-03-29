@@ -1,4 +1,5 @@
 import { getBobberScreenCoords } from '../scene/bobber';
+import { isFISH_ON } from '../scene/fisherman';
 
 const template = document.getElementById(
   'template_fish_on'
@@ -11,6 +12,8 @@ export function setupUI_fishOn() {
 }
 
 export function updateUI_fishOn() {
+  if (isFISH_ON() === false) return;
+
   const bobberPosition = getBobberScreenCoords();
   const rect = fishOn_H3.getBoundingClientRect();
   const halfWidth = rect.width / 2;

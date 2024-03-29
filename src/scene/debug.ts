@@ -6,7 +6,6 @@ import {
   Vector3,
 } from 'three';
 import sceneRoot from './scene';
-import { fishermanState } from './fisherman';
 
 interface TrackingOrb {
   meshToTrack: Object3D;
@@ -14,16 +13,9 @@ interface TrackingOrb {
 }
 
 const trackingOrbs: TrackingOrb[] = [];
-let prevFishermanState: string = '';
 
 export function updateDebug() {
   updateTrackingOrbs();
-
-  // state
-  if (fishermanState != prevFishermanState) {
-    console.log('fishermanState:', fishermanState);
-  }
-  prevFishermanState = fishermanState;
 }
 
 export function createTrackingOrb(meshToTrack: undefined | Object3D) {

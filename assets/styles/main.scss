@@ -58,9 +58,10 @@ body {
   position:fixed;
   top: 0;
   right: 0;
-  font-size: 0.5em;
+  max-width: 25vw;
+  font-size: 0.6em;
   color: cyan;
   background-color: black;
 
-  opacity: 0.35;
+  opacity: 0.5;
 }

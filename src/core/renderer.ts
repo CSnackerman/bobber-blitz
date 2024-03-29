@@ -1,11 +1,9 @@
 import { WebGLRenderer, ACESFilmicToneMapping } from 'three';
+import { isMobile } from '../util/device';
 
 export const renderer = new WebGLRenderer({
   canvas: document.getElementById('c') as HTMLCanvasElement,
-  antialias:
-    navigator.userAgent.includes('Windows') ||
-    navigator.userAgent.includes('Mac') ||
-    navigator.userAgent.includes('Linux'),
+  antialias: isMobile() ? false : true,
 });
 
 export function setupRenderer() {
