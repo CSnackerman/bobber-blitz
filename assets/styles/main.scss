@@ -18,6 +18,11 @@ body {
 
 /* UI */
 
+#stats {
+  transform-origin: top left;
+  transform: scale(0.75);
+}
+
 #fish_on {
   visibility: hidden;
   position: fixed;
@@ -46,4 +51,16 @@ body {
 
   animation: glimmer 1.5s linear infinite alternate,
     pulse 300ms linear infinite alternate;
+}
+
+#debug {
+  padding: 3px;
+  position:fixed;
+  top: 0;
+  right: 0;
+  font-size: 0.5em;
+  color: cyan;
+  background-color: black;
+
+  opacity: 0.35;
 }

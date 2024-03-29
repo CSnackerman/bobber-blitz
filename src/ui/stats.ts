@@ -3,7 +3,7 @@ import Stats from 'three/addons/libs/stats.module.js';
 const stats = new Stats();
 
 export function setupStats() {
-  (stats.dom.firstChild as HTMLCanvasElement).style.cursor = 'default'
+  stats.dom.id = 'stats';
   document.body.appendChild(stats.dom);
 }
 

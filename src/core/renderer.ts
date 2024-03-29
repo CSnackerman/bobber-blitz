@@ -9,6 +9,7 @@ export const renderer = new WebGLRenderer({
 });
 
 export function setupRenderer() {
+  renderer.setPixelRatio(devicePixelRatio > 2 ? 2 : devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
