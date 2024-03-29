@@ -17,14 +17,14 @@ import { setupCastHandler } from './controls/cast';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupUI, updateUI } from './ui/ui';
-// import { initFirebase } from './core/firebase';
+import { initFirebase } from './core/firebase';
 
 main().catch((e: Error) => {
   console.error(e);
 });
 
 async function main() {
-  // initFirebase();
+  initFirebase();
   await loadModels();
   init();
   run();
