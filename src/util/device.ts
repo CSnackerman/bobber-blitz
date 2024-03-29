@@ -3,6 +3,8 @@ export function isMobile() {
   return ua.search(/android|mobile|iphone/i) !== -1;
 }
 
-export function getDeviceType() {
+export type DeviceType = 'mobile' | 'desktop';
+
+export function getDeviceType(): DeviceType {
   return isMobile() ? 'mobile' : 'desktop';
 }
