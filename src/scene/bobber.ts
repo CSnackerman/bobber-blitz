@@ -81,6 +81,12 @@ export function setPlunkTimer() {
   plunkTimerId = setTimeout(plunkBobber, getRandomInt(min, max));
 }
 
+export function cancelBobberPlunk() {
+  clearTimeout(plunkTimerId);
+  plunkAnimAction.stop();
+  plunkAnimAction.reset();
+}
+
 export function getBobberScreenCoords() {
   const worldPosition = new Vector3();
   bobber.getWorldPosition(worldPosition);

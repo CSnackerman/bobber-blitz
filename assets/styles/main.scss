@@ -53,9 +53,58 @@ body {
     pulse 300ms linear infinite alternate;
 }
 
+$line_tension_border_radius: 2em;
+#line_tension {
+  pointer-events: none;
+  display: block;
+  position: fixed;
+  bottom: 5px;
+  right: 3vw;
+  width: 0.5em;
+  height: 15em;
+  background-color: #00000080;
+  border-radius: $line_tension_border_radius;
+  border: 1px solid black;
+  overflow: clip;
+
+  & > div {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    width: 98%;
+    height: 75%;
+    transform: translateX(1%);
+    background-color: red;
+    border-radius: $line_tension_border_radius;
+  }
+}
+
+#fish_health {
+  pointer-events: none;
+  display: block;
+  position: fixed;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-3em);
+  width: 5em;
+  height: 0.4em;
+  background-color: #000000;
+  border: 1px solid green;
+  overflow: clip;
+
+  & > div {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 75%;
+    height: 98%;
+    background-color: yellowgreen;
+  }
+}
+
 #debug {
   padding: 3px;
-  position:fixed;
+  position: fixed;
   top: 0;
   right: 0;
   max-width: 25vw;

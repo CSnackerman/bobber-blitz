@@ -13,11 +13,11 @@ import { postitionReticle } from './controls/aim';
 import { updateTimeDelta } from './core/time';
 import { updateDebug } from './scene/debug';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
-import { setupCastHandler } from './controls/cast';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { setupFishAsync, updateFish } from './scene/fish';
-import { setupUI, updateUI } from './ui/ui';
+import { setupUI, updateUI } from './ui';
 import { initFirebase } from './core/firebase';
+import { setupControls } from './controls';
 
 main().catch((e: Error) => {
   console.error(e);
@@ -44,7 +44,7 @@ function init() {
   setupCamera();
   setupResizeHandler();
   setupPointerHandler();
-  setupCastHandler();
+  setupControls();
   setupStats();
   setupSky();
   setupWater();

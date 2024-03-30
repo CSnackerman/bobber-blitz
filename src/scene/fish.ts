@@ -1,6 +1,12 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import sceneRoot from './scene';
-import { AnimationAction, AnimationClip, AnimationMixer, Group } from 'three';
+import {
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  Group,
+  Vector3,
+} from 'three';
 import { delta } from '../core/time';
 import { getRandomFloat, getRandomInt } from '../util/random';
 
@@ -17,9 +23,8 @@ export async function setupFishAsync() {
 
   fish = gltf.scene;
 
-  fish.scale.set(10, 10, 10);
-  fish.position.y = 50;
-  // fish.visible = false;
+  setRandomScale();
+  fish.visible = false;
 
   sceneRoot.add(fish);
 
@@ -88,4 +93,13 @@ export function flopRandomly() {
 function flopFish(flopCount: number) {
   flopAction.reset();
   flopAction.play().repetitions = flopCount;
+}
+
+export function setFishPosition(p: Vector3) {
+  fish.position.copy(p);
+}
+
+function setRandomScale() {
+  const scale = getRandomFloat(0.75, 2.2);
+  fish.scale.set(scale, scale, scale);
 }

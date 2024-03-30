@@ -8,3 +8,7 @@ export type DeviceType = 'mobile' | 'desktop';
 export function getDeviceType(): DeviceType {
   return isMobile() ? 'mobile' : 'desktop';
 }
+
+export function getDeviceOrientation() {
+  return screen.orientation.type;
+}

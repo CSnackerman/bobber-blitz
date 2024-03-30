@@ -12,7 +12,7 @@ export function setupUI_fishOn() {
 }
 
 export function updateUI_fishOn() {
-  if (isFISH_ON() === false) return;
+  if (!isFISH_ON()) return;
 
   const bobberPosition = getBobberScreenCoords();
   const rect = fishOn_H3.getBoundingClientRect();

@@ -12,6 +12,7 @@ import { degToRad } from 'three/src/math/MathUtils.js';
 import { aimPoint, showReticle } from '../controls/aim';
 import { delta } from '../core/time';
 import {
+  cancelBobberPlunk,
   getTopBobberPoint,
   hideBobber,
   plopBobber,
@@ -19,6 +20,7 @@ import {
   showBobber,
 } from './bobber';
 import { hideUI_fishOn, showUI_fishOn } from '../ui/ui_fish_on';
+import { isSpaceDown } from '../controls/reel';
 
 let fisherman: Group;
 
@@ -71,6 +73,9 @@ export function setFishermanState_FISH_ON() {
 
 export function setFishermanState_REELING() {
   setFishermanState('REELING');
+  hideUI_fishOn();
+  hideBobber();
+  cancelBobberPlunk();
 }
 
 export async function setupFishermanAsync() {
@@ -95,10 +100,14 @@ export async function setupFishermanAsync() {
 }
 
 export function updateFisherman() {
-  if (fishermanState === 'IDLE') {
+  if (isIDLE()) {
     fisherman.lookAt(aimPoint);
   } else {
     fisherman.lookAt(getTopBobberPoint());
+  }
+
+  if (isFISH_ON() && isSpaceDown) {
+    setFishermanState_REELING();
   }
 
   fishermanMixer.update(delta * 3);
@@ -115,7 +124,7 @@ export function getFishingLineAnchorPoint(): Vector3 {
 
 export function playCastAnimation() {
   // play animation if not in middle of casting
-  if (isCASTING() === false) {
+  if (!isCASTING()) {
     setFishermanState_CASTING();
     castAnimAction.reset();
   }
