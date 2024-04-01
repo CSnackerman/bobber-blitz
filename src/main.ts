@@ -11,7 +11,7 @@ import { setupSky } from './scene/sky';
 import { setupPointerHandler } from './events/pointer';
 import { postitionReticle } from './controls/aim';
 import { updateTimeDelta } from './core/time';
-import { updateDebug } from './scene/debug';
+import { updateDebug } from './scene/debug_orbs';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { setupFishAsync, updateFish } from './scene/fish';
