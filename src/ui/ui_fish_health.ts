@@ -21,6 +21,7 @@ export function setupUI_fishHealth() {
   document.body.appendChild(fishHealth_div);
   updateBarColor();
   updateBarProgress();
+  hideUI_fishHealth();
 }
 
 export function updateUI_fishHealth() {

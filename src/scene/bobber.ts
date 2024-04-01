@@ -61,6 +61,10 @@ export function hideBobber() {
   bobber.visible = false;
 }
 
+export function getBobberPosition() {
+  return bobber.position;
+}
+
 function plunkBobber() {
   setFishermanState_FISH_ON();
   plunkAnimAction.reset();

@@ -18,6 +18,7 @@ import { setupFishAsync, updateFish } from './scene/fish';
 import { setupUI, updateUI } from './ui';
 import { initFirebase } from './core/firebase';
 import { setupControls } from './controls';
+import { updateFishingLine } from './scene/fishing_line';
 
 main().catch((e: Error) => {
   console.error(e);
@@ -60,6 +61,7 @@ function run() {
   updateWater();
   updateBoat();
   updateFisherman();
+  updateFishingLine();
   updateBobber();
   updateFish();
   postitionReticle();

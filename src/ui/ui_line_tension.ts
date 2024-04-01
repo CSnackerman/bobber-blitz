@@ -21,6 +21,7 @@ export function setupUI_lineTension() {
   document.body.appendChild(lineTension_div);
   updateBarColor();
   updateBarProgress();
+  hideUI_lineTension();
 }
 
 export function updateUI_lineTension() {

@@ -1,7 +1,15 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
 import sceneRoot from './scene';
-import { fishermanState, getFishingLineAnchorPoint } from './fisherman';
+import {
+  getFishingLineAnchorPoint,
+  isCASTING,
+  isFISHING,
+  isFISH_ON,
+  isIDLE,
+  isREELING,
+} from './fisherman';
 import { getTopBobberPoint } from './bobber';
+import { getFishPosition } from './fish';
 
 let fishingLine: Line;
 
@@ -25,14 +33,26 @@ export function setupFishingLine() {
 }
 
 export function updateFishingLine() {
-  if (fishermanState !== 'IDLE' && fishermanState !== 'CASTING') {
+  if (isFISHING() || isFISH_ON()) {
     fishingLine.visible = true;
     fishingLine.geometry.setFromPoints([
       getFishingLineAnchorPoint(),
       getTopBobberPoint(),
     ]);
-  } else {
+    return;
+  }
+
+  if (isREELING()) {
+    fishingLine.geometry.setFromPoints([
+      getFishingLineAnchorPoint(),
+      getFishPosition(),
+    ]);
+    return;
+  }
+
+  if (isIDLE() || isCASTING()) {
     fishingLine.visible = false;
+    return;
   }
 }
 

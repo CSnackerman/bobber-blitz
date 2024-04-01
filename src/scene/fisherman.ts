@@ -7,8 +7,7 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import sceneRoot from './scene';
-import { setupFishingLine, updateFishingLine } from './fishing_line';
-import { degToRad } from 'three/src/math/MathUtils.js';
+import { setupFishingLine } from './fishing_line';
 import { aimPoint, showReticle } from '../controls/aim';
 import { delta } from '../core/time';
 import {
@@ -21,6 +20,10 @@ import {
 } from './bobber';
 import { hideUI_fishOn, showUI_fishOn } from '../ui/ui_fish_on';
 import { isSpaceDown } from '../controls/reel';
+import { hideUI_fishHealth, showUI_fishHealth } from '../ui/ui_fish_health';
+import { hideUI_lineTension, showUI_lineTension } from '../ui/ui_line_tension';
+import { getFishPosition, moveFishBelowBobber } from './fish';
+import { STATE_CHANGE_EVENT, eventManager } from '../events/event_manager';
 
 let fisherman: Group;
 
@@ -35,11 +38,13 @@ export type FishermanState =
   | 'REELING';
 
 export let fishermanState: FishermanState = 'IDLE';
+
 export function getFishermanState() {
   return fishermanState;
 }
 export function setFishermanState(state: FishermanState) {
   fishermanState = state;
+  eventManager.dispatchEvent(STATE_CHANGE_EVENT);
 }
 export const isIDLE = () => fishermanState === 'IDLE';
 export const isCASTING = () => fishermanState === 'CASTING';
@@ -52,12 +57,15 @@ export function setFishermanState_IDLE() {
   hideBobber();
   showReticle();
   hideUI_fishOn();
+  hideUI_fishHealth();
+  hideUI_lineTension();
 }
 
 export function setFishermanState_CASTING() {
   setFishermanState('CASTING');
   hideBobber();
   plopBobber();
+  hideUI_fishHealth();
 }
 
 export function setFishermanState_FISHING() {
@@ -73,9 +81,12 @@ export function setFishermanState_FISH_ON() {
 
 export function setFishermanState_REELING() {
   setFishermanState('REELING');
+  moveFishBelowBobber();
   hideUI_fishOn();
   hideBobber();
   cancelBobberPlunk();
+  showUI_fishHealth();
+  showUI_lineTension();
 }
 
 export async function setupFishermanAsync() {
@@ -86,7 +97,6 @@ export async function setupFishermanAsync() {
   fisherman = loaded.scene as Group;
 
   fisherman.scale.set(10, 10, 10);
-  fisherman.rotation.y = degToRad(90);
 
   sceneRoot.add(fisherman);
 
@@ -97,21 +107,31 @@ export async function setupFishermanAsync() {
   const animations = loaded.animations;
   const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
   castAnimAction = fishermanMixer.clipAction(castAnimClip);
+  fishermanMixer.addEventListener('finished', setFishermanState_FISHING);
 }
 
 export function updateFisherman() {
+  fishermanMixer.update(delta * 3);
+
   if (isIDLE()) {
     fisherman.lookAt(aimPoint);
-  } else {
+    return;
+  }
+
+  if (isCASTING() || isFISHING()) {
     fisherman.lookAt(getTopBobberPoint());
+    return;
   }
 
   if (isFISH_ON() && isSpaceDown) {
     setFishermanState_REELING();
+    return;
   }
 
-  fishermanMixer.update(delta * 3);
-  updateFishingLine();
+  if (isREELING()) {
+    fisherman.lookAt(getFishPosition());
+    return;
+  }
 }
 
 // util
@@ -130,15 +150,6 @@ export function playCastAnimation() {
   }
 
   castAnimAction.play().repetitions = 1;
-
-  // on finished
-  const onFinished = setFishermanState_FISHING;
-
-  const hasOnFinished = fishermanMixer.hasEventListener('finished', onFinished);
-
-  if (!hasOnFinished) {
-    fishermanMixer.addEventListener('finished', onFinished);
-  }
 }
 
 export function castAnimationIsPlaying() {
