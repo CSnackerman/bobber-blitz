@@ -2,7 +2,7 @@ import { PlaneGeometry, RepeatWrapping, TextureLoader, Vector3 } from 'three';
 import { Water } from 'three/addons/objects/Water.js';
 import sceneRoot from './scene';
 
-export const water = new Water(new PlaneGeometry(3000, 3000), {
+export const water = new Water(new PlaneGeometry(10000, 10000), {
   textureWidth: 512,
   textureHeight: 512,
   waterNormals: new TextureLoader().load('/waternormals.jpg', (texture) => {
