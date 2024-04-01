@@ -11,7 +11,7 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
   sunDirection: new Vector3(),
   sunColor: 0x00007f,
   waterColor: 0x001e0f,
-  distortionScale: 3,
+  distortionScale: 5,
   fog: undefined,
 });
 
