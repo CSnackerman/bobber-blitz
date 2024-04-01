@@ -7,3 +7,9 @@ export function getRandomInt(min: number, max: number) {
 export function getRandomFloat(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
+
+export function getRandomColorHex() {
+  const max = 16777215;
+  const randColor = getRandomInt(0, max);
+  return '#' + randColor.toString(16);
+}

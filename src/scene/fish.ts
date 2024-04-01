@@ -5,14 +5,17 @@ import {
   AnimationClip,
   AnimationMixer,
   Group,
-  Vector2,
   Vector3,
 } from 'three';
 import { delta } from '../core/time';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getBobberPosition } from './bobber';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { eventManager, STATE_CHANGE_EVENT } from '../events/event_manager';
+import { getFishermanPosition } from './fisherman';
+import {
+  addListener_HOOK_FISH,
+  dispatch_STATE_CHANGE,
+} from '../events/event_manager';
 
 let fish: Group;
 
@@ -22,18 +25,18 @@ let flopPlaybackSpeed = 2.5;
 
 const swimSpeed = 30;
 
-export type FishState = 'FLOPPING' | 'SWIMMING' | 'IDLE';
+export type FishState = 'SWIMMING' | 'FLOPPING' | 'IDLE';
 let fishState: FishState = 'IDLE';
 
-export const isFLOPPING = () => fishState === 'FLOPPING';
 export const isSWIMMING = () => fishState === 'SWIMMING';
+export const isFLOPPING = () => fishState === 'FLOPPING';
 export const isIDLE = () => fishState === 'IDLE';
 
 export const getFishState = () => fishState;
 
 export function setFishState(s: FishState) {
   fishState = s;
-  eventManager.dispatchEvent(STATE_CHANGE_EVENT);
+  dispatch_STATE_CHANGE();
 }
 
 export function setFishState_FLOPPING() {
@@ -54,9 +57,9 @@ export async function setupFishAsync() {
   fish = gltf.scene;
 
   setRandomScale(2, 5);
-  // fish.visible = false;
-  setFishPosition(new Vector3(5, 2, 50));
-  fish.lookAt(new Vector3(0, 2, 0));
+  setFishPosition(new Vector3(0, 2, 50));
+
+  setFishState_IDLE();
   sceneRoot.add(fish);
 
   // setup animation
@@ -70,14 +73,13 @@ export async function setupFishAsync() {
     flopTimeoutId = null;
   });
 
-  flopRandomly();
+  // event handlers
+  addListener_HOOK_FISH(onHook);
 }
 
 export function updateFish() {
-  if (!fish.visible) return;
-
   if (isIDLE()) {
-    flopRandomly();
+    return;
   }
 
   if (swimDirectionChangeTimeoutId === null) {
@@ -148,39 +150,50 @@ function swimForward() {
   fish.position.addScaledVector(v, swimSpeed * delta);
 }
 
-function setDirectionRandomlyAwayFromFisherman(arc: number) {
-  const fisherman2d = new Vector2(0, 0);
-  const fish2d = new Vector2(fish.position.x, fish.position.z);
-  const angleBetween = fisherman2d.angleTo(fish2d);
-
-  const arcRadians = degToRad(arc);
-  const adjusted =
-    angleBetween + getRandomFloat(-arcRadians / 2, arcRadians / 2);
-
-  console.log('ang', angleBetween);
-  console.log('adj', adjusted);
-
-  fish.rotation.set(fish.rotation.x, adjusted, fish.rotation.z);
-}
-
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
 
 function changeSwimDirections() {
   if (swimDirectionChangeTimeoutId !== null) return;
 
-  const delay = getRandomInt(300, 3500);
+  const delay = getRandomInt(300, 1000);
 
   swimDirectionChangeTimeoutId = setTimeout(() => {
-    setRandomSwimDirection();
-    // setDirectionRandomlyAwayFromFisherman(30);
+    setDirectionRandomlyAway(180);
     swimDirectionChangeTimeoutId = null;
   }, delay);
 }
 
-function setRandomSwimDirection() {
-  fish.rotateY(degToRad(getRandomFloat(-180, 180)));
+// function setRandomSwimDirection() {
+//   fish.rotateY(degToRad(getRandomFloat(-180, 180)));
+// }
+
+function setDirectionRandomlyAway(arc: number) {
+  const from = getFishermanPosition().clone();
+  const to = getFishPosition().clone();
+  const diff = to.sub(from);
+  const direction = diff.normalize();
+  direction.setY(0);
+
+  fish.setRotationFromAxisAngle(
+    new Vector3(0, 1, 0),
+    Math.atan2(direction.x, direction.z) +
+      degToRad(getRandomFloat(-arc / 2, arc / 2))
+  );
+
+  const v = new Vector3();
+  fish.getWorldDirection(v);
+
+  // debug
+  // const helper = createArrowHelper(new Vector3(0, 0, 0), v.normalize());
+  // helper.position.copy(fish.position);
+  // helper.position.y = 45;
 }
 
 export function getFishPosition() {
-  return fish.position;
+  return fish.position.clone();
+}
+
+function onHook() {
+  setFishState_SWIMMING();
+  changeSwimDirections();
 }

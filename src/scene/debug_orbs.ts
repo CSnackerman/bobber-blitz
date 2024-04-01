@@ -1,4 +1,6 @@
 import {
+  ArrowHelper,
+  AxesHelper,
   IcosahedronGeometry,
   Mesh,
   MeshStandardMaterial,
@@ -6,6 +8,7 @@ import {
   Vector3,
 } from 'three';
 import sceneRoot from './scene';
+import { getRandomColorHex } from '../util/random';
 
 interface TrackingOrb {
   meshToTrack: Object3D;
@@ -37,4 +40,21 @@ function updateTrackingOrbs() {
     orb.meshToTrack.getWorldPosition(wp);
     orb.selfMesh.position.copy(wp);
   });
+}
+
+export function createArrowHelper(from: Vector3, to: Vector3) {
+  const fromClone = from.clone();
+  const toClone = to.clone();
+  const diff = toClone.sub(fromClone);
+  const direction = diff.normalize();
+
+  const helper = new ArrowHelper(direction, from, 25, getRandomColorHex());
+  sceneRoot.add(helper);
+  return helper;
+}
+
+export function setupHelpers() {
+  const axesHelper = new AxesHelper(10);
+  axesHelper.position.setY(75);
+  sceneRoot.add(axesHelper);
 }

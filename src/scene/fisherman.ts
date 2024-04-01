@@ -23,7 +23,10 @@ import { isSpaceDown } from '../controls/reel';
 import { hideUI_fishHealth, showUI_fishHealth } from '../ui/ui_fish_health';
 import { hideUI_lineTension, showUI_lineTension } from '../ui/ui_line_tension';
 import { getFishPosition, moveFishBelowBobber } from './fish';
-import { STATE_CHANGE_EVENT, eventManager } from '../events/event_manager';
+import {
+  dispatch_HOOK_FISH,
+  dispatch_STATE_CHANGE,
+} from '../events/event_manager';
 
 let fisherman: Group;
 
@@ -44,7 +47,7 @@ export function getFishermanState() {
 }
 export function setFishermanState(state: FishermanState) {
   fishermanState = state;
-  eventManager.dispatchEvent(STATE_CHANGE_EVENT);
+  dispatch_STATE_CHANGE();
 }
 export const isIDLE = () => fishermanState === 'IDLE';
 export const isCASTING = () => fishermanState === 'CASTING';
@@ -66,6 +69,8 @@ export function setFishermanState_CASTING() {
   hideBobber();
   plopBobber();
   hideUI_fishHealth();
+  hideUI_fishOn();
+  cancelBobberPlunk();
 }
 
 export function setFishermanState_FISHING() {
@@ -87,6 +92,7 @@ export function setFishermanState_REELING() {
   cancelBobberPlunk();
   showUI_fishHealth();
   showUI_lineTension();
+  dispatch_HOOK_FISH();
 }
 
 export async function setupFishermanAsync() {
@@ -154,4 +160,8 @@ export function playCastAnimation() {
 
 export function castAnimationIsPlaying() {
   return castAnimAction.isRunning();
+}
+
+export function getFishermanPosition() {
+  return fisherman.position.clone();
 }

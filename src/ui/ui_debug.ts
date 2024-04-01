@@ -1,7 +1,7 @@
 import { renderer } from '../core/renderer';
-import { STATE_CHANGE, eventManager } from '../events/event_manager';
-import { FishState, getFishState } from '../scene/fish';
-import { FishermanState, getFishermanState } from '../scene/fisherman';
+import { addListener_STATE_CHANGE } from '../events/event_manager';
+import { getFishState } from '../scene/fish';
+import { getFishermanState } from '../scene/fisherman';
 import { getDeviceOrientation, getDeviceType } from '../util/device';
 import { getSpan } from '../util/ui_util';
 
@@ -15,13 +15,12 @@ export function setupUI_debug() {
   debug_div.innerHTML = getDebugInnerHtml();
   document.body.appendChild(debug_div);
 
-  eventManager.addEventListener(STATE_CHANGE, refreshUpdateUI_debug);
+  addListener_STATE_CHANGE(refreshUpdateUI_debug);
   window.addEventListener('resize', refreshUpdateUI_debug);
   screen.orientation.addEventListener('change', refreshUpdateUI_debug);
 }
 
 export function refreshUpdateUI_debug() {
-  // console.log('here');
   debug_div.innerHTML = getDebugInnerHtml();
 }
 

@@ -12,7 +12,8 @@ export function setupCamera() {
   camera.far = 3000;
 
   // transform
-  camera.position.set(35, 45, 100);
+  // camera.position.set(100, 100, 250);
+  camera.position.set(0, 300, 0);
   camera.updateProjectionMatrix();
 
   setupOrbitControls();
@@ -22,11 +23,11 @@ export function setupCamera() {
 const controls = new OrbitControls(camera, renderer.domElement);
 
 function setupOrbitControls() {
-  controls.autoRotate = true;
+  // controls.autoRotate = true;
   controls.autoRotateSpeed = 0.15;
-  controls.enablePan = false;
-  controls.enableRotate = false;
-  controls.enableZoom = false;
+  // controls.enablePan = false;
+  // controls.enableRotate = false;
+  // controls.enableZoom = false;
   controls.target.set(0, 0, 0);
 }
 
