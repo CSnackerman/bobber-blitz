@@ -124,6 +124,11 @@ export function updateFisherman() {
     return;
   }
 
+  if (!(isFISH_ON() || isREELING()) && isSpaceDown) {
+    setFishermanState_IDLE();
+    return;
+  }
+
   if (isCASTING() || isFISHING()) {
     fisherman.lookAt(getTopBobberPoint());
     return;

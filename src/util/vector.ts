@@ -11,3 +11,11 @@ export function getDistance(p1: Vector3, p2: Vector3) {
   // length of p2 - p1
   return p2.clone().sub(p1.clone()).length();
 }
+
+export function getDirection(from: Vector3, to: Vector3) {
+  const f = from.clone();
+  const t = to.clone();
+  const diff = t.sub(f);
+
+  return diff.normalize();
+}

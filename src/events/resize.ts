@@ -1,5 +1,5 @@
-import { camera } from '../scene/camera';
-import { renderer } from '../core/renderer';
+import { camera } from "../scene/camera";
+import { renderer } from "../core/renderer";
 
 function resizeWindow() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -9,5 +9,5 @@ function resizeWindow() {
 }
 
 export function setupResizeHandler() {
-  window.addEventListener('resize', resizeWindow);
+  window.addEventListener("resize", resizeWindow);
 }

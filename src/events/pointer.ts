@@ -1,5 +1,5 @@
-import { Vector2 } from 'three';
-import { renderer } from '../core/renderer';
+import { Vector2 } from "three";
+import { renderer } from "../core/renderer";
 
 export const pointer = new Vector2();
 
@@ -20,5 +20,5 @@ function setPickPosition(event: MouseEvent) {
 }
 
 export function setupPointerHandler() {
-  document.addEventListener('pointermove', setPickPosition);
+  document.addEventListener("pointermove", setPickPosition);
 }
