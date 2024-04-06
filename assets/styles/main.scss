@@ -102,6 +102,61 @@ $line_tension_border_radius: 2em;
   }
 }
 
+#prize_card {
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 100%);
+  width: fit-content;
+  height: fit-content;
+
+  background-color: #7373ba50;
+  border: 1px solid gray;
+
+  border-radius: 0.2em;
+
+  & > div {
+    display: block;
+    padding: 0.5em;
+    font-weight: bold;
+    color: lightskyblue;
+    background-color: rgba(0, 0, 255, 0.2);
+    border-radius: 0.2em;
+
+    & > span {
+      color: wheat;
+    }
+  }
+
+  & > button {
+    all: unset;
+    margin: 0.3em;
+    padding: 0.3em;
+    color: darkslategrey;
+    background-color: cornflowerblue;
+    width: fit-content;
+    align-self: center;
+    border: 0.5px solid white;
+    border-radius: 0.1em;
+    opacity: 0.8;
+
+    &:hover {
+      cursor: pointer;
+      background-color: rgb(130, 168, 240);
+      opacity: 1;
+    }
+
+    &:active {
+      color: black;
+      background-color: blue;
+    }
+  }
+}
+
 #debug {
   padding: 3px;
   position: fixed;

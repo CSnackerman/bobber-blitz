@@ -1,3 +1,5 @@
+import { Color } from 'three';
+
 export function getRandomInt(min: number, max: number) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
@@ -9,7 +11,10 @@ export function getRandomFloat(min: number, max: number) {
 }
 
 export function getRandomColorHex() {
-  const max = 16777215;
-  const randColor = getRandomInt(0, max);
-  return '#' + randColor.toString(16);
+  const r = getRandomInt(0, 255);
+  const g = getRandomInt(0, 255);
+  const b = getRandomInt(0, 255);
+  const color = new Color(`rgb(${r}, ${g}, ${b})`);
+
+  return '#' + color.getHexString();
 }

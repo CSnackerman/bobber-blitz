@@ -4,6 +4,7 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
+  Euler,
   Group,
   Vector3,
 } from 'three';
@@ -12,12 +13,16 @@ import { getRandomFloat, getRandomInt } from '../util/random';
 import { getBobberPosition } from './bobber';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { getFishermanPosition } from './fisherman';
-import {
-  addListener_HOOK_FISH,
-  dispatch_STATE_CHANGE,
-} from '../events/event_manager';
-import { getDirection } from '../util/vector';
+import { getDirection, getDistance } from '../util/vector';
 import { createArrowHelper } from './debug_orbs';
+import {
+  FISH_CAUGHT,
+  FISH_HOOKED,
+  RESET,
+  STATE_CHANGE,
+  receive,
+  transmit,
+} from '../events/event_manager';
 
 let fish: Group;
 
@@ -39,7 +44,7 @@ export const getFishState = () => fishState;
 
 export function setFishState(s: FishState) {
   fishState = s;
-  dispatch_STATE_CHANGE();
+  transmit(STATE_CHANGE);
 }
 
 export function setFishState_FLOPPING() {
@@ -53,6 +58,10 @@ export function setFishState_BEING_REELED() {
 }
 export function setFishState_IDLE() {
   setFishState('IDLE');
+  cancelFlop();
+  setRandomScale(2, 5);
+  setFishPosition(new Vector3(0, 2, 50));
+  fish.lookAt(getFishermanPosition());
 }
 
 export async function setupFishAsync() {
@@ -62,10 +71,6 @@ export async function setupFishAsync() {
 
   fish = gltf.scene;
 
-  setRandomScale(2, 5);
-  setFishPosition(new Vector3(0, 2, 50));
-
-  setFishState_IDLE();
   sceneRoot.add(fish);
 
   // setup animation
@@ -75,12 +80,15 @@ export async function setupFishAsync() {
   flopAction = fishMixer.clipAction(clip);
 
   fishMixer.addEventListener('finished', () => {
-    setFishState_IDLE();
     flopTimeoutId = null;
   });
 
+  setFishState_IDLE();
+
   // event handlers
-  addListener_HOOK_FISH(onHook);
+  receive(FISH_HOOKED, onHook);
+  receive(FISH_CAUGHT, onCaught);
+  receive(RESET, onReset);
 }
 
 export function updateFish() {
@@ -90,12 +98,21 @@ export function updateFish() {
     return;
   }
 
+  if (isFLOPPING()) {
+    if (flopTimeoutId === null) {
+      flopRandomly();
+    }
+
+    return;
+  }
+
   if (isSWIMMING() || isBEING_REELED()) {
     if (swimDirectionChangeTimeoutId === null) {
       changeSwimDirections();
     }
 
     swimForward();
+    checkDistance();
     return;
   }
 }
@@ -139,6 +156,11 @@ function flopFish(flopCount: number) {
   flopAction.play().repetitions = flopCount;
 }
 
+function cancelFlop() {
+  flopAction.reset();
+  clearTimeout(flopTimeoutId as NodeJS.Timeout);
+}
+
 export function setFishPosition(p: Vector3) {
   fish.position.copy(p);
 }
@@ -159,7 +181,20 @@ function swimForward() {
   fish.position.addScaledVector(v, swimSpeed * delta);
 }
 
+function checkDistance() {
+  const catchDistance = 30;
+  const distance = getDistance(getFishermanPosition(), getFishPosition());
+  if (distance < catchDistance) {
+    transmit(FISH_CAUGHT);
+  }
+}
+
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
+
+function cancelChangeSwimDirections() {
+  clearTimeout(swimDirectionChangeTimeoutId as NodeJS.Timeout);
+  swimDirectionChangeTimeoutId = null;
+}
 
 function changeSwimDirections() {
   if (swimDirectionChangeTimeoutId !== null) return;
@@ -222,4 +257,14 @@ export function getFishPosition() {
 function onHook() {
   setFishState_SWIMMING();
   setDirectionRandomlyAway(0);
+}
+
+function onCaught() {
+  setFishState('FLOPPING');
+  fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
+  cancelChangeSwimDirections();
+}
+
+function onReset() {
+  setFishState_IDLE();
 }

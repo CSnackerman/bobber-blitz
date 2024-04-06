@@ -1,21 +1,27 @@
 const et = new EventTarget();
 
-// event names
 export const STATE_CHANGE = 'state_change';
-export const HOOK_FISH = 'hook_fish';
+export const FISH_HOOKED = 'hook_fish';
+export const FISH_CAUGHT = 'caught_fish';
+export const RESET = 'reset';
 
-// events
-const EVENT_STATE_CHANGE = new Event(STATE_CHANGE);
-const EVENT_HOOK_FISH = new Event(HOOK_FISH);
+type EventName =
+  | typeof STATE_CHANGE
+  | typeof FISH_HOOKED
+  | typeof FISH_CAUGHT
+  | typeof RESET;
 
-// dispatchers
-export const dispatch_HOOK_FISH = () => et.dispatchEvent(EVENT_HOOK_FISH);
+const Events = {
+  [STATE_CHANGE]: new Event(STATE_CHANGE),
+  [FISH_HOOKED]: new Event(FISH_HOOKED),
+  [FISH_CAUGHT]: new Event(FISH_CAUGHT),
+  [RESET]: new Event(RESET),
+} as const;
 
-export const dispatch_STATE_CHANGE = () => et.dispatchEvent(EVENT_STATE_CHANGE);
+export function transmit(e: EventName) {
+  et.dispatchEvent(Events[e]);
+}
 
-// listeners
-export const addListener_HOOK_FISH = (callback: () => void) =>
-  et.addEventListener(HOOK_FISH, callback);
-
-export const addListener_STATE_CHANGE = (callback: () => void) =>
-  et.addEventListener(STATE_CHANGE, callback);
+export function receive(e: EventName, action: () => void) {
+  et.addEventListener(e, action);
+}

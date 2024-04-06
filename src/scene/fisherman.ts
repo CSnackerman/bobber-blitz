@@ -24,8 +24,11 @@ import { hideUI_fishHealth, showUI_fishHealth } from '../ui/ui_fish_health';
 import { hideUI_lineTension, showUI_lineTension } from '../ui/ui_line_tension';
 import { getFishPosition, moveFishBelowBobber } from './fish';
 import {
-  dispatch_HOOK_FISH,
-  dispatch_STATE_CHANGE,
+  FISH_CAUGHT,
+  FISH_HOOKED,
+  STATE_CHANGE,
+  receive,
+  transmit,
 } from '../events/event_manager';
 
 let fisherman: Group;
@@ -38,7 +41,8 @@ export type FishermanState =
   | 'CASTING'
   | 'FISHING'
   | 'FISH_ON'
-  | 'REELING';
+  | 'REELING'
+  | 'HOLDING_PRIZE';
 
 export let fishermanState: FishermanState = 'IDLE';
 
@@ -47,13 +51,14 @@ export function getFishermanState() {
 }
 export function setFishermanState(state: FishermanState) {
   fishermanState = state;
-  dispatch_STATE_CHANGE();
+  transmit(STATE_CHANGE);
 }
 export const isIDLE = () => fishermanState === 'IDLE';
 export const isCASTING = () => fishermanState === 'CASTING';
 export const isFISHING = () => fishermanState === 'FISHING';
 export const isFISH_ON = () => fishermanState === 'FISH_ON';
 export const isREELING = () => fishermanState === 'REELING';
+export const isHOLDING_PRIZE = () => fishermanState === 'HOLDING_PRIZE';
 
 export function setFishermanState_IDLE() {
   setFishermanState('IDLE');
@@ -92,7 +97,10 @@ export function setFishermanState_REELING() {
   cancelBobberPlunk();
   showUI_fishHealth();
   showUI_lineTension();
-  dispatch_HOOK_FISH();
+}
+
+export function setFishermanState_HOLDING_PRIZE() {
+  setFishermanState('HOLDING_PRIZE');
 }
 
 export async function setupFishermanAsync() {
@@ -114,6 +122,9 @@ export async function setupFishermanAsync() {
   const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
   castAnimAction = fishermanMixer.clipAction(castAnimClip);
   fishermanMixer.addEventListener('finished', setFishermanState_FISHING);
+
+  // receivers
+  receive(FISH_CAUGHT, setFishermanState_HOLDING_PRIZE);
 }
 
 export function updateFisherman() {
@@ -136,6 +147,7 @@ export function updateFisherman() {
 
   if (isFISH_ON() && isSpaceDown) {
     setFishermanState_REELING();
+    transmit(FISH_HOOKED);
     return;
   }
 

@@ -13,7 +13,7 @@ export function setupCamera() {
 
   // transform
   // camera.position.set(100, 100, 250);
-  camera.position.set(100, 300, 100);
+  camera.position.set(50, 150, 50);
   camera.updateProjectionMatrix();
 
   setupOrbitControls();
