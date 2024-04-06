@@ -26,6 +26,7 @@ import { getFishPosition, moveFishBelowBobber } from './fish';
 import {
   FISH_CAUGHT,
   FISH_HOOKED,
+  RESET,
   STATE_CHANGE,
   receive,
   transmit,
@@ -125,6 +126,7 @@ export async function setupFishermanAsync() {
 
   // receivers
   receive(FISH_CAUGHT, setFishermanState_HOLDING_PRIZE);
+  receive(RESET, setFishermanState_IDLE);
 }
 
 export function updateFisherman() {
@@ -166,8 +168,7 @@ export function getFishingLineAnchorPoint(): Vector3 {
 }
 
 export function playCastAnimation() {
-  // play animation if not in middle of casting
-  if (!isCASTING()) {
+  if (isIDLE() || isFISHING() || isFISH_ON()) {
     setFishermanState_CASTING();
     castAnimAction.reset();
   }

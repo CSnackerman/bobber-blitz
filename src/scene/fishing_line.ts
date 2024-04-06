@@ -10,6 +10,7 @@ import {
 } from './fisherman';
 import { getTopBobberPoint } from './bobber';
 import { getFishPosition } from './fish';
+import { RESET, receive } from '../events/event_manager';
 
 let fishingLine: Line;
 
@@ -30,6 +31,9 @@ export function setupFishingLine() {
   fishingLine.visible = false;
 
   sceneRoot.add(fishingLine);
+
+  // receivers
+  receive(RESET, onReset);
 }
 
 export function updateFishingLine() {
@@ -57,3 +61,7 @@ export function updateFishingLine() {
 }
 
 //todo: caternary curve & parabola
+
+function onReset() {
+  fishingLine.visible = false;
+}

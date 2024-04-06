@@ -156,8 +156,9 @@ function flopFish(flopCount: number) {
 }
 
 function cancelFlop() {
-  flopAction.reset();
   clearTimeout(flopTimeoutId as NodeJS.Timeout);
+  flopAction.stop();
+  flopAction.reset();
 }
 
 export function setFishPosition(p: Vector3) {

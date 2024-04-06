@@ -14,7 +14,7 @@ export const castPoint = new Vector3();
 
 export function setupCastHandler() {
   renderer.domElement.addEventListener('click', () => {
-    if (isAimingAtWater && !isREELING() && !isFISH_ON()) {
+    if (isAimingAtWater && !isREELING()) {
       castPoint.copy(aimPoint);
       playCastAnimation();
       return;

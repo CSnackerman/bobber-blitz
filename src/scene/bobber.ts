@@ -36,6 +36,8 @@ export async function setupBobberAsync() {
   const animations = gltf.animations;
   const clip = AnimationClip.findByName(animations, 'plunk');
   plunkAnimAction = bobberMixer.clipAction(clip);
+
+  bobberMixer.addEventListener('finished', setFishermanState_IDLE);
 }
 
 export function getTopBobberPoint(): Vector3 {
@@ -69,19 +71,14 @@ function plunkBobber() {
   setFishermanState_FISH_ON();
   plunkAnimAction.reset();
   plunkAnimAction.play().repetitions = 3;
-
-  // on animation finished
-  const onFinished = setFishermanState_IDLE;
-  if (!bobberMixer.hasEventListener('finished', onFinished))
-    bobberMixer.addEventListener('finished', onFinished);
 }
 
 let plunkTimerId: NodeJS.Timeout;
 
 export function setPlunkTimer() {
   clearTimeout(plunkTimerId);
-  const min = 5000;
-  const max = 11000;
+  const min = 500;
+  const max = 700;
   plunkTimerId = setTimeout(plunkBobber, getRandomInt(min, max));
 }
 
