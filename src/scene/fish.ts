@@ -14,7 +14,6 @@ import { getBobberPosition } from './bobber';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { getFishermanPosition } from './fisherman';
 import { getDirection, getDistance } from '../util/vector';
-import { createArrowHelper } from './debug_orbs';
 import {
   FISH_CAUGHT,
   FISH_HOOKED,
@@ -224,11 +223,6 @@ function setDirectionRandomlyAway(arc: number) {
 
   const v = new Vector3();
   fish.getWorldDirection(v);
-
-  // debug;
-  const helper = createArrowHelper(new Vector3(0, 0, 0), v.normalize());
-  helper.position.copy(fish.position);
-  helper.position.y = 45;
 }
 
 function setDirectionRandomlyToward(arc: number) {
@@ -243,11 +237,6 @@ function setDirectionRandomlyToward(arc: number) {
 
   const v = new Vector3();
   fish.getWorldDirection(v);
-
-  // debug;
-  const helper = createArrowHelper(new Vector3(0, 0, 0), v.normalize());
-  helper.position.copy(fish.position);
-  helper.position.y = 45;
 }
 
 export function getFishPosition() {

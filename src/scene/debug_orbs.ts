@@ -53,7 +53,7 @@ export function createArrowHelper(from: Vector3, to: Vector3) {
   return helper;
 }
 
-export function setupHelpers() {
+export function showWorldAxes() {
   const axesHelper = new AxesHelper(10);
   axesHelper.position.setY(75);
   sceneRoot.add(axesHelper);
