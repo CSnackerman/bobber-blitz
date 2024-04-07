@@ -8,27 +8,35 @@ import {
   ON_FISHING,
   ON_FISH_FIGHT,
   RESET,
-  STATE_CHANGE,
   receive,
-  transmit,
 } from '../events/event_manager';
+import { State } from '../core/state';
 
 let fishingLine: Line;
 
-export type FishingLineState = 'HIDDEN' | 'ATTACHED_BOBBER' | 'ATTACHED_FISH';
+enum FishingLineState {
+  HIDDEN = 'HIDDEN',
+  ATTACHED_BOBBER = 'ATTACHED_BOBBER',
+  ATTACHED_FISH = 'ATTACHED_FISH',
+}
+const { HIDDEN, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
 
-let fishingLineState: FishingLineState = 'HIDDEN';
+const state = new State<FishingLineState>(HIDDEN, null);
 
-let update: (() => void) | null = null;
+export const getFishingLineState = () => state.get();
 
-function setState(s: FishingLineState, func: (() => void) | null) {
-  fishingLineState = s;
-  update = func;
-  transmit(STATE_CHANGE);
+function while_ATTACHED_BOBBER() {
+  fishingLine.geometry.setFromPoints([
+    getFishingLineAnchorPoint(),
+    getTopBobberPoint(),
+  ]);
 }
 
-export function getFishingLineState() {
-  return fishingLineState;
+function while_ATTACHED_FISH() {
+  fishingLine.geometry.setFromPoints([
+    getFishingLineAnchorPoint(),
+    getFishPosition(),
+  ]);
 }
 
 export function setupFishingLine() {
@@ -51,38 +59,28 @@ export function setupFishingLine() {
 
   // event handlers
   receive(RESET, () => {
-    setState('HIDDEN', null);
     fishingLine.visible = false;
+    state.set(HIDDEN, null);
   });
 
   receive(ON_CASTING, () => {
-    setState('HIDDEN', null);
     fishingLine.visible = false;
+    state.set(HIDDEN, null);
   });
 
   receive(ON_FISHING, () => {
-    setState('ATTACHED_BOBBER', () => {
-      fishingLine.geometry.setFromPoints([
-        getFishingLineAnchorPoint(),
-        getTopBobberPoint(),
-      ]);
-    });
-
     fishingLine.visible = true;
+
+    state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
   receive(ON_FISH_FIGHT, () => {
-    setState('ATTACHED_FISH', () => {
-      fishingLine.geometry.setFromPoints([
-        getFishingLineAnchorPoint(),
-        getFishPosition(),
-      ]);
-    });
+    state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
 }
 
 export function updateFishingLine() {
-  update?.();
+  state.update();
 }
 
 //todo: caternary curve & parabola

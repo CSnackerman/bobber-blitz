@@ -18,41 +18,60 @@ import {
   ON_FISH_CAUGHT,
   ON_FISH_FIGHT,
   RESET,
-  STATE_CHANGE,
   receive,
   transmit,
   ON_FISHING,
   ON_FISH_ON,
 } from '../events/event_manager';
-import { NullableVoidCallback } from '../core/types';
+import { State } from '../core/state';
 
 let fisherman: Group;
 
 let fishermanMixer: AnimationMixer;
 let castAnimAction: AnimationAction;
 
-export type FishermanState =
-  | 'IDLE'
-  | 'CASTING'
-  | 'FISHING'
-  | 'FISH_ON'
-  | 'REELING'
-  | 'HOLDING_PRIZE';
-
-let fishermanState: FishermanState = 'IDLE';
-
-let update: NullableVoidCallback;
-
-export function updateFisherman() {
-  update?.();
+enum FishermanState {
+  IDLE = 'IDLE',
+  CASTING = 'CASTING',
+  FISHING = 'FISHING',
+  FISH_ON = 'FISH_ON',
+  REELING = 'REELING',
+  HOLDING_PRIZE = 'HOLDING_PRIZE',
 }
 
-export const getFishermanState = () => fishermanState;
+const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
+  FishermanState;
 
-function setState(s: FishermanState, onUpdate: NullableVoidCallback) {
-  fishermanState = s;
-  update = onUpdate;
-  transmit(STATE_CHANGE);
+let state = new State<FishermanState>(IDLE, while_IDLE);
+
+export const getFishermanState = () => state.get();
+
+export function updateFisherman() {
+  state.update();
+}
+
+function while_IDLE() {
+  fisherman.lookAt(aimPoint);
+}
+
+function while_CASTING() {
+  fisherman.lookAt(getTopBobberPoint());
+  fishermanMixer.update(delta * 3);
+}
+
+function while_FISHING() {
+  fisherman.lookAt(getTopBobberPoint());
+
+  if (isSpaceDown) transmit(RESET);
+}
+function while_FISH_ON() {
+  if (isSpaceDown) transmit(ON_FISH_FIGHT);
+}
+function while_REELING() {
+  fisherman.lookAt(getFishPosition());
+}
+function while_HOLDING_PRIZE() {
+  return;
 }
 
 export async function setupFishermanAsync() {
@@ -80,42 +99,29 @@ export async function setupFishermanAsync() {
 
   // receivers
   receive(RESET, () => {
-    setState('IDLE', () => {
-      fisherman.lookAt(aimPoint);
-    });
+    state.set(IDLE, while_IDLE);
   });
 
   receive(ON_CASTING, () => {
-    setState('CASTING', () => {
-      fisherman.lookAt(getTopBobberPoint());
-      fishermanMixer.update(delta * 3);
-    });
-
     playCastAnimation();
+
+    state.set(CASTING, while_CASTING);
   });
 
   receive(ON_FISHING, () => {
-    setState('FISHING', () => {
-      fisherman.lookAt(getTopBobberPoint());
-
-      if (isSpaceDown) transmit(RESET);
-    });
+    state.set(FISHING, while_FISHING);
   });
 
   receive(ON_FISH_ON, () => {
-    setState('FISH_ON', () => {
-      if (isSpaceDown) transmit(ON_FISH_FIGHT);
-    });
+    state.set(FISH_ON, while_FISH_ON);
   });
 
   receive(ON_FISH_FIGHT, () => {
-    setState('REELING', () => {
-      fisherman.lookAt(getFishPosition());
-    });
+    state.set(REELING, while_REELING);
   });
 
   receive(ON_FISH_CAUGHT, () => {
-    setState('HOLDING_PRIZE', () => {});
+    state.set(HOLDING_PRIZE, while_HOLDING_PRIZE);
   });
 }
 

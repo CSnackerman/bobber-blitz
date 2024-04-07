@@ -32,7 +32,7 @@ let flopPlaybackSpeed = 2.5;
 
 const swimSpeed = 30;
 
-export enum FishState {
+enum FishState {
   IDLE = 'IDLE',
   SWIMMING = 'SWIMMING',
   BEING_REELED = 'BEING_REELED',
