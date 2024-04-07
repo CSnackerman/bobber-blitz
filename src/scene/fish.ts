@@ -38,13 +38,12 @@ let fishState: FishState = 'IDLE';
 
 export const getFishState = () => fishState;
 
-function setFishState(s: FishState) {
+let update: (() => void) | null = null;
+
+function setState(s: FishState, onUpdate: (() => void) | null) {
   fishState = s;
   transmit(STATE_CHANGE);
-}
-
-function is(s: FishState) {
-  return fishState === s;
+  update = onUpdate;
 }
 
 export async function setupFishAsync() {
@@ -68,24 +67,46 @@ export async function setupFishAsync() {
 
   // event handlers
   receive(ON_FISH_FIGHT, () => {
-    setFishState('SWIMMING');
+    setState('SWIMMING', () => {
+      if (swimDirectionChangeTimeoutId === null) {
+        changeSwimDirections('away');
+      }
+
+      swimForward();
+    });
+
     moveBelowBobber();
     setDirectionRandomlyAway(0);
   });
 
   receive(ON_FISHERMAN_FIGHT, () => {
-    setFishState('BEING_REELED');
+    setState('BEING_REELED', () => {
+      if (swimDirectionChangeTimeoutId === null) {
+        changeSwimDirections('toward');
+      }
+
+      swimForward();
+      checkDistance();
+    });
+
     setDirectionRandomlyToward(0);
   });
 
   receive(ON_FISH_CAUGHT, () => {
-    setFishState('FLOPPING');
+    setState('FLOPPING', () => {
+      if (flopTimeoutId === null) {
+        flopRandomly();
+      }
+
+      fishMixer.update(delta * flopPlaybackSpeed);
+    });
+
     cancelChangeSwimDirections();
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
   });
 
   receive(RESET, () => {
-    setFishState('IDLE');
+    setState('IDLE', null);
     cancelFlop();
     setRandomScale(2, 5);
     setFishPosition(new Vector3(0, 2, 50));
@@ -94,29 +115,7 @@ export async function setupFishAsync() {
 }
 
 export function updateFish() {
-  fishMixer.update(delta * flopPlaybackSpeed);
-
-  if (is('IDLE')) {
-    return;
-  }
-
-  if (is('FLOPPING')) {
-    if (flopTimeoutId === null) {
-      flopRandomly();
-    }
-
-    return;
-  }
-
-  if (is('SWIMMING') || is('BEING_REELED')) {
-    if (swimDirectionChangeTimeoutId === null) {
-      changeSwimDirections();
-    }
-
-    swimForward();
-    checkDistance();
-    return;
-  }
+  update?.();
 }
 
 function setFlopPlaybackSpeed(s: number) {
@@ -145,7 +144,6 @@ export function flopRandomly() {
 }
 
 function flopFish(flopCount: number) {
-  setFishState('FLOPPING');
   flopAction.reset();
   flopAction.play().repetitions = flopCount;
 }
@@ -191,13 +189,13 @@ function cancelChangeSwimDirections() {
   swimDirectionChangeTimeoutId = null;
 }
 
-function changeSwimDirections() {
+function changeSwimDirections(direction: 'toward' | 'away') {
   if (swimDirectionChangeTimeoutId !== null) return;
 
   const delay = getRandomInt(300, 1000);
 
   swimDirectionChangeTimeoutId = setTimeout(() => {
-    if (is('BEING_REELED')) {
+    if (direction === 'toward') {
       setDirectionRandomlyToward(45);
     } else {
       setDirectionRandomlyAway(180);
