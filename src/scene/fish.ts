@@ -19,10 +19,10 @@ import {
   ON_FISH_CAUGHT,
   ON_FISH_FIGHT,
   RESET,
-  STATE_CHANGE,
   receive,
   transmit,
 } from '../events/event_manager';
+import { State } from '../core/state';
 
 let fish: Group;
 
@@ -32,18 +32,47 @@ let flopPlaybackSpeed = 2.5;
 
 const swimSpeed = 30;
 
-type FishState = 'SWIMMING' | 'BEING_REELED' | 'FLOPPING' | 'IDLE';
+export enum FishState {
+  IDLE = 'IDLE',
+  SWIMMING = 'SWIMMING',
+  BEING_REELED = 'BEING_REELED',
+  FLOPPING = 'FLOPPING',
+}
+const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishState;
 
-let fishState: FishState = 'IDLE';
+let state = new State<FishState>(IDLE, null);
 
-export const getFishState = () => fishState;
+export function updateFish() {
+  state.update();
+}
 
-let update: (() => void) | null = null;
+export function getFishState() {
+  return state.get();
+}
 
-function setState(s: FishState, onUpdate: (() => void) | null) {
-  fishState = s;
-  transmit(STATE_CHANGE);
-  update = onUpdate;
+function while_SWIMMING() {
+  if (swimDirectionChangeTimeoutId === null) {
+    changeSwimDirections('away');
+  }
+
+  swimForward();
+}
+
+function while_BEING_REELED() {
+  if (swimDirectionChangeTimeoutId === null) {
+    changeSwimDirections('toward');
+  }
+
+  swimForward();
+  checkDistance();
+}
+
+function while_FLOPPING() {
+  if (flopTimeoutId === null) {
+    flopRandomly();
+  }
+
+  fishMixer.update(delta * flopPlaybackSpeed);
 }
 
 export async function setupFishAsync() {
@@ -67,64 +96,39 @@ export async function setupFishAsync() {
 
   // event handlers
   receive(ON_FISH_FIGHT, () => {
-    setState('SWIMMING', () => {
-      if (swimDirectionChangeTimeoutId === null) {
-        changeSwimDirections('away');
-      }
-
-      swimForward();
-    });
-
+    cancelChangeSwimDirections();
     moveBelowBobber();
     setDirectionRandomlyAway(0);
+
+    state.set(SWIMMING, while_SWIMMING);
   });
 
   receive(ON_FISHERMAN_FIGHT, () => {
-    setState('BEING_REELED', () => {
-      if (swimDirectionChangeTimeoutId === null) {
-        changeSwimDirections('toward');
-      }
-
-      swimForward();
-      checkDistance();
-    });
-
+    cancelChangeSwimDirections();
     setDirectionRandomlyToward(0);
+
+    state.set(BEING_REELED, while_BEING_REELED);
   });
 
   receive(ON_FISH_CAUGHT, () => {
-    setState('FLOPPING', () => {
-      if (flopTimeoutId === null) {
-        flopRandomly();
-      }
-
-      fishMixer.update(delta * flopPlaybackSpeed);
-    });
-
     cancelChangeSwimDirections();
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
+
+    state.set(FLOPPING, while_FLOPPING);
   });
 
   receive(RESET, () => {
-    setState('IDLE', null);
     cancelFlop();
     setRandomScale(2, 5);
     setFishPosition(new Vector3(0, 2, 50));
     fish.lookAt(getFishermanPosition());
+
+    state.set(IDLE, null);
   });
 }
 
-export function updateFish() {
-  update?.();
-}
-
 function setFlopPlaybackSpeed(s: number) {
-  if (s <= 0) {
-    console.info(
-      `Warn: flopPlaybackSpeed cannot be negative. Value unchanged. (${flopPlaybackSpeed})`
-    );
-    return;
-  }
+  if (s <= 0) s = 0.1;
   flopPlaybackSpeed = s;
 }
 

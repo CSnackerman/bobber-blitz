@@ -15,7 +15,7 @@ import {
 
 let fishingLine: Line;
 
-type FishingLineState = 'HIDDEN' | 'ATTACHED_BOBBER' | 'ATTACHED_FISH';
+export type FishingLineState = 'HIDDEN' | 'ATTACHED_BOBBER' | 'ATTACHED_FISH';
 
 let fishingLineState: FishingLineState = 'HIDDEN';
 
@@ -23,8 +23,8 @@ let update: (() => void) | null = null;
 
 function setState(s: FishingLineState, func: (() => void) | null) {
   fishingLineState = s;
-  transmit(STATE_CHANGE);
   update = func;
+  transmit(STATE_CHANGE);
 }
 
 export function getFishingLineState() {

@@ -22,6 +22,7 @@ type EventName =
   | typeof ON_FISH_CAUGHT;
 
 export function transmit(e: EventName) {
+  if (e !== STATE_CHANGE) console.log(e);
   et.dispatchEvent(new Event(e));
 }
 

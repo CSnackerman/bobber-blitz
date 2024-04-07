@@ -1,3 +1,4 @@
+import { getCastState } from '../controls/cast';
 import { renderer } from '../core/renderer';
 import { STATE_CHANGE, receive } from '../events/event_manager';
 import { getFishState } from '../scene/fish';
@@ -44,6 +45,7 @@ function getDebugInnerHtml() {
       `${window.innerWidth}x${window.innerHeight}`
     )} <br><br>` +
     `Fisherman State: ${getSpan(getFishermanState(), 'red')} <br>` +
+    `Cast State: ${getSpan(getCastState(), 'yellow')} <br>` +
     `Fishing Line State: ${getSpan(getFishingLineState(), 'orange')} <br>` +
     `Fish State: ${getSpan(getFishState(), 'pink')} <br>`
   );

@@ -24,13 +24,14 @@ import {
   ON_FISHING,
   ON_FISH_ON,
 } from '../events/event_manager';
+import { NullableVoidCallback } from '../core/types';
 
 let fisherman: Group;
 
 let fishermanMixer: AnimationMixer;
 let castAnimAction: AnimationAction;
 
-type FishermanState =
+export type FishermanState =
   | 'IDLE'
   | 'CASTING'
   | 'FISHING'
@@ -40,19 +41,18 @@ type FishermanState =
 
 let fishermanState: FishermanState = 'IDLE';
 
-export function getFishermanState() {
-  return fishermanState;
-}
-function setState(s: FishermanState, onUpdate: () => void) {
-  fishermanState = s;
-  transmit(STATE_CHANGE);
-  update = onUpdate;
-}
-
-let update: (() => void) | null = null;
+let update: NullableVoidCallback;
 
 export function updateFisherman() {
   update?.();
+}
+
+export const getFishermanState = () => fishermanState;
+
+function setState(s: FishermanState, onUpdate: NullableVoidCallback) {
+  fishermanState = s;
+  update = onUpdate;
+  transmit(STATE_CHANGE);
 }
 
 export async function setupFishermanAsync() {
@@ -128,7 +128,6 @@ export function getFishingLineAnchorPoint(): Vector3 {
 }
 
 export function playCastAnimation() {
-  transmit(ON_CASTING);
   castAnimAction.reset();
 
   castAnimAction.play().repetitions = 1;
