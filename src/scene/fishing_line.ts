@@ -19,13 +19,16 @@ type FishingLineState = 'HIDDEN' | 'ATTACHED_BOBBER' | 'ATTACHED_FISH';
 
 let fishingLineState: FishingLineState = 'HIDDEN';
 
-function setFishingLineState(s: FishingLineState) {
+let update: (() => void) | null = null;
+
+function setState(s: FishingLineState, func: (() => void) | null) {
   fishingLineState = s;
   transmit(STATE_CHANGE);
+  update = func;
 }
 
-function is(s: FishingLineState) {
-  return fishingLineState === s;
+export function getFishingLineState() {
+  return fishingLineState;
 }
 
 export function setupFishingLine() {
@@ -56,31 +59,28 @@ export function setupFishingLine() {
   });
 
   receive(ON_FISHING, () => {
-    setFishingLineState('ATTACHED_BOBBER');
+    setState('ATTACHED_BOBBER', () => {
+      fishingLine.geometry.setFromPoints([
+        getFishingLineAnchorPoint(),
+        getTopBobberPoint(),
+      ]);
+    });
+
     fishingLine.visible = true;
   });
 
   receive(ON_FISH_FIGHT, () => {
-    setFishingLineState('ATTACHED_FISH');
+    setState('ATTACHED_FISH', () => {
+      fishingLine.geometry.setFromPoints([
+        getFishingLineAnchorPoint(),
+        getFishPosition(),
+      ]);
+    });
   });
 }
 
 export function updateFishingLine() {
-  if (is('ATTACHED_BOBBER')) {
-    fishingLine.geometry.setFromPoints([
-      getFishingLineAnchorPoint(),
-      getTopBobberPoint(),
-    ]);
-    return;
-  }
-
-  if (is('ATTACHED_FISH')) {
-    fishingLine.geometry.setFromPoints([
-      getFishingLineAnchorPoint(),
-      getFishPosition(),
-    ]);
-    return;
-  }
+  update?.();
 }
 
 //todo: caternary curve & parabola

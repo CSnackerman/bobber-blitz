@@ -2,6 +2,7 @@ import { renderer } from '../core/renderer';
 import { STATE_CHANGE, receive } from '../events/event_manager';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
+import { getFishingLineState } from '../scene/fishing_line';
 import { getDeviceOrientation, getDeviceType } from '../util/device';
 import { getSpan } from '../util/ui_util';
 
@@ -41,8 +42,9 @@ function getDebugInnerHtml() {
     `Renderer Pixel Ratio: ${getSpan(renderer.getPixelRatio())} <br> ` +
     `Window Size: ${getSpan(
       `${window.innerWidth}x${window.innerHeight}`
-    )} <br> ` +
+    )} <br><br>` +
     `Fisherman State: ${getSpan(getFishermanState(), 'red')} <br>` +
-    `Fish State: ${getSpan(getFishState(), 'lightblue')} <br>`
+    `Fishing Line State: ${getSpan(getFishingLineState(), 'orange')} <br>` +
+    `Fish State: ${getSpan(getFishState(), 'pink')} <br>`
   );
 }
