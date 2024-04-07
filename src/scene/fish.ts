@@ -69,6 +69,7 @@ export async function setupFishAsync() {
   // event handlers
   receive(ON_FISH_FIGHT, () => {
     setFishState('SWIMMING');
+    moveBelowBobber();
     setDirectionRandomlyAway(0);
   });
 
@@ -159,7 +160,7 @@ export function setFishPosition(p: Vector3) {
   fish.position.copy(p);
 }
 
-export function moveFishBelowBobber() {
+function moveBelowBobber() {
   const b = getBobberPosition();
   fish.position.set(b.x, fish.position.y, b.z);
 }

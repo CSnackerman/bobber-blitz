@@ -1,5 +1,10 @@
+import {
+  ON_CASTING,
+  ON_FISH_FIGHT,
+  ON_FISH_ON,
+  receive,
+} from '../events/event_manager';
 import { getBobberScreenCoords } from '../scene/bobber';
-import { isFISH_ON } from '../scene/fisherman';
 
 const template = document.getElementById(
   'template_fish_on'
@@ -7,12 +12,26 @@ const template = document.getElementById(
 
 const fishOn_H3 = template.content.querySelector('h3') as HTMLHeadingElement;
 
+let enabled = false;
+
 export function setupUI_fishOn() {
   document.body.appendChild(fishOn_H3);
+
+  receive(ON_FISH_ON, () => {
+    enabled = true;
+  });
+
+  receive(ON_FISH_FIGHT, () => {
+    enabled = false;
+  });
+
+  receive(ON_CASTING, () => {
+    enabled = false;
+  });
 }
 
 export function updateUI_fishOn() {
-  if (!isFISH_ON()) return;
+  if (!enabled) return;
 
   const bobberPosition = getBobberScreenCoords();
   const rect = fishOn_H3.getBoundingClientRect();

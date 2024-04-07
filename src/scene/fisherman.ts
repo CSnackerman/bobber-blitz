@@ -10,12 +10,9 @@ import sceneRoot from './scene';
 import { setupFishingLine } from './fishing_line';
 import { aimPoint } from '../controls/aim';
 import { delta } from '../core/time';
-import { cancelBobberPlunk, getTopBobberPoint, hideBobber } from './bobber';
-import { hideUI_fishOn, showUI_fishOn } from '../ui/ui_fish_on';
+import { getTopBobberPoint } from './bobber';
 import { isSpaceDown } from '../controls/reel';
-import { showUI_fishHealth } from '../ui/ui_fish_health';
-import { showUI_lineTension } from '../ui/ui_line_tension';
-import { getFishPosition, moveFishBelowBobber } from './fish';
+import { getFishPosition } from './fish';
 import {
   ON_CASTING,
   ON_FISH_CAUGHT,
@@ -24,7 +21,6 @@ import {
   STATE_CHANGE,
   receive,
   transmit,
-  ON_FISHERMAN_IDLE,
   ON_FISHING,
   ON_FISH_ON,
 } from '../events/event_manager';
@@ -34,7 +30,7 @@ let fisherman: Group;
 let fishermanMixer: AnimationMixer;
 let castAnimAction: AnimationAction;
 
-export type FishermanState =
+type FishermanState =
   | 'IDLE'
   | 'CASTING'
   | 'FISHING'
@@ -42,54 +38,18 @@ export type FishermanState =
   | 'REELING'
   | 'HOLDING_PRIZE';
 
-export let fishermanState: FishermanState = 'IDLE';
+let fishermanState: FishermanState = 'IDLE';
 
 export function getFishermanState() {
   return fishermanState;
 }
-export function setFishermanState(state: FishermanState) {
+function setFishermanState(state: FishermanState) {
   fishermanState = state;
   transmit(STATE_CHANGE);
 }
-export const isIDLE = () => fishermanState === 'IDLE';
-export const isCASTING = () => fishermanState === 'CASTING';
-export const isFISHING = () => fishermanState === 'FISHING';
-export const isFISH_ON = () => fishermanState === 'FISH_ON';
-export const isREELING = () => fishermanState === 'REELING';
-export const isHOLDING_PRIZE = () => fishermanState === 'HOLDING_PRIZE';
 
-export function setFishermanState_IDLE() {
-  setFishermanState('IDLE');
-  transmit(ON_FISHERMAN_IDLE);
-}
-
-export function setFishermanState_CASTING() {
-  setFishermanState('CASTING');
-  transmit(ON_CASTING);
-}
-
-export function setFishermanState_FISHING() {
-  setFishermanState('FISHING');
-  transmit(ON_FISHING);
-}
-
-export function setFishermanState_FISH_ON() {
-  setFishermanState('FISH_ON');
-  transmit(ON_FISH_ON);
-}
-
-export function setFishermanState_REELING() {
-  setFishermanState('REELING');
-  moveFishBelowBobber();
-  hideUI_fishOn();
-  hideBobber();
-  cancelBobberPlunk();
-  showUI_fishHealth();
-  showUI_lineTension();
-}
-
-export function setFishermanState_HOLDING_PRIZE() {
-  setFishermanState('HOLDING_PRIZE');
+function is(s: FishermanState) {
+  return fishermanState === s;
 }
 
 export async function setupFishermanAsync() {
@@ -110,38 +70,50 @@ export async function setupFishermanAsync() {
   const animations = loaded.animations;
   const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
   castAnimAction = fishermanMixer.clipAction(castAnimClip);
-  fishermanMixer.addEventListener('finished', setFishermanState_FISHING);
+  fishermanMixer.addEventListener('finished', () => {
+    setFishermanState('FISHING');
+    transmit(ON_FISHING);
+  });
 
   // receivers
-  receive(RESET, setFishermanState_IDLE);
-  receive(ON_FISH_FIGHT, setFishermanState_REELING);
-  receive(ON_FISH_CAUGHT, setFishermanState_HOLDING_PRIZE);
+  receive(RESET, () => {
+    setFishermanState('IDLE');
+  });
+  receive(ON_FISH_ON, () => {
+    setFishermanState('FISH_ON');
+  });
+  receive(ON_FISH_FIGHT, () => {
+    setFishermanState('REELING');
+  });
+  receive(ON_FISH_CAUGHT, () => {
+    setFishermanState('HOLDING_PRIZE');
+  });
 }
 
 export function updateFisherman() {
   fishermanMixer.update(delta * 3);
 
-  if (isIDLE()) {
+  if (is('IDLE')) {
     fisherman.lookAt(aimPoint);
     return;
   }
 
-  if (!(isFISH_ON() || isREELING()) && isSpaceDown) {
-    setFishermanState_IDLE();
+  if (!(is('FISH_ON') || is('REELING')) && isSpaceDown) {
+    setFishermanState('IDLE');
     return;
   }
 
-  if (isCASTING() || isFISHING()) {
+  if (is('CASTING') || is('FISHING')) {
     fisherman.lookAt(getTopBobberPoint());
     return;
   }
 
-  if (isFISH_ON() && isSpaceDown) {
+  if (is('FISH_ON') && isSpaceDown) {
     transmit(ON_FISH_FIGHT);
     return;
   }
 
-  if (isREELING()) {
+  if (is('REELING')) {
     fisherman.lookAt(getFishPosition());
     return;
   }
@@ -156,8 +128,9 @@ export function getFishingLineAnchorPoint(): Vector3 {
 }
 
 export function playCastAnimation() {
-  if (isIDLE() || isFISHING() || isFISH_ON()) {
-    setFishermanState_CASTING();
+  if (is('IDLE') || is('FISHING') || is('FISH_ON')) {
+    setFishermanState('CASTING');
+    transmit(ON_CASTING);
     castAnimAction.reset();
   }
 

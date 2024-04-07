@@ -1,18 +1,32 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
 import sceneRoot from './scene';
-import {
-  getFishingLineAnchorPoint,
-  isCASTING,
-  isFISHING,
-  isFISH_ON,
-  isIDLE,
-  isREELING,
-} from './fisherman';
+import { getFishingLineAnchorPoint } from './fisherman';
 import { getTopBobberPoint } from './bobber';
 import { getFishPosition } from './fish';
-import { RESET, receive } from '../events/event_manager';
+import {
+  ON_CASTING,
+  ON_FISHING,
+  ON_FISH_FIGHT,
+  RESET,
+  STATE_CHANGE,
+  receive,
+  transmit,
+} from '../events/event_manager';
 
 let fishingLine: Line;
+
+type FishingLineState = 'HIDDEN' | 'ATTACHED_BOBBER' | 'ATTACHED_FISH';
+
+let fishingLineState: FishingLineState = 'HIDDEN';
+
+function setFishingLineState(s: FishingLineState) {
+  fishingLineState = s;
+  transmit(STATE_CHANGE);
+}
+
+function is(s: FishingLineState) {
+  return fishingLineState === s;
+}
 
 export function setupFishingLine() {
   const mat = new LineBasicMaterial({
@@ -32,13 +46,27 @@ export function setupFishingLine() {
 
   sceneRoot.add(fishingLine);
 
-  // receivers
-  receive(RESET, onReset);
+  // event handlers
+  receive(RESET, () => {
+    fishingLine.visible = false;
+  });
+
+  receive(ON_CASTING, () => {
+    fishingLine.visible = false;
+  });
+
+  receive(ON_FISHING, () => {
+    setFishingLineState('ATTACHED_BOBBER');
+    fishingLine.visible = true;
+  });
+
+  receive(ON_FISH_FIGHT, () => {
+    setFishingLineState('ATTACHED_FISH');
+  });
 }
 
 export function updateFishingLine() {
-  if (isFISHING() || isFISH_ON()) {
-    fishingLine.visible = true;
+  if (is('ATTACHED_BOBBER')) {
     fishingLine.geometry.setFromPoints([
       getFishingLineAnchorPoint(),
       getTopBobberPoint(),
@@ -46,22 +74,13 @@ export function updateFishingLine() {
     return;
   }
 
-  if (isREELING()) {
+  if (is('ATTACHED_FISH')) {
     fishingLine.geometry.setFromPoints([
       getFishingLineAnchorPoint(),
       getFishPosition(),
     ]);
     return;
   }
-
-  if (isIDLE() || isCASTING()) {
-    fishingLine.visible = false;
-    return;
-  }
 }
 
 //todo: caternary curve & parabola
-
-function onReset() {
-  fishingLine.visible = false;
-}

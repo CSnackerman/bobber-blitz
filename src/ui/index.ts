@@ -9,6 +9,7 @@ import { setupUI_debug } from './ui_debug';
 import {
   hideUI_fishHealth,
   setupUI_fishHealth,
+  showUI_fishHealth,
   updateUI_fishHealth,
 } from './ui_fish_health';
 import {
@@ -20,6 +21,7 @@ import {
 import {
   hideUI_lineTension,
   setupUI_lineTension,
+  showUI_lineTension,
   updateUI_lineTension,
 } from './ui_line_tension';
 import { setupUI_prize, updateUI_prize } from './ui_prize';
@@ -47,7 +49,11 @@ export function setupUI() {
     showUI_fishOn();
   });
 
-  receive(ON_FISH_FIGHT, () => {});
+  receive(ON_FISH_FIGHT, () => {
+    hideUI_fishOn();
+    showUI_fishHealth();
+    showUI_lineTension();
+  });
 }
 
 export function updateUI() {

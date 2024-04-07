@@ -10,13 +10,16 @@ import {
 import { delta, getElapsedTime } from '../core/time';
 import { castPoint } from '../controls/cast';
 import { getRandomInt } from '../util/random';
-import { setFishermanState_FISH_ON, setFishermanState_IDLE } from './fisherman';
 import { camera } from './camera';
 import {
   ON_CASTING,
   ON_FISHERMAN_IDLE,
   ON_FISHING,
+  ON_FISH_FIGHT,
+  ON_FISH_ON,
+  RESET,
   receive,
+  transmit,
 } from '../events/event_manager';
 
 let bobber: Group;
@@ -43,7 +46,9 @@ export async function setupBobberAsync() {
   const clip = AnimationClip.findByName(animations, 'plunk');
   plunkAnimAction = bobberMixer.clipAction(clip);
 
-  bobberMixer.addEventListener('finished', setFishermanState_IDLE);
+  bobberMixer.addEventListener('finished', () => {
+    transmit(RESET);
+  });
 
   // event handlers
   receive(ON_FISHERMAN_IDLE, () => {
@@ -59,6 +64,11 @@ export async function setupBobberAsync() {
   receive(ON_FISHING, () => {
     showBobber();
     setPlunkTimer();
+  });
+
+  receive(ON_FISH_FIGHT, () => {
+    hideBobber();
+    cancelBobberPlunk();
   });
 }
 
@@ -92,7 +102,7 @@ export function getBobberPosition() {
 }
 
 function plunkBobber() {
-  setFishermanState_FISH_ON();
+  transmit(ON_FISH_ON);
   plunkAnimAction.reset();
   plunkAnimAction.play().repetitions = 3;
 }
