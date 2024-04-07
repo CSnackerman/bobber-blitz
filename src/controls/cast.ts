@@ -7,8 +7,8 @@ import {
   setFishermanState_REELING,
 } from '../scene/fisherman';
 import { aimPoint, isAimingAtWater } from './aim';
-import { setFishState_BEING_REELED } from '../scene/fish';
 import { isMobile } from '../util/device';
+import { ON_FISHERMAN_FIGHT, transmit } from '../events/event_manager';
 
 export const castPoint = new Vector3();
 
@@ -26,7 +26,7 @@ export function setupCastHandler() {
     }
 
     if (isREELING()) {
-      setFishState_BEING_REELED();
+      transmit(ON_FISHERMAN_FIGHT);
       return;
     }
   });

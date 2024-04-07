@@ -12,6 +12,12 @@ import { castPoint } from '../controls/cast';
 import { getRandomInt } from '../util/random';
 import { setFishermanState_FISH_ON, setFishermanState_IDLE } from './fisherman';
 import { camera } from './camera';
+import {
+  ON_CASTING,
+  ON_FISHERMAN_IDLE,
+  ON_FISHING,
+  receive,
+} from '../events/event_manager';
 
 let bobber: Group;
 
@@ -38,6 +44,22 @@ export async function setupBobberAsync() {
   plunkAnimAction = bobberMixer.clipAction(clip);
 
   bobberMixer.addEventListener('finished', setFishermanState_IDLE);
+
+  // event handlers
+  receive(ON_FISHERMAN_IDLE, () => {
+    hideBobber();
+  });
+
+  receive(ON_CASTING, () => {
+    hideBobber();
+    plopBobber();
+    cancelBobberPlunk();
+  });
+
+  receive(ON_FISHING, () => {
+    showBobber();
+    setPlunkTimer();
+  });
 }
 
 export function getTopBobberPoint(): Vector3 {
@@ -48,7 +70,9 @@ export function getTopBobberPoint(): Vector3 {
 
 export function updateBobber() {
   bobberMixer.update(delta);
-  bobber.position.y = Math.sin(getElapsedTime() * 3.0) * 0.4; // side-to-side
+
+  // idle bob
+  bobber.position.y = Math.sin(getElapsedTime() * 3.0) * 0.4;
 }
 
 export function plopBobber() {

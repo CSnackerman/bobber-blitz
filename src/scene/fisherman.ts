@@ -8,28 +8,25 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import sceneRoot from './scene';
 import { setupFishingLine } from './fishing_line';
-import { aimPoint, showReticle } from '../controls/aim';
+import { aimPoint } from '../controls/aim';
 import { delta } from '../core/time';
-import {
-  cancelBobberPlunk,
-  getTopBobberPoint,
-  hideBobber,
-  plopBobber,
-  setPlunkTimer,
-  showBobber,
-} from './bobber';
+import { cancelBobberPlunk, getTopBobberPoint, hideBobber } from './bobber';
 import { hideUI_fishOn, showUI_fishOn } from '../ui/ui_fish_on';
 import { isSpaceDown } from '../controls/reel';
-import { hideUI_fishHealth, showUI_fishHealth } from '../ui/ui_fish_health';
-import { hideUI_lineTension, showUI_lineTension } from '../ui/ui_line_tension';
+import { showUI_fishHealth } from '../ui/ui_fish_health';
+import { showUI_lineTension } from '../ui/ui_line_tension';
 import { getFishPosition, moveFishBelowBobber } from './fish';
 import {
-  FISH_CAUGHT,
-  FISH_HOOKED,
+  ON_CASTING,
+  ON_FISH_CAUGHT,
+  ON_FISH_FIGHT,
   RESET,
   STATE_CHANGE,
   receive,
   transmit,
+  ON_FISHERMAN_IDLE,
+  ON_FISHING,
+  ON_FISH_ON,
 } from '../events/event_manager';
 
 let fisherman: Group;
@@ -63,31 +60,22 @@ export const isHOLDING_PRIZE = () => fishermanState === 'HOLDING_PRIZE';
 
 export function setFishermanState_IDLE() {
   setFishermanState('IDLE');
-  hideBobber();
-  showReticle();
-  hideUI_fishOn();
-  hideUI_fishHealth();
-  hideUI_lineTension();
+  transmit(ON_FISHERMAN_IDLE);
 }
 
 export function setFishermanState_CASTING() {
   setFishermanState('CASTING');
-  hideBobber();
-  plopBobber();
-  hideUI_fishHealth();
-  hideUI_fishOn();
-  cancelBobberPlunk();
+  transmit(ON_CASTING);
 }
 
 export function setFishermanState_FISHING() {
   setFishermanState('FISHING');
-  showBobber();
-  setPlunkTimer();
+  transmit(ON_FISHING);
 }
 
 export function setFishermanState_FISH_ON() {
   setFishermanState('FISH_ON');
-  showUI_fishOn();
+  transmit(ON_FISH_ON);
 }
 
 export function setFishermanState_REELING() {
@@ -125,8 +113,9 @@ export async function setupFishermanAsync() {
   fishermanMixer.addEventListener('finished', setFishermanState_FISHING);
 
   // receivers
-  receive(FISH_CAUGHT, setFishermanState_HOLDING_PRIZE);
   receive(RESET, setFishermanState_IDLE);
+  receive(ON_FISH_FIGHT, setFishermanState_REELING);
+  receive(ON_FISH_CAUGHT, setFishermanState_HOLDING_PRIZE);
 }
 
 export function updateFisherman() {
@@ -148,8 +137,7 @@ export function updateFisherman() {
   }
 
   if (isFISH_ON() && isSpaceDown) {
-    setFishermanState_REELING();
-    transmit(FISH_HOOKED);
+    transmit(ON_FISH_FIGHT);
     return;
   }
 

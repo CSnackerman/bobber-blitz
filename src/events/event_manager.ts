@@ -1,25 +1,30 @@
 const et = new EventTarget();
 
-export const STATE_CHANGE = 'state_change';
-export const FISH_HOOKED = 'hook_fish';
-export const FISH_CAUGHT = 'caught_fish';
+/* Event Registry */
+
 export const RESET = 'reset';
+export const STATE_CHANGE = 'state_change';
+export const ON_FISHERMAN_IDLE = 'on_fisherman_idle';
+export const ON_CASTING = 'on_casting';
+export const ON_FISHING = 'on_fishing';
+export const ON_FISH_ON = 'on_fish_on';
+export const ON_FISH_FIGHT = 'on_fish_fight';
+export const ON_FISHERMAN_FIGHT = 'on_fisherman_fight';
+export const ON_FISH_CAUGHT = 'on_fish_caught';
 
 type EventName =
+  | typeof RESET
   | typeof STATE_CHANGE
-  | typeof FISH_HOOKED
-  | typeof FISH_CAUGHT
-  | typeof RESET;
-
-const Events = {
-  [STATE_CHANGE]: new Event(STATE_CHANGE),
-  [FISH_HOOKED]: new Event(FISH_HOOKED),
-  [FISH_CAUGHT]: new Event(FISH_CAUGHT),
-  [RESET]: new Event(RESET),
-} as const;
+  | typeof ON_FISHERMAN_IDLE
+  | typeof ON_CASTING
+  | typeof ON_FISHING
+  | typeof ON_FISH_ON
+  | typeof ON_FISH_FIGHT
+  | typeof ON_FISHERMAN_FIGHT
+  | typeof ON_FISH_CAUGHT;
 
 export function transmit(e: EventName) {
-  et.dispatchEvent(Events[e]);
+  et.dispatchEvent(new Event(e));
 }
 
 export function receive(e: EventName, action: () => void) {

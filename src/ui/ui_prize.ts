@@ -1,4 +1,9 @@
-import { FISH_CAUGHT, RESET, receive, transmit } from '../events/event_manager';
+import {
+  ON_FISH_CAUGHT,
+  RESET,
+  receive,
+  transmit,
+} from '../events/event_manager';
 
 const template = document.getElementById(
   'template_prize'
@@ -28,7 +33,7 @@ export function setupUI_prize() {
     transmit(RESET);
   };
 
-  receive(FISH_CAUGHT, showUI_prize);
+  receive(ON_FISH_CAUGHT, showUI_prize);
 
   hideUI_prize();
 }

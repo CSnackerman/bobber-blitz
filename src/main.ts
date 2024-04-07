@@ -19,6 +19,7 @@ import { setupUI, updateUI } from './ui';
 import { initFirebase } from './core/firebase';
 import { setupControls } from './controls';
 import { updateFishingLine } from './scene/fishing_line';
+import { RESET, transmit } from './events/event_manager';
 
 main().catch((e: Error) => {
   console.error(e);
@@ -51,6 +52,8 @@ function init() {
   setupWater();
   setupLights();
   setupUI();
+
+  transmit(RESET);
 }
 
 function run() {
