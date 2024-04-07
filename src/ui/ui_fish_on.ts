@@ -1,9 +1,3 @@
-import {
-  ON_CASTING,
-  ON_FISH_FIGHT,
-  ON_FISH_ON,
-  receive,
-} from '../events/event_manager';
 import { getBobberScreenCoords } from '../scene/bobber';
 
 const template = document.getElementById(
@@ -16,18 +10,6 @@ let enabled = false;
 
 export function setupUI_fishOn() {
   document.body.appendChild(fishOn_H3);
-
-  receive(ON_FISH_ON, () => {
-    enabled = true;
-  });
-
-  receive(ON_FISH_FIGHT, () => {
-    enabled = false;
-  });
-
-  receive(ON_CASTING, () => {
-    enabled = false;
-  });
 }
 
 export function updateUI_fishOn() {
@@ -47,8 +29,10 @@ export function updateUI_fishOn() {
 
 export function hideUI_fishOn() {
   fishOn_H3.style.visibility = 'hidden';
+  enabled = false;
 }
 
 export function showUI_fishOn() {
   fishOn_H3.style.visibility = 'visible';
+  enabled = true;
 }

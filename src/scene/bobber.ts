@@ -50,6 +50,7 @@ export async function setupBobberAsync() {
     bobber.scale.set(2, 2, 2);
     bobber.position.x = 50;
     hideBobber();
+    cancelBobberPlunk();
   });
 
   receive(ON_CASTING, () => {
