@@ -51,10 +51,12 @@ export function setupFishingLine() {
 
   // event handlers
   receive(RESET, () => {
+    setState('HIDDEN', null);
     fishingLine.visible = false;
   });
 
   receive(ON_CASTING, () => {
+    setState('HIDDEN', null);
     fishingLine.visible = false;
   });
 
