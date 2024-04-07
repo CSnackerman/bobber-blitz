@@ -36,16 +36,15 @@ type FishState = 'SWIMMING' | 'BEING_REELED' | 'FLOPPING' | 'IDLE';
 
 let fishState: FishState = 'IDLE';
 
-const isBEING_REELED = () => fishState === 'BEING_REELED';
-const isSWIMMING = () => fishState === 'SWIMMING';
-const isFLOPPING = () => fishState === 'FLOPPING';
-const isIDLE = () => fishState === 'IDLE';
-
 export const getFishState = () => fishState;
 
 function setFishState(s: FishState) {
   fishState = s;
   transmit(STATE_CHANGE);
+}
+
+function is(s: FishState) {
+  return fishState === s;
 }
 
 export async function setupFishAsync() {
@@ -96,11 +95,11 @@ export async function setupFishAsync() {
 export function updateFish() {
   fishMixer.update(delta * flopPlaybackSpeed);
 
-  if (isIDLE()) {
+  if (is('IDLE')) {
     return;
   }
 
-  if (isFLOPPING()) {
+  if (is('FLOPPING')) {
     if (flopTimeoutId === null) {
       flopRandomly();
     }
@@ -108,7 +107,7 @@ export function updateFish() {
     return;
   }
 
-  if (isSWIMMING() || isBEING_REELED()) {
+  if (is('SWIMMING') || is('BEING_REELED')) {
     if (swimDirectionChangeTimeoutId === null) {
       changeSwimDirections();
     }
@@ -197,7 +196,7 @@ function changeSwimDirections() {
   const delay = getRandomInt(300, 1000);
 
   swimDirectionChangeTimeoutId = setTimeout(() => {
-    if (isBEING_REELED()) {
+    if (is('BEING_REELED')) {
       setDirectionRandomlyToward(45);
     } else {
       setDirectionRandomlyAway(180);
