@@ -10,7 +10,7 @@ import sceneRoot from '../scene/scene';
 import { water } from '../scene/water';
 import { camera } from '../scene/camera';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { ON_FISHERMAN_IDLE, receive } from '../events/event_manager';
+import { RESET, receive } from '../events/event_manager';
 
 export const aimPoint = new Vector3();
 export let isAimingAtWater: boolean;
@@ -25,7 +25,7 @@ const reticle = new Mesh(
 
 sceneRoot.add(reticle);
 
-receive(ON_FISHERMAN_IDLE, () => {
+receive(RESET, () => {
   showReticle();
 });
 

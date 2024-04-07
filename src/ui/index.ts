@@ -1,8 +1,8 @@
 import {
   ON_CASTING,
-  ON_FISHERMAN_IDLE,
   ON_FISH_FIGHT,
   ON_FISH_ON,
+  RESET,
   receive,
 } from '../events/event_manager';
 import { setupUI_debug } from './ui_debug';
@@ -34,9 +34,9 @@ export function setupUI() {
   setupUI_debug();
 
   // event handlers
-  receive(ON_FISHERMAN_IDLE, () => {
-    hideUI_fishOn();
+  receive(RESET, () => {
     hideUI_fishHealth();
+    hideUI_fishOn();
     hideUI_lineTension();
   });
 

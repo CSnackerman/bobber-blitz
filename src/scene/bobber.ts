@@ -13,7 +13,6 @@ import { getRandomInt } from '../util/random';
 import { camera } from './camera';
 import {
   ON_CASTING,
-  ON_FISHERMAN_IDLE,
   ON_FISHING,
   ON_FISH_FIGHT,
   ON_FISH_ON,
@@ -34,10 +33,6 @@ export async function setupBobberAsync() {
 
   bobber = gltf.scene;
 
-  bobber.scale.set(2, 2, 2);
-  bobber.position.x = 50;
-  bobber.visible = false;
-
   sceneRoot.add(bobber);
 
   // setup animation
@@ -50,8 +45,10 @@ export async function setupBobberAsync() {
     transmit(RESET);
   });
 
-  // event handlers
-  receive(ON_FISHERMAN_IDLE, () => {
+  // setup event handlers
+  receive(RESET, () => {
+    bobber.scale.set(2, 2, 2);
+    bobber.position.x = 50;
     hideBobber();
   });
 

@@ -43,8 +43,8 @@ let fishermanState: FishermanState = 'IDLE';
 export function getFishermanState() {
   return fishermanState;
 }
-function setFishermanState(state: FishermanState) {
-  fishermanState = state;
+function setState(s: FishermanState) {
+  fishermanState = s;
   transmit(STATE_CHANGE);
 }
 
@@ -71,22 +71,22 @@ export async function setupFishermanAsync() {
   const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
   castAnimAction = fishermanMixer.clipAction(castAnimClip);
   fishermanMixer.addEventListener('finished', () => {
-    setFishermanState('FISHING');
+    setState('FISHING');
     transmit(ON_FISHING);
   });
 
   // receivers
   receive(RESET, () => {
-    setFishermanState('IDLE');
+    setState('IDLE');
   });
   receive(ON_FISH_ON, () => {
-    setFishermanState('FISH_ON');
+    setState('FISH_ON');
   });
   receive(ON_FISH_FIGHT, () => {
-    setFishermanState('REELING');
+    setState('REELING');
   });
   receive(ON_FISH_CAUGHT, () => {
-    setFishermanState('HOLDING_PRIZE');
+    setState('HOLDING_PRIZE');
   });
 }
 
@@ -98,8 +98,8 @@ export function updateFisherman() {
     return;
   }
 
-  if (!(is('FISH_ON') || is('REELING')) && isSpaceDown) {
-    setFishermanState('IDLE');
+  if (!is('FISH_ON') && !is('REELING') && isSpaceDown) {
+    setState('IDLE');
     return;
   }
 
@@ -129,7 +129,7 @@ export function getFishingLineAnchorPoint(): Vector3 {
 
 export function playCastAnimation() {
   if (is('IDLE') || is('FISHING') || is('FISH_ON')) {
-    setFishermanState('CASTING');
+    setState('CASTING');
     transmit(ON_CASTING);
     castAnimAction.reset();
   }

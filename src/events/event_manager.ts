@@ -4,7 +4,6 @@ const et = new EventTarget();
 
 export const RESET = 'reset';
 export const STATE_CHANGE = 'state_change';
-export const ON_FISHERMAN_IDLE = 'on_fisherman_idle';
 export const ON_CASTING = 'on_casting';
 export const ON_FISHING = 'on_fishing';
 export const ON_FISH_ON = 'on_fish_on';
@@ -15,7 +14,6 @@ export const ON_FISH_CAUGHT = 'on_fish_caught';
 type EventName =
   | typeof RESET
   | typeof STATE_CHANGE
-  | typeof ON_FISHERMAN_IDLE
   | typeof ON_CASTING
   | typeof ON_FISHING
   | typeof ON_FISH_ON
