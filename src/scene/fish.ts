@@ -42,9 +42,7 @@ const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishState;
 
 let state = new State<FishState>(IDLE, null);
 
-export function getFishState() {
-  return state.get();
-}
+export const getFishState = () => state.get();
 
 function while_SWIMMING() {
   if (swimDirectionChangeTimeoutId === null) {
