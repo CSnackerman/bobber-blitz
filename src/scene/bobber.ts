@@ -57,7 +57,7 @@ function setupReceivers() {
 
   receive(ON_CASTING, () => {
     hide();
-    setPosition();
+    moveToCastPoint();
     cancelPlunk();
   });
 
@@ -128,7 +128,7 @@ function getPosition() {
   return bobber.position;
 }
 
-function setPosition() {
+function moveToCastPoint() {
   bobber.position.copy(castPoint);
 }
 
