@@ -6,7 +6,7 @@ import {
   Group,
   Vector3,
 } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { State } from '../core/state';
 import { delta } from '../core/time';
@@ -19,68 +19,60 @@ import {
   transmit,
 } from '../events/event_manager';
 import { getRandomFloat, getRandomInt } from '../util/random';
-import { getDirection, getDistance } from '../util/vector';
+import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';
 import { getFishermanPosition } from './fisherman';
 import sceneRoot from './scene';
 
+/* Initialization */
 let fish: Group;
 
-let fishMixer: AnimationMixer;
-let flopAction: AnimationAction;
-let flopPlaybackSpeed = 2.5;
+export async function setupFishAsync() {
+  const gltfLoader = new GLTFLoader();
 
-const swimSpeed = 30;
+  const gltf = await gltfLoader.loadAsync('/models/fish.glb');
 
-enum FishState {
+  fish = gltf.scene;
+
+  sceneRoot.add(fish);
+
+  setupAnimation(gltf);
+
+  setupReceivers();
+}
+
+/* State */
+
+enum FishStates {
   IDLE = 'IDLE',
   SWIMMING = 'SWIMMING',
   BEING_REELED = 'BEING_REELED',
   FLOPPING = 'FLOPPING',
 }
-const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishState;
+const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishStates;
 
-let state = new State<FishState>(IDLE, null);
+let state = new State<FishStates>(IDLE, null);
 
 export const getFishState = () => state.get();
 
-function while_SWIMMING() {
-  if (swimDirectionChangeTimeoutId === null) {
-    changeSwimDirections('away');
-  }
-
-  swimForward();
-}
-
-function while_BEING_REELED() {
-  if (swimDirectionChangeTimeoutId === null) {
-    changeSwimDirections('toward');
-  }
-
-  swimForward();
-  checkDistance();
-}
-
-function while_FLOPPING() {
-  if (flopTimeoutId === null) {
-    flopRandomly();
-  }
-
-  fishMixer.update(delta * flopPlaybackSpeed);
+export function updateFish() {
+  state.update();
 }
 
 function setupReceivers() {
   receive(ON_FISH_FIGHT, () => {
     cancelChangeSwimDirections();
     moveBelowBobber();
-    setDirectionRandomlyAway(0);
+    setSwimDirection_AwayFisherman();
+    changeSwimDirectionCallback = setSwimDirection_AwayFisherman;
 
     state.set(SWIMMING, while_SWIMMING);
   });
 
   receive(ON_FISHERMAN_FIGHT, () => {
     cancelChangeSwimDirections();
-    setDirectionRandomlyToward(0);
+    setSwimDirection_TowardFisherman();
+    changeSwimDirectionCallback = setSwimDirection_TowardFisherman;
 
     state.set(BEING_REELED, while_BEING_REELED);
   });
@@ -102,38 +94,56 @@ function setupReceivers() {
   });
 }
 
-export async function setupFishAsync() {
-  const gltfLoader = new GLTFLoader();
+function while_SWIMMING() {
+  if (swimDirectionChangeTimeoutId === null) {
+    changeSwimDirections();
+  }
 
-  const gltf = await gltfLoader.loadAsync('/models/fish.glb');
+  swimForward();
+}
 
-  fish = gltf.scene;
+function while_BEING_REELED() {
+  if (swimDirectionChangeTimeoutId === null) {
+    changeSwimDirections();
+  }
 
-  sceneRoot.add(fish);
+  swimForward();
+  checkDistance();
+}
 
-  // setup animation
-  fishMixer = new AnimationMixer(fish);
-  const animations = gltf.animations;
-  const clip = AnimationClip.findByName(animations, 'flop');
-  flopAction = fishMixer.clipAction(clip);
+function while_FLOPPING() {
+  if (flopTimeoutId === null) {
+    flopRandomly();
+  }
 
-  fishMixer.addEventListener('finished', () => {
+  animationMixer.update(delta * flopPlaybackSpeed);
+}
+
+/* Animations */
+
+let animationMixer: AnimationMixer;
+
+function setupAnimation(gltf: GLTF) {
+  animationMixer = new AnimationMixer(fish);
+
+  animationMixer.addEventListener('finished', () => {
     flopTimeoutId = null;
   });
 
-  setupReceivers();
+  setupAnimation_Flop(gltf);
 }
 
-export function updateFish() {
-  state.update();
-}
+// Flop Animation //
 
-function setFlopPlaybackSpeed(s: number) {
-  if (s <= 0) s = 0.1;
-  flopPlaybackSpeed = s;
-}
-
+let flopAnimationAction: AnimationAction;
+let flopPlaybackSpeed = 2.5;
 let flopTimeoutId: NodeJS.Timeout | null = null;
+
+function setupAnimation_Flop(gltf: GLTF) {
+  flopAnimationAction = animationMixer.clipAction(
+    AnimationClip.findByName(gltf.animations, 'flop')
+  );
+}
 
 function flopRandomly() {
   if (flopTimeoutId !== null) return;
@@ -149,15 +159,22 @@ function flopRandomly() {
 }
 
 function flopFish(flopCount: number) {
-  flopAction.reset();
-  flopAction.play().repetitions = flopCount;
+  flopAnimationAction.reset();
+  flopAnimationAction.play().repetitions = flopCount;
 }
 
 function cancelFlop() {
   clearTimeout(flopTimeoutId as NodeJS.Timeout);
-  flopAction.stop();
-  flopAction.reset();
+  flopAnimationAction.stop();
+  flopAnimationAction.reset();
 }
+
+function setFlopPlaybackSpeed(s: number) {
+  if (s <= 0) s = 0.1;
+  flopPlaybackSpeed = s;
+}
+
+/* Transformation */
 
 export function getFishPosition() {
   return fish.position.clone();
@@ -177,67 +194,70 @@ function setRandomScale(min: number, max: number) {
   fish.scale.set(scale, scale, scale);
 }
 
-function swimForward() {
-  const v = new Vector3();
-  fish.getWorldDirection(v);
-  fish.position.addScaledVector(v, swimSpeed * delta);
-}
-
 function checkDistance() {
   const catchDistance = 30;
-  const distance = getDistance(getFishermanPosition(), getFishPosition());
+  const distance = getFishPosition().distanceTo(getFishermanPosition());
   if (distance < catchDistance) {
     transmit(ON_FISH_CAUGHT);
   }
 }
 
+/* Swimming */
+
+const swimSpeed = 30;
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
+let changeSwimDirectionCallback: () => void = setSwimDirection_TowardFisherman;
 
 function cancelChangeSwimDirections() {
   clearTimeout(swimDirectionChangeTimeoutId as NodeJS.Timeout);
   swimDirectionChangeTimeoutId = null;
 }
 
-function changeSwimDirections(direction: 'toward' | 'away') {
+function setSwimDirection_TowardFisherman() {
+  const halfAngleOffset = degToRad(45 / 2);
+
+  const angleOffset = getRandomFloat(-halfAngleOffset, halfAngleOffset);
+
+  const direction = new Vector3().copy(
+    getDirection(getFishPosition(), getFishermanPosition())
+  );
+
+  setDirectionFrom(direction, angleOffset);
+}
+
+function setSwimDirection_AwayFisherman() {
+  const halfAngleOffset = degToRad(180 / 2);
+
+  const angleOffset = getRandomFloat(-halfAngleOffset, halfAngleOffset);
+
+  const direction = new Vector3().copy(
+    getDirection(getFishermanPosition(), getFishPosition())
+  );
+
+  setDirectionFrom(direction, angleOffset);
+}
+
+function setDirectionFrom(vec: Vector3, angleOffset: number) {
+  fish.setRotationFromAxisAngle(
+    new Vector3(0, 1, 0),
+    Math.atan2(vec.x, vec.z) + angleOffset // rads
+  );
+}
+
+function changeSwimDirections() {
   if (swimDirectionChangeTimeoutId !== null) return;
 
   const delay = getRandomInt(300, 1000);
 
   swimDirectionChangeTimeoutId = setTimeout(() => {
-    if (direction === 'toward') {
-      setDirectionRandomlyToward(45);
-    } else {
-      setDirectionRandomlyAway(180);
-    }
+    changeSwimDirectionCallback();
 
     swimDirectionChangeTimeoutId = null;
   }, delay);
 }
 
-function setDirectionRandomlyAway(arc: number) {
-  const direction = getDirection(getFishermanPosition(), getFishPosition());
-  direction.setY(0);
-
-  fish.setRotationFromAxisAngle(
-    new Vector3(0, 1, 0),
-    Math.atan2(direction.x, direction.z) +
-      degToRad(getRandomFloat(-arc / 2, arc / 2))
-  );
-
+function swimForward() {
   const v = new Vector3();
   fish.getWorldDirection(v);
-}
-
-function setDirectionRandomlyToward(arc: number) {
-  const direction = getDirection(getFishPosition(), getFishermanPosition());
-  direction.setY(0);
-
-  fish.setRotationFromAxisAngle(
-    new Vector3(0, 1, 0),
-    Math.atan2(direction.x, direction.z) +
-      degToRad(getRandomFloat(-arc / 2, arc / 2))
-  );
-
-  const v = new Vector3();
-  fish.getWorldDirection(v);
+  fish.position.addScaledVector(v, swimSpeed * delta);
 }
