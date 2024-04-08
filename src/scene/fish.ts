@@ -24,10 +24,19 @@ import { getBobberPosition } from './bobber';
 import { getFishermanPosition } from './fisherman';
 import sceneRoot from './scene';
 
+/* Aliases */
+
+export {
+  setup as setupFishAsync,
+  update as updateFish,
+  getState as getFishState,
+  getPosition as getFishPosition,
+};
+
 /* Initialization */
 let fish: Group;
 
-export async function setupFishAsync() {
+async function setup() {
   const gltfLoader = new GLTFLoader();
 
   const gltf = await gltfLoader.loadAsync('/models/fish.glb');
@@ -53,9 +62,9 @@ const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishStates;
 
 let state = new State<FishStates>(IDLE, null);
 
-export const getFishState = () => state.get();
+const getState = () => state.get();
 
-export function updateFish() {
+function update() {
   state.update();
 }
 
@@ -87,7 +96,7 @@ function setupReceivers() {
   receive(RESET, () => {
     cancelFlop();
     setRandomScale(2, 5);
-    setFishPosition(new Vector3(0, 2, 50));
+    setPosition(new Vector3(0, 2, 50));
     fish.lookAt(getFishermanPosition());
 
     state.set(IDLE, null);
@@ -154,17 +163,18 @@ function flopRandomly() {
 
   flopTimeoutId = setTimeout(() => {
     setFlopPlaybackSpeed(speed);
-    flopFish(nFlops);
+    flop(nFlops);
   }, delay);
 }
 
-function flopFish(flopCount: number) {
+function flop(flopCount: number) {
   flopAnimationAction.reset();
   flopAnimationAction.play().repetitions = flopCount;
 }
 
 function cancelFlop() {
   clearTimeout(flopTimeoutId as NodeJS.Timeout);
+  flopTimeoutId = null;
   flopAnimationAction.stop();
   flopAnimationAction.reset();
 }
@@ -176,11 +186,11 @@ function setFlopPlaybackSpeed(s: number) {
 
 /* Transformation */
 
-export function getFishPosition() {
+function getPosition() {
   return fish.position.clone();
 }
 
-function setFishPosition(p: Vector3) {
+function setPosition(p: Vector3) {
   fish.position.copy(p);
 }
 
@@ -196,7 +206,7 @@ function setRandomScale(min: number, max: number) {
 
 function checkDistance() {
   const catchDistance = 30;
-  const distance = getFishPosition().distanceTo(getFishermanPosition());
+  const distance = getPosition().distanceTo(getFishermanPosition());
   if (distance < catchDistance) {
     transmit(ON_FISH_CAUGHT);
   }
@@ -206,7 +216,7 @@ function checkDistance() {
 
 const swimSpeed = 30;
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
-let changeSwimDirectionCallback: () => void = setSwimDirection_TowardFisherman;
+let changeSwimDirectionCallback = () => {};
 
 function cancelChangeSwimDirections() {
   clearTimeout(swimDirectionChangeTimeoutId as NodeJS.Timeout);
@@ -219,7 +229,7 @@ function setSwimDirection_TowardFisherman() {
   const angleOffset = getRandomFloat(-halfAngleOffset, halfAngleOffset);
 
   const direction = new Vector3().copy(
-    getDirection(getFishPosition(), getFishermanPosition())
+    getDirection(getPosition(), getFishermanPosition())
   );
 
   setDirectionFrom(direction, angleOffset);
@@ -231,7 +241,7 @@ function setSwimDirection_AwayFisherman() {
   const angleOffset = getRandomFloat(-halfAngleOffset, halfAngleOffset);
 
   const direction = new Vector3().copy(
-    getDirection(getFishermanPosition(), getFishPosition())
+    getDirection(getFishermanPosition(), getPosition())
   );
 
   setDirectionFrom(direction, angleOffset);

@@ -24,11 +24,19 @@ import { getTopBobberPoint } from './bobber';
 import { getFishPosition } from './fish';
 import sceneRoot from './scene';
 
+export {
+  getPosition as getFishermanPosition,
+  getState as getFishermanState,
+  getFishingLineAnchorPoint,
+  setup as setupFishermanAsync,
+  update as updateFisherman,
+};
+
 /* Initialization */
 
 let fisherman: Group;
 
-export async function setupFishermanAsync() {
+async function setup() {
   const loader = new GLTFLoader();
 
   const gltf = await loader.loadAsync('/models/fisherman.glb');
@@ -60,9 +68,9 @@ const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
 
 let state = new State<FishermanStates>(IDLE, while_IDLE);
 
-export const getFishermanState = () => state.get();
+const getState = () => state.get();
 
-export function updateFisherman() {
+function update() {
   state.update();
 }
 
@@ -142,7 +150,7 @@ function setupAnimation_Cast(gltf: GLTF) {
   );
 }
 
-export function playCastAnimation() {
+function playCastAnimation() {
   castAnimationAction.reset();
 
   castAnimationAction.play().repetitions = 1;
@@ -150,11 +158,11 @@ export function playCastAnimation() {
 
 /* Transformation */
 
-export function getFishermanPosition() {
+function getPosition() {
   return fisherman.position.clone();
 }
 
-export function getFishingLineAnchorPoint() {
+function getFishingLineAnchorPoint() {
   let p = new Vector3();
   fisherman.getObjectByName('string_pivot')?.getWorldPosition(p);
   return p;
