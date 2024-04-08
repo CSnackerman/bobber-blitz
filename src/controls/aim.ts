@@ -44,6 +44,7 @@ export function postitionReticle() {
   if (intersection.length) {
     const info = intersection[0];
     reticle.position.copy(info.point);
+    reticle.translateY(0.5);
     aimPoint.copy(info.point);
     isAimingAtWater = true;
   } else {
