@@ -26,14 +26,7 @@ import {
 } from './ui_line_tension';
 import { setupUI_prize, updateUI_prize } from './ui_prize';
 
-export function setupUI() {
-  setupUI_fishOn();
-  setupUI_lineTension();
-  setupUI_fishHealth();
-  setupUI_prize();
-  setupUI_debug();
-
-  // event handlers
+function setupReceivers() {
   receive(RESET, () => {
     hideUI_fishHealth();
     hideUI_fishOn();
@@ -54,6 +47,16 @@ export function setupUI() {
     showUI_fishHealth();
     showUI_lineTension();
   });
+}
+
+export function setupUI() {
+  setupUI_fishOn();
+  setupUI_lineTension();
+  setupUI_fishHealth();
+  setupUI_prize();
+  setupUI_debug();
+
+  setupReceivers();
 }
 
 export function updateUI() {

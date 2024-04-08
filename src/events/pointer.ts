@@ -1,5 +1,5 @@
-import { Vector2 } from "three";
-import { renderer } from "../core/renderer";
+import { Vector2 } from 'three';
+import { renderer } from '../core/renderer';
 
 export const pointer = new Vector2();
 
@@ -16,9 +16,9 @@ function setPickPosition(event: MouseEvent) {
   const canvas = renderer.domElement;
   const pos = getCanvasRelativePosition(event);
   pointer.x = (pos.x / canvas.width) * 2 - 1;
-  pointer.y = (pos.y / canvas.height) * -2 + 1; // note we flip Y
+  pointer.y = (pos.y / canvas.height) * -2 + 1;
 }
 
 export function setupPointerHandler() {
-  document.addEventListener("pointermove", setPickPosition);
+  document.addEventListener('pointermove', setPickPosition);
 }

@@ -5,12 +5,12 @@ import {
   TorusGeometry,
   Vector3,
 } from 'three';
-import { pointer } from '../events/pointer';
-import sceneRoot from '../scene/scene';
-import { water } from '../scene/water';
-import { camera } from '../scene/camera';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { RESET, receive } from '../events/event_manager';
+import { pointer } from '../events/pointer';
+import { camera } from '../scene/camera';
+import sceneRoot from '../scene/scene';
+import { water } from '../scene/water';
 
 export const aimPoint = new Vector3();
 export let isAimingAtWater: boolean;

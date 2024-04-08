@@ -1,5 +1,3 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import sceneRoot from './scene';
 import {
   AnimationAction,
   AnimationClip,
@@ -7,10 +5,9 @@ import {
   Group,
   Vector3,
 } from 'three';
-import { delta, getElapsedTime } from '../core/time';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
-import { getRandomInt } from '../util/random';
-import { camera } from './camera';
+import { delta, getElapsedTime } from '../core/time';
 import {
   ON_CASTING,
   ON_FISHING,
@@ -20,6 +17,9 @@ import {
   receive,
   transmit,
 } from '../events/event_manager';
+import { getRandomInt } from '../util/random';
+import { camera } from './camera';
+import sceneRoot from './scene';
 
 let bobber: Group;
 

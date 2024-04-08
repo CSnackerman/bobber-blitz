@@ -1,7 +1,6 @@
 import { Vector3 } from 'three';
 import { renderer } from '../core/renderer';
-import { playCastAnimation } from '../scene/fisherman';
-import { aimPoint, isAimingAtWater } from './aim';
+import { State } from '../core/state';
 import {
   ON_CASTING,
   ON_FISHERMAN_FIGHT,
@@ -9,11 +8,11 @@ import {
   ON_FISH_FIGHT,
   ON_FISH_ON,
   RESET,
-  STATE_CHANGE,
   receive,
   transmit,
 } from '../events/event_manager';
-import { NullableVoidCallback } from '../core/types';
+import { playCastAnimation } from '../scene/fisherman';
+import { aimPoint, isAimingAtWater } from './aim';
 
 export const castPoint = new Vector3();
 
@@ -24,50 +23,46 @@ export enum CastState {
 }
 const { DISABLED, CAN_CAST, CAN_REEL } = CastState;
 
-let castState = CAN_CAST;
+const state = new State<CastState>(CAN_CAST, null);
 
-function setState(s: CastState, onUpdate: NullableVoidCallback) {
-  castState = s;
-  update = onUpdate;
-  transmit(STATE_CHANGE);
-}
+export const getCastState = () => state.get();
 
-export const getCastState = () => castState;
-
-let update: NullableVoidCallback = null;
-
-export function setupCastHandler() {
-  renderer.domElement.addEventListener('click', () => {
-    update?.();
-  });
-
+function setupReceivers() {
   receive(RESET, () => {
-    setState(CAN_CAST, () => {
+    state.set(CAN_CAST, () => {
       cast();
     });
   });
 
   receive(ON_CASTING, () => {
-    setState(DISABLED, null);
+    state.set(DISABLED, null);
   });
 
   receive(ON_FISHING, () => {
-    setState(CAN_CAST, () => {
+    state.set(CAN_CAST, () => {
       cast();
     });
   });
 
   receive(ON_FISH_ON, () => {
-    setState(CAN_CAST, () => {
+    state.set(CAN_CAST, () => {
       cast();
     });
   });
 
   receive(ON_FISH_FIGHT, () => {
-    setState(CAN_REEL, () => {
+    state.set(CAN_REEL, () => {
       transmit(ON_FISHERMAN_FIGHT);
     });
   });
+}
+
+export function setupCastHandler() {
+  renderer.domElement.addEventListener('click', () => {
+    state.update();
+  });
+
+  setupReceivers();
 }
 
 function cast() {

@@ -7,8 +7,8 @@ import {
   Object3D,
   Vector3,
 } from 'three';
-import sceneRoot from './scene';
 import { getRandomColorHex } from '../util/random';
+import sceneRoot from './scene';
 
 interface TrackingOrb {
   meshToTrack: Object3D;

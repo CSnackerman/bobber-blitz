@@ -1,4 +1,4 @@
-import { WebGLRenderer, ACESFilmicToneMapping } from 'three';
+import { ACESFilmicToneMapping, WebGLRenderer } from 'three';
 import { isMobile } from '../util/device';
 
 export const renderer = new WebGLRenderer({

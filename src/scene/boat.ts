@@ -1,7 +1,7 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import sceneRoot from './scene';
 import { Object3D, Object3DEventMap } from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getElapsedTime } from '../core/time';
+import sceneRoot from './scene';
 
 let boat: Object3D<Object3DEventMap>;
 

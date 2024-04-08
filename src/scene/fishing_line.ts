@@ -1,8 +1,5 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
-import sceneRoot from './scene';
-import { getFishingLineAnchorPoint } from './fisherman';
-import { getTopBobberPoint } from './bobber';
-import { getFishPosition } from './fish';
+import { State } from '../core/state';
 import {
   ON_CASTING,
   ON_FISHING,
@@ -10,7 +7,10 @@ import {
   RESET,
   receive,
 } from '../events/event_manager';
-import { State } from '../core/state';
+import { getTopBobberPoint } from './bobber';
+import { getFishPosition } from './fish';
+import { getFishingLineAnchorPoint } from './fisherman';
+import sceneRoot from './scene';
 
 let fishingLine: Line;
 
@@ -39,25 +39,7 @@ function while_ATTACHED_FISH() {
   ]);
 }
 
-export function setupFishingLine() {
-  const mat = new LineBasicMaterial({
-    color: '#a9d665',
-    transparent: true,
-    opacity: 0.3,
-  });
-
-  const geometry = new BufferGeometry().setFromPoints([
-    new Vector3(0, 0, 0),
-    new Vector3(50, 50, 50),
-  ]);
-
-  fishingLine = new Line(geometry, mat);
-
-  fishingLine.visible = false;
-
-  sceneRoot.add(fishingLine);
-
-  // event handlers
+function setupReceivers() {
   receive(RESET, () => {
     fishingLine.visible = false;
     state.set(HIDDEN, null);
@@ -77,6 +59,27 @@ export function setupFishingLine() {
   receive(ON_FISH_FIGHT, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
+}
+
+export function setupFishingLine() {
+  const mat = new LineBasicMaterial({
+    color: '#a9d665',
+    transparent: true,
+    opacity: 0.3,
+  });
+
+  const geometry = new BufferGeometry().setFromPoints([
+    new Vector3(0, 0, 0),
+    new Vector3(50, 50, 50),
+  ]);
+
+  fishingLine = new Line(geometry, mat);
+
+  fishingLine.visible = false;
+
+  sceneRoot.add(fishingLine);
+
+  setupReceivers();
 }
 
 export function updateFishingLine() {

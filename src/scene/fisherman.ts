@@ -6,24 +6,24 @@ import {
   Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import sceneRoot from './scene';
-import { setupFishingLine } from './fishing_line';
 import { aimPoint } from '../controls/aim';
-import { delta } from '../core/time';
-import { getTopBobberPoint } from './bobber';
 import { isSpaceDown } from '../controls/reel';
-import { getFishPosition } from './fish';
+import { State } from '../core/state';
+import { delta } from '../core/time';
 import {
   ON_CASTING,
+  ON_FISHING,
   ON_FISH_CAUGHT,
   ON_FISH_FIGHT,
+  ON_FISH_ON,
   RESET,
   receive,
   transmit,
-  ON_FISHING,
-  ON_FISH_ON,
 } from '../events/event_manager';
-import { State } from '../core/state';
+import { getTopBobberPoint } from './bobber';
+import { getFishPosition } from './fish';
+import { setupFishingLine } from './fishing_line';
+import sceneRoot from './scene';
 
 let fisherman: Group;
 
@@ -46,10 +46,6 @@ let state = new State<FishermanState>(IDLE, while_IDLE);
 
 export const getFishermanState = () => state.get();
 
-export function updateFisherman() {
-  state.update();
-}
-
 function while_IDLE() {
   fisherman.lookAt(aimPoint);
 }
@@ -64,40 +60,20 @@ function while_FISHING() {
 
   if (isSpaceDown) transmit(RESET);
 }
+
 function while_FISH_ON() {
   if (isSpaceDown) transmit(ON_FISH_FIGHT);
 }
+
 function while_REELING() {
   fisherman.lookAt(getFishPosition());
 }
+
 function while_HOLDING_PRIZE() {
   return;
 }
 
-export async function setupFishermanAsync() {
-  const loader = new GLTFLoader();
-
-  const loaded = await loader.loadAsync('/models/fisherman.glb');
-
-  fisherman = loaded.scene as Group;
-
-  fisherman.scale.set(10, 10, 10);
-
-  sceneRoot.add(fisherman);
-
-  setupFishingLine();
-
-  // setup animation
-  fishermanMixer = new AnimationMixer(fisherman);
-  const animations = loaded.animations;
-  const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
-  castAnimAction = fishermanMixer.clipAction(castAnimClip);
-
-  fishermanMixer.addEventListener('finished', () => {
-    transmit(ON_FISHING);
-  });
-
-  // receivers
+function setupReceivers() {
   receive(RESET, () => {
     state.set(IDLE, while_IDLE);
   });
@@ -125,9 +101,39 @@ export async function setupFishermanAsync() {
   });
 }
 
-// util
+export async function setupFishermanAsync() {
+  const loader = new GLTFLoader();
 
-export function getFishingLineAnchorPoint(): Vector3 {
+  const loaded = await loader.loadAsync('/models/fisherman.glb');
+
+  fisherman = loaded.scene as Group;
+
+  fisherman.scale.set(10, 10, 10);
+
+  sceneRoot.add(fisherman);
+
+  setupFishingLine();
+
+  // setup animation
+  fishermanMixer = new AnimationMixer(fisherman);
+  const animations = loaded.animations;
+  const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
+  castAnimAction = fishermanMixer.clipAction(castAnimClip);
+
+  fishermanMixer.addEventListener('finished', () => {
+    transmit(ON_FISHING);
+  });
+
+  setupReceivers();
+}
+
+export function updateFisherman() {
+  state.update();
+}
+
+/* Utility */
+
+export function getFishingLineAnchorPoint() {
   let p = new Vector3();
   fisherman.getObjectByName('string_pivot')?.getWorldPosition(p);
   return p;

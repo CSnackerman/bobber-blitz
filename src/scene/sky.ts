@@ -7,8 +7,8 @@ import {
   WebGLRenderTarget,
 } from 'three';
 import { Sky } from 'three/examples/jsm/Addons.js';
-import sceneRoot from './scene';
 import { renderer } from '../core/renderer';
+import sceneRoot from './scene';
 import { water } from './water';
 
 const sun = new Vector3();

@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
-import { delta } from '../core/time';
 import { lerp } from 'three/src/math/MathUtils.js';
+import { delta } from '../core/time';
 
 // dom
 const template = document.getElementById(
