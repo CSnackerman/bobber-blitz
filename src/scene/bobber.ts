@@ -5,7 +5,7 @@ import {
   Group,
   Vector3,
 } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
 import { delta, getElapsedTime } from '../core/time';
 import {
@@ -19,108 +19,120 @@ import {
 } from '../events/event_manager';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
+
+export {
+  getPosition as getBobberPosition,
+  getScreenCoords as getBobberScreenCoords,
+  getTopPoint as getBobberTopPoint,
+  setup as setupBobberAsync,
+  update as updateBobber,
+};
+
+/* Initialization */
 
 let bobber: Group;
 
-let bobberMixer: AnimationMixer;
-let plunkAnimAction: AnimationAction;
-
-export async function setupBobberAsync() {
+async function setup() {
   const gltfLoader = new GLTFLoader();
 
   const gltf = await gltfLoader.loadAsync('/models/bobber.glb');
 
   bobber = gltf.scene;
 
-  sceneRoot.add(bobber);
+  rootScene.add(bobber);
 
-  // setup animation
-  bobberMixer = new AnimationMixer(bobber);
-  const animations = gltf.animations;
-  const clip = AnimationClip.findByName(animations, 'plunk');
-  plunkAnimAction = bobberMixer.clipAction(clip);
+  setupAnimation(gltf);
 
-  bobberMixer.addEventListener('finished', () => {
-    transmit(RESET);
-  });
+  setupReceivers();
+}
 
-  // setup event handlers
+function setupReceivers() {
   receive(RESET, () => {
     bobber.scale.set(2, 2, 2);
     bobber.position.x = 50;
-    hideBobber();
-    cancelBobberPlunk();
+    hide();
+    cancelPlunk();
   });
 
   receive(ON_CASTING, () => {
-    hideBobber();
-    plopBobber();
-    cancelBobberPlunk();
+    hide();
+    setPosition();
+    cancelPlunk();
   });
 
   receive(ON_FISHING, () => {
-    showBobber();
+    show();
     setPlunkTimer();
   });
 
   receive(ON_FISH_FIGHT, () => {
-    hideBobber();
-    cancelBobberPlunk();
+    hide();
+    cancelPlunk();
   });
 }
 
-export function getTopBobberPoint(): Vector3 {
-  let p = new Vector3();
-  bobber.getObjectByName('top_bobber')?.getWorldPosition(p);
-  return p;
-}
-
-export function updateBobber() {
-  bobberMixer.update(delta);
+function update() {
+  animationMixer.update(delta);
 
   // idle bob
   bobber.position.y = Math.sin(getElapsedTime() * 3.0) * 0.4;
 }
 
-export function plopBobber() {
-  bobber.position.copy(castPoint);
-}
-
-export function showBobber() {
-  bobber.visible = true;
-}
-
-export function hideBobber() {
-  bobber.visible = false;
-}
-
-export function getBobberPosition() {
-  return bobber.position;
-}
-
-function plunkBobber() {
-  transmit(ON_FISH_ON);
-  plunkAnimAction.reset();
-  plunkAnimAction.play().repetitions = 3;
-}
-
+/* Animation */
+let animationMixer: AnimationMixer;
+let plunkAnimationAction: AnimationAction;
 let plunkTimerId: NodeJS.Timeout;
 
-export function setPlunkTimer() {
+function setupAnimation(gltf: GLTF) {
+  animationMixer = new AnimationMixer(bobber);
+  animationMixer.addEventListener('finished', () => transmit(RESET));
+
+  setupAnimation_Plunk(gltf);
+}
+
+function setupAnimation_Plunk(gltf: GLTF) {
+  plunkAnimationAction = animationMixer.clipAction(
+    AnimationClip.findByName(gltf.animations, 'plunk')
+  );
+}
+
+function plunk() {
+  transmit(ON_FISH_ON);
+  plunkAnimationAction.reset();
+  plunkAnimationAction.play().repetitions = 3;
+}
+
+function setPlunkTimer() {
   clearTimeout(plunkTimerId);
   const min = 500;
   const max = 700;
-  plunkTimerId = setTimeout(plunkBobber, getRandomInt(min, max));
+  plunkTimerId = setTimeout(plunk, getRandomInt(min, max));
 }
 
-export function cancelBobberPlunk() {
+function cancelPlunk() {
   clearTimeout(plunkTimerId);
-  plunkAnimAction.stop();
-  plunkAnimAction.reset();
+  plunkAnimationAction.stop();
+  plunkAnimationAction.reset();
 }
 
-export function getBobberScreenCoords() {
+/* Transformation */
+
+function getTopPoint() {
+  let p = new Vector3();
+  bobber.getObjectByName('top_bobber')?.getWorldPosition(p);
+  return p;
+}
+
+function getPosition() {
+  return bobber.position;
+}
+
+function setPosition() {
+  bobber.position.copy(castPoint);
+}
+
+function getScreenCoords() {
   const worldPosition = new Vector3();
   bobber.getWorldPosition(worldPosition);
 
@@ -131,4 +143,12 @@ export function getBobberScreenCoords() {
     ((-worldPosition.y + 1) / 2) * window.innerHeight,
     1
   );
+}
+
+function show() {
+  bobber.visible = true;
+}
+
+function hide() {
+  bobber.visible = false;
 }

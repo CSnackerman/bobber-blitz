@@ -8,7 +8,7 @@ import {
   Vector3,
 } from 'three';
 import { getRandomColorHex } from '../util/random';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 
 interface TrackingOrb {
   meshToTrack: Object3D;
@@ -31,7 +31,7 @@ export function createTrackingOrb(meshToTrack: undefined | Object3D) {
 
   trackingOrbs.push({ meshToTrack, selfMesh });
 
-  sceneRoot.add(selfMesh);
+  rootScene.add(selfMesh);
 }
 
 function updateTrackingOrbs() {
@@ -49,12 +49,12 @@ export function createArrowHelper(from: Vector3, to: Vector3) {
   const direction = diff.normalize();
 
   const helper = new ArrowHelper(direction, from, 25, getRandomColorHex());
-  sceneRoot.add(helper);
+  rootScene.add(helper);
   return helper;
 }
 
 export function showWorldAxes() {
   const axesHelper = new AxesHelper(10);
   axesHelper.position.setY(75);
-  sceneRoot.add(axesHelper);
+  rootScene.add(axesHelper);
 }

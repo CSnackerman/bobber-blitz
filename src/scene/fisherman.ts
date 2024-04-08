@@ -20,9 +20,9 @@ import {
   receive,
   transmit,
 } from '../events/event_manager';
-import { getTopBobberPoint } from './bobber';
+import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 
 export {
   getPosition as getFishermanPosition,
@@ -45,7 +45,7 @@ async function setup() {
 
   fisherman.scale.set(10, 10, 10);
 
-  sceneRoot.add(fisherman);
+  rootScene.add(fisherman);
 
   setupAnimation(gltf);
 
@@ -107,12 +107,12 @@ function while_IDLE() {
 }
 
 function while_CASTING() {
-  fisherman.lookAt(getTopBobberPoint());
+  fisherman.lookAt(getBobberTopPoint());
   animationMixer.update(delta * 3);
 }
 
 function while_FISHING() {
-  fisherman.lookAt(getTopBobberPoint());
+  fisherman.lookAt(getBobberTopPoint());
 
   if (isSpaceDown) transmit(RESET);
 }

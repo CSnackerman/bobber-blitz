@@ -1,10 +1,10 @@
 import { isMobile } from '../util/device';
-import { setupCastHandler } from './cast';
+import { setupCast } from './cast';
 import { setupReelControls_Desktop } from './reel';
 
 export function setupControls() {
   // platform universal controls
-  setupCastHandler();
+  setupCast();
 
   // platform specific controls
   if (isMobile() === true) {

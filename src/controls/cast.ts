@@ -13,18 +13,28 @@ import {
 } from '../events/event_manager';
 import { aimPoint, isAimingAtWater } from './aim';
 
-export const castPoint = new Vector3();
+export { castPoint, getState as getCastState, setup as setupCast };
 
-export enum CastState {
+const castPoint = new Vector3();
+
+enum CastStates {
   DISABLED = 'DISABLED',
   CAN_CAST = 'CAN_CAST',
   CAN_REEL = 'CAN_REEL',
 }
-const { DISABLED, CAN_CAST, CAN_REEL } = CastState;
+const { DISABLED, CAN_CAST, CAN_REEL } = CastStates;
 
-const state = new State<CastState>(CAN_CAST, null);
+const state = new State<CastStates>(CAN_CAST, null);
 
-export const getCastState = () => state.get();
+const getState = () => state.get();
+
+function setup() {
+  renderer.domElement.addEventListener('click', () => {
+    state.update();
+  });
+
+  setupReceivers();
+}
 
 function setupReceivers() {
   receive(RESET, () => {
@@ -54,14 +64,6 @@ function setupReceivers() {
       transmit(ON_FISHERMAN_FIGHT);
     });
   });
-}
-
-export function setupCastHandler() {
-  renderer.domElement.addEventListener('click', () => {
-    state.update();
-  });
-
-  setupReceivers();
 }
 
 function cast() {

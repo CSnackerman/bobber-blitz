@@ -1,5 +1,9 @@
 import { Scene } from 'three';
 
-const sceneRoot = new Scene();
+export { rootScene, init as initScene };
 
-export default sceneRoot;
+let rootScene: Scene;
+
+function init() {
+  rootScene = new Scene();
+}

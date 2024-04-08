@@ -22,7 +22,7 @@ import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';
 import { getFishermanPosition } from './fisherman';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 
 /* Aliases */
 
@@ -43,7 +43,7 @@ async function setup() {
 
   fish = gltf.scene;
 
-  sceneRoot.add(fish);
+  rootScene.add(fish);
 
   setupAnimation(gltf);
 

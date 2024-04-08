@@ -7,10 +7,10 @@ import {
   RESET,
   receive,
 } from '../events/event_manager';
-import { getTopBobberPoint } from './bobber';
+import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { getFishingLineAnchorPoint } from './fisherman';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 
 let fishingLine: Line;
 
@@ -28,7 +28,7 @@ export const getFishingLineState = () => state.get();
 function while_ATTACHED_BOBBER() {
   fishingLine.geometry.setFromPoints([
     getFishingLineAnchorPoint(),
-    getTopBobberPoint(),
+    getBobberTopPoint(),
   ]);
 }
 
@@ -77,7 +77,7 @@ export async function setupFishingLineAsync() {
 
   fishingLine.visible = false;
 
-  sceneRoot.add(fishingLine);
+  rootScene.add(fishingLine);
 
   setupReceivers();
 }

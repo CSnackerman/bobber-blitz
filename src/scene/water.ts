@@ -1,6 +1,6 @@
 import { PlaneGeometry, RepeatWrapping, TextureLoader, Vector3 } from 'three';
 import { Water } from 'three/addons/objects/Water.js';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 
 export const water = new Water(new PlaneGeometry(10000, 10000), {
   textureWidth: 512,
@@ -19,7 +19,7 @@ export function setupWater() {
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -1, 0);
 
-  sceneRoot.add(water);
+  rootScene.add(water);
 }
 
 export function updateWater() {

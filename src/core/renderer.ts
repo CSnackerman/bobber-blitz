@@ -1,12 +1,14 @@
 import { ACESFilmicToneMapping, WebGLRenderer } from 'three';
 import { isMobile } from '../util/device';
 
-export const renderer = new WebGLRenderer({
+export { renderer, setup as setupRenderer };
+
+const renderer = new WebGLRenderer({
   canvas: document.getElementById('c') as HTMLCanvasElement,
   antialias: isMobile() ? false : true,
 });
 
-export function setupRenderer() {
+function setup() {
   renderer.setPixelRatio(devicePixelRatio > 2 ? 2 : devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = ACESFilmicToneMapping;

@@ -1,5 +1,5 @@
 import { setupControls } from './controls';
-import { postitionReticle } from './controls/aim';
+import { postitionReticle, setupAim } from './controls/aim';
 import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { updateTimeDelta } from './core/time';
@@ -14,7 +14,7 @@ import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
 import { setupLights } from './scene/lights';
-import sceneRoot from './scene/scene';
+import { rootScene, initScene } from './scene/scene';
 import { setupSky } from './scene/sky';
 import { setupWater, updateWater } from './scene/water';
 import { setupUI, updateUI } from './ui';
@@ -28,8 +28,9 @@ main().catch((e: Error) => {
 
 async function main() {
   initFirebase();
+  initScene();
   await loadModels();
-  init();
+  setup();
   run();
 }
 
@@ -43,11 +44,12 @@ async function loadModels() {
   ]);
 }
 
-function init() {
+function setup() {
   setupRenderer();
   setupCamera();
   setupResizeHandler();
   setupPointerHandler();
+  setupAim();
   setupControls();
   setupStats();
   setupSky();
@@ -74,5 +76,5 @@ function run() {
 
   updateDebug();
 
-  renderer.render(sceneRoot, camera);
+  renderer.render(rootScene, camera);
 }

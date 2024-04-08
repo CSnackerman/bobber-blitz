@@ -3,6 +3,10 @@ import { renderer } from '../core/renderer';
 
 export const pointer = new Vector2();
 
+export function setupPointerHandler() {
+  document.addEventListener('pointermove', setPickPosition);
+}
+
 function getCanvasRelativePosition(event: MouseEvent) {
   const canvas = renderer.domElement;
   const rect = canvas.getBoundingClientRect();
@@ -17,8 +21,4 @@ function setPickPosition(event: MouseEvent) {
   const pos = getCanvasRelativePosition(event);
   pointer.x = (pos.x / canvas.width) * 2 - 1;
   pointer.y = (pos.y / canvas.height) * -2 + 1;
-}
-
-export function setupPointerHandler() {
-  document.addEventListener('pointermove', setPickPosition);
 }

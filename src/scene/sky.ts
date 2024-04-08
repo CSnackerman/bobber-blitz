@@ -8,7 +8,7 @@ import {
 } from 'three';
 import { Sky } from 'three/examples/jsm/Addons.js';
 import { renderer } from '../core/renderer';
-import sceneRoot from './scene';
+import { rootScene } from './scene';
 import { water } from './water';
 
 const sun = new Vector3();
@@ -49,7 +49,7 @@ export function setupSky() {
 
   sceneEnv.add(sky);
   renderTarget = pmremGenerator.fromScene(sceneEnv);
-  sceneRoot.add(sky);
+  rootScene.add(sky);
 
-  sceneRoot.environment = renderTarget.texture;
+  rootScene.environment = renderTarget.texture;
 }
