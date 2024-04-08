@@ -1,24 +1,18 @@
 import { Vector2 } from 'three';
 import { renderer } from '../core/renderer';
 
-export const pointer = new Vector2();
+export { pointer, setup as setupPointer };
 
-export function setupPointerHandler() {
-  document.addEventListener('pointermove', setPickPosition);
+const pointer = new Vector2();
+
+function setup() {
+  document.addEventListener('pointermove', update);
 }
 
-function getCanvasRelativePosition(event: MouseEvent) {
+function update(event: MouseEvent) {
   const canvas = renderer.domElement;
   const rect = canvas.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) * canvas.width) / rect.width,
-    y: ((event.clientY - rect.top) * canvas.height) / rect.height,
-  };
-}
-
-function setPickPosition(event: MouseEvent) {
-  const canvas = renderer.domElement;
-  const pos = getCanvasRelativePosition(event);
-  pointer.x = (pos.x / canvas.width) * 2 - 1;
-  pointer.y = (pos.y / canvas.height) * -2 + 1;
+  const x = ((event.clientX - rect.left) * canvas.width) / rect.width;
+  const y = ((event.clientY - rect.top) * canvas.height) / rect.height;
+  pointer.set((x / canvas.width) * 2 - 1, (y / canvas.height) * -2 + 1);
 }

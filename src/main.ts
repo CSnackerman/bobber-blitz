@@ -4,7 +4,7 @@ import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { updateTimeDelta } from './core/time';
 import { RESET, transmit } from './events/event_manager';
-import { setupPointerHandler } from './events/pointer';
+import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
@@ -48,7 +48,7 @@ function setup() {
   setupRenderer();
   setupCamera();
   setupResizeHandler();
-  setupPointerHandler();
+  setupPointer();
   setupAim();
   setupControls();
   setupStats();
