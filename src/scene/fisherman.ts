@@ -5,7 +5,7 @@ import {
   Group,
   Vector3,
 } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { aimPoint } from '../controls/aim';
 import { isSpaceDown } from '../controls/reel';
 import { State } from '../core/state';
@@ -22,15 +22,31 @@ import {
 } from '../events/event_manager';
 import { getTopBobberPoint } from './bobber';
 import { getFishPosition } from './fish';
-import { setupFishingLine } from './fishing_line';
 import sceneRoot from './scene';
+
+/* Initialization */
 
 let fisherman: Group;
 
-let fishermanMixer: AnimationMixer;
-let castAnimAction: AnimationAction;
+export async function setupFishermanAsync() {
+  const loader = new GLTFLoader();
 
-enum FishermanState {
+  const gltf = await loader.loadAsync('/models/fisherman.glb');
+
+  fisherman = gltf.scene;
+
+  fisherman.scale.set(10, 10, 10);
+
+  sceneRoot.add(fisherman);
+
+  setupAnimation(gltf);
+
+  setupReceivers();
+}
+
+/* State */
+
+enum FishermanStates {
   IDLE = 'IDLE',
   CASTING = 'CASTING',
   FISHING = 'FISHING',
@@ -40,37 +56,14 @@ enum FishermanState {
 }
 
 const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
-  FishermanState;
+  FishermanStates;
 
-let state = new State<FishermanState>(IDLE, while_IDLE);
+let state = new State<FishermanStates>(IDLE, while_IDLE);
 
 export const getFishermanState = () => state.get();
 
-function while_IDLE() {
-  fisherman.lookAt(aimPoint);
-}
-
-function while_CASTING() {
-  fisherman.lookAt(getTopBobberPoint());
-  fishermanMixer.update(delta * 3);
-}
-
-function while_FISHING() {
-  fisherman.lookAt(getTopBobberPoint());
-
-  if (isSpaceDown) transmit(RESET);
-}
-
-function while_FISH_ON() {
-  if (isSpaceDown) transmit(ON_FISH_FIGHT);
-}
-
-function while_REELING() {
-  fisherman.lookAt(getFishPosition());
-}
-
-function while_HOLDING_PRIZE() {
-  return;
+export function updateFisherman() {
+  state.update();
 }
 
 function setupReceivers() {
@@ -101,54 +94,68 @@ function setupReceivers() {
   });
 }
 
-export async function setupFishermanAsync() {
-  const loader = new GLTFLoader();
+function while_IDLE() {
+  fisherman.lookAt(aimPoint);
+}
 
-  const loaded = await loader.loadAsync('/models/fisherman.glb');
+function while_CASTING() {
+  fisherman.lookAt(getTopBobberPoint());
+  animationMixer.update(delta * 3);
+}
 
-  fisherman = loaded.scene as Group;
+function while_FISHING() {
+  fisherman.lookAt(getTopBobberPoint());
 
-  fisherman.scale.set(10, 10, 10);
+  if (isSpaceDown) transmit(RESET);
+}
 
-  sceneRoot.add(fisherman);
+function while_FISH_ON() {
+  if (isSpaceDown) transmit(ON_FISH_FIGHT);
+}
 
-  setupFishingLine();
+function while_REELING() {
+  fisherman.lookAt(getFishPosition());
+}
 
-  // setup animation
-  fishermanMixer = new AnimationMixer(fisherman);
-  const animations = loaded.animations;
-  const castAnimClip = AnimationClip.findByName(animations, 'cast_anim');
-  castAnimAction = fishermanMixer.clipAction(castAnimClip);
+function while_HOLDING_PRIZE() {
+  return;
+}
 
-  fishermanMixer.addEventListener('finished', () => {
+/* Animation */
+
+let animationMixer: AnimationMixer;
+let castAnimationAction: AnimationAction;
+
+function setupAnimation(gltf: GLTF) {
+  animationMixer = new AnimationMixer(fisherman);
+
+  animationMixer.addEventListener('finished', () => {
     transmit(ON_FISHING);
   });
 
-  setupReceivers();
+  setupAnimation_Cast(gltf);
 }
 
-export function updateFisherman() {
-  state.update();
+function setupAnimation_Cast(gltf: GLTF) {
+  castAnimationAction = animationMixer.clipAction(
+    AnimationClip.findByName(gltf.animations, 'cast_anim')
+  );
 }
 
-/* Utility */
+export function playCastAnimation() {
+  castAnimationAction.reset();
+
+  castAnimationAction.play().repetitions = 1;
+}
+
+/* Transformation */
+
+export function getFishermanPosition() {
+  return fisherman.position.clone();
+}
 
 export function getFishingLineAnchorPoint() {
   let p = new Vector3();
   fisherman.getObjectByName('string_pivot')?.getWorldPosition(p);
   return p;
-}
-
-export function playCastAnimation() {
-  castAnimAction.reset();
-
-  castAnimAction.play().repetitions = 1;
-}
-
-export function castAnimationIsPlaying() {
-  return castAnimAction.isRunning();
-}
-
-export function getFishermanPosition() {
-  return fisherman.position.clone();
 }

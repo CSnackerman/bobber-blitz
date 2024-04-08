@@ -12,7 +12,7 @@ import { camera, setupCamera, updateOrbitControls } from './scene/camera';
 import { updateDebug } from './scene/debug_orbs';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
-import { updateFishingLine } from './scene/fishing_line';
+import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
 import { setupLights } from './scene/lights';
 import sceneRoot from './scene/scene';
 import { setupSky } from './scene/sky';
@@ -37,6 +37,7 @@ async function loadModels() {
   await Promise.all([
     setupBoatAsync(),
     setupFishermanAsync(),
+    setupFishingLineAsync(),
     setupBobberAsync(),
     setupFishAsync(),
   ]);

@@ -11,7 +11,6 @@ import {
   receive,
   transmit,
 } from '../events/event_manager';
-import { playCastAnimation } from '../scene/fisherman';
 import { aimPoint, isAimingAtWater } from './aim';
 
 export const castPoint = new Vector3();
@@ -68,6 +67,5 @@ export function setupCastHandler() {
 function cast() {
   if (!isAimingAtWater) return;
   castPoint.copy(aimPoint);
-  playCastAnimation();
   transmit(ON_CASTING);
 }

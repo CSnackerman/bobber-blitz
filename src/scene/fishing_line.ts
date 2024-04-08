@@ -61,7 +61,7 @@ function setupReceivers() {
   });
 }
 
-export function setupFishingLine() {
+export async function setupFishingLineAsync() {
   const mat = new LineBasicMaterial({
     color: '#a9d665',
     transparent: true,
