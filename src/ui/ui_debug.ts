@@ -58,15 +58,15 @@ function getDebugInnerHtml() {
       getSpan(`${window.innerWidth} x ${window.innerHeight}`).outerHTML
     } <br><br>` +
 
-    `Fisherman: ${getSpan(getFishermanState(), 'red').outerHTML} <br>` +
-    `Cast: ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
-    `Fishing Line: ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
-    `Fish: ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
-    `Reticle: ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br><br>` +
+    `Fisherman.... ${getSpan(getFishermanState(), 'red').outerHTML} <br>` +
+    `Cast......... ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
+    `Fishing Line. ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
+    `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
+    `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br><br>` +
 
-    `Cast Point::${getSpan(str(castPoint), 'white').outerHTML} <br>` +
-    `Bobber::::::${getSpan(str(getBobberPosition()), 'white').outerHTML} <br>` +
-    `Aim Point:::${getSpan(str(reticlePoint), 'white').outerHTML} <br>` +
-    `Reticle:::::${getSpan(str(getReticlePosition()), 'white').outerHTML} <br>`
+    `Cast Point. ${getSpan(str(castPoint), 'white').outerHTML} <br>` +
+    `Bobber..... ${getSpan(str(getBobberPosition()), 'white').outerHTML} <br>` +
+    `Aim Point.. ${getSpan(str(reticlePoint), 'white').outerHTML} <br>` +
+    `Reticle.... ${getSpan(str(getReticlePosition()), 'white').outerHTML} <br>`
   );
 }
