@@ -1,12 +1,5 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
-import { State } from '../core/state';
-import {
-  ON_CASTING,
-  ON_FISHING,
-  ON_FISH_FIGHT,
-  RESET,
-  receive,
-} from '../events/event_manager';
+import { Signals, State, observe } from '../core/state';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { getFishingLineAnchorPoint } from './fisherman';
@@ -39,24 +32,26 @@ function while_ATTACHED_FISH() {
   ]);
 }
 
-function setupReceivers() {
-  receive(RESET, () => {
+const { RESET, ON_CAST, ON_FISHING, ON_FISH_OFFENSE } = Signals;
+
+function setupObservers() {
+  observe(RESET, () => {
     fishingLine.visible = false;
     state.set(HIDDEN, null);
   });
 
-  receive(ON_CASTING, () => {
+  observe(ON_CAST, () => {
     fishingLine.visible = false;
     state.set(HIDDEN, null);
   });
 
-  receive(ON_FISHING, () => {
+  observe(ON_FISHING, () => {
     fishingLine.visible = true;
 
     state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
-  receive(ON_FISH_FIGHT, () => {
+  observe(ON_FISH_OFFENSE, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
 }
@@ -79,7 +74,7 @@ export async function setupFishingLineAsync() {
 
   rootScene.add(fishingLine);
 
-  setupReceivers();
+  setupObservers();
 }
 
 export function updateFishingLine() {

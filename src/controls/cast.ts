@@ -1,17 +1,7 @@
 import { Vector3 } from 'three';
 import { renderer } from '../core/renderer';
-import { State } from '../core/state';
-import {
-  ON_CASTING,
-  ON_FISHERMAN_FIGHT,
-  ON_FISHING,
-  ON_FISH_FIGHT,
-  ON_FISH_ON,
-  RESET,
-  receive,
-  transmit,
-} from '../events/event_manager';
-import { aimPoint, isAimingAtWater } from './aim';
+import { State, Signals, propagate, observe } from '../core/state';
+import { reticlePoint, isAimingAtWater } from '../scene/reticle';
 
 export { castPoint, getState as getCastState, setup as setupCast };
 
@@ -33,41 +23,57 @@ function setup() {
     state.update();
   });
 
-  setupReceivers();
+  setupObservers();
 }
 
-function setupReceivers() {
-  receive(RESET, () => {
+const {
+  RESET,
+  ON_CAST,
+  ON_FISHING,
+  ON_FISH_ON,
+  ON_FISH_OFFENSE,
+  ON_FISH_DEFENSE,
+} = Signals;
+
+function setupObservers() {
+  observe(RESET, () => {
     state.set(CAN_CAST, () => {
       cast();
+      propagate(ON_CAST);
     });
   });
 
-  receive(ON_CASTING, () => {
-    state.set(DISABLED, null);
-  });
+  observe(
+    ON_CAST,
+    () => {
+      state.set(DISABLED, null);
+      cast();
+    },
+    1 // prio
+  );
 
-  receive(ON_FISHING, () => {
+  observe(ON_FISHING, () => {
     state.set(CAN_CAST, () => {
       cast();
+      propagate(ON_CAST);
     });
   });
 
-  receive(ON_FISH_ON, () => {
+  observe(ON_FISH_ON, () => {
     state.set(CAN_CAST, () => {
       cast();
+      propagate(ON_CAST);
     });
   });
 
-  receive(ON_FISH_FIGHT, () => {
+  observe(ON_FISH_OFFENSE, () => {
     state.set(CAN_REEL, () => {
-      transmit(ON_FISHERMAN_FIGHT);
+      propagate(ON_FISH_DEFENSE);
     });
   });
 }
 
 function cast() {
   if (!isAimingAtWater) return;
-  castPoint.copy(aimPoint);
-  transmit(ON_CASTING);
+  castPoint.copy(reticlePoint);
 }

@@ -1,11 +1,18 @@
-import { getCastState } from '../controls/cast';
+import { castPoint, getCastState } from '../controls/cast';
 import { renderer } from '../core/renderer';
-import { STATE_CHANGE, receive } from '../events/event_manager';
+import { Signals, observe } from '../core/state';
+import { getBobberPosition } from '../scene/bobber';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
 import { getFishingLineState } from '../scene/fishing_line';
+import {
+  getReticlePosition,
+  getReticleState,
+  reticlePoint,
+} from '../scene/reticle';
 import { getDeviceOrientation, getDeviceType } from '../util/device';
 import { getSpan } from '../util/ui_util';
+import { str } from '../util/vector';
 
 const template = document.getElementById(
   'template_debug'
@@ -14,10 +21,11 @@ const template = document.getElementById(
 const debug_div = template.content.querySelector('div') as HTMLDivElement;
 
 export function setupUI_debug() {
+  debug_div.style.fontFamily = 'monospace';
   debug_div.innerHTML = getDebugInnerHtml();
   document.body.appendChild(debug_div);
 
-  receive(STATE_CHANGE, refreshUpdateUI_debug);
+  observe(Signals.STATE_CHANGE, refreshUpdateUI_debug);
   window.addEventListener('resize', refreshUpdateUI_debug);
   screen.orientation.addEventListener('change', refreshUpdateUI_debug);
 }
@@ -34,19 +42,31 @@ export function showUI_debug() {
   debug_div.style.visibility = 'visible';
 }
 
+// prettier-ignore
 function getDebugInnerHtml() {
   return (
-    `User Agent: ${getSpan(navigator.userAgent, 'yellow')} <br>` +
-    `Device Type: ${getSpan(getDeviceType(), 'hotpink')} <br>` +
-    `Orientation: ${getSpan(getDeviceOrientation(), 'yellowgreen')} <br>` +
-    `Device Pixel Ratio: ${getSpan(devicePixelRatio)} <br>` +
-    `Renderer Pixel Ratio: ${getSpan(renderer.getPixelRatio())} <br> ` +
-    `Window Size: ${getSpan(
-      `${window.innerWidth}x${window.innerHeight}`
-    )} <br><br>` +
-    `Fisherman State: ${getSpan(getFishermanState(), 'red')} <br>` +
-    `Cast State: ${getSpan(getCastState(), 'yellow')} <br>` +
-    `Fishing Line State: ${getSpan(getFishingLineState(), 'orange')} <br>` +
-    `Fish State: ${getSpan(getFishState(), 'pink')} <br>`
+    `User Agent: ${getSpan(navigator.userAgent, 'yellow').outerHTML} <br>` +
+    `Device Type: ${getSpan(getDeviceType(), 'hotpink').outerHTML} <br>` +
+    `Orientation: ${
+      getSpan(getDeviceOrientation(), 'yellowgreen').outerHTML
+    } <br>` +
+    `Device Pixel Ratio: ${getSpan(devicePixelRatio).outerHTML} <br>` +
+    `Renderer Pixel Ratio: ${
+      getSpan(renderer.getPixelRatio()).outerHTML
+    } <br> ` +
+    `Window Size: ${
+      getSpan(`${window.innerWidth} x ${window.innerHeight}`).outerHTML
+    } <br><br>` +
+
+    `Fisherman: ${getSpan(getFishermanState(), 'red').outerHTML} <br>` +
+    `Cast: ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
+    `Fishing Line: ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
+    `Fish: ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
+    `Reticle: ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br><br>` +
+
+    `Cast Point::${getSpan(str(castPoint), 'white').outerHTML} <br>` +
+    `Bobber::::::${getSpan(str(getBobberPosition()), 'white').outerHTML} <br>` +
+    `Aim Point:::${getSpan(str(reticlePoint), 'white').outerHTML} <br>` +
+    `Reticle:::::${getSpan(str(getReticlePosition()), 'white').outerHTML} <br>`
   );
 }

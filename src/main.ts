@@ -1,9 +1,8 @@
 import { setupControls } from './controls';
-import { postitionReticle, setupAim } from './controls/aim';
 import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
+import { Signals, propagate } from './core/state';
 import { updateTimeDelta } from './core/time';
-import { RESET, transmit } from './events/event_manager';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
@@ -14,7 +13,8 @@ import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
 import { setupLights } from './scene/lights';
-import { rootScene, initScene } from './scene/scene';
+import { setupReticle, updateReticle } from './scene/reticle';
+import { initScene, rootScene } from './scene/scene';
 import { setupSky } from './scene/sky';
 import { setupWater, updateWater } from './scene/water';
 import { setupUI, updateUI } from './ui';
@@ -49,7 +49,7 @@ function setup() {
   setupCamera();
   setupResizeHandler();
   setupPointer();
-  setupAim();
+  setupReticle();
   setupControls();
   setupStats();
   setupSky();
@@ -57,7 +57,7 @@ function setup() {
   setupLights();
   setupUI();
 
-  transmit(RESET);
+  propagate(Signals.RESET);
 }
 
 function run() {
@@ -71,7 +71,7 @@ function run() {
   updateFishingLine();
   updateBobber();
   updateFish();
-  postitionReticle();
+  updateReticle();
   updateUI();
 
   updateDebug();

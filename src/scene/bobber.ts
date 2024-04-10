@@ -7,16 +7,8 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
+import { Signals, observe, propagate } from '../core/state';
 import { delta, getElapsedTime } from '../core/time';
-import {
-  ON_CASTING,
-  ON_FISHING,
-  ON_FISH_FIGHT,
-  ON_FISH_ON,
-  RESET,
-  receive,
-  transmit,
-} from '../events/event_manager';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
 import { rootScene } from './scene';
@@ -44,29 +36,35 @@ async function setup() {
 
   setupAnimation(gltf);
 
-  setupReceivers();
+  setupObservers();
 }
 
-function setupReceivers() {
-  receive(RESET, () => {
+const { RESET, ON_CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_ON } = Signals;
+
+function setupObservers() {
+  observe(RESET, () => {
     bobber.scale.set(2, 2, 2);
     bobber.position.x = 50;
     hide();
     cancelPlunk();
   });
 
-  receive(ON_CASTING, () => {
-    hide();
-    moveToCastPoint();
-    cancelPlunk();
-  });
+  observe(
+    ON_CAST,
+    () => {
+      cancelPlunk();
+      hide();
+      moveToCastPoint();
+    },
+    2 // prio
+  );
 
-  receive(ON_FISHING, () => {
+  observe(ON_FISHING, () => {
     show();
     setPlunkTimer();
   });
 
-  receive(ON_FISH_FIGHT, () => {
+  observe(ON_FISH_OFFENSE, () => {
     hide();
     cancelPlunk();
   });
@@ -86,7 +84,7 @@ let plunkTimerId: NodeJS.Timeout;
 
 function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(bobber);
-  animationMixer.addEventListener('finished', () => transmit(RESET));
+  animationMixer.addEventListener('finished', () => propagate(RESET));
 
   setupAnimation_Plunk(gltf);
 }
@@ -98,16 +96,15 @@ function setupAnimation_Plunk(gltf: GLTF) {
 }
 
 function plunk() {
-  transmit(ON_FISH_ON);
+  propagate(ON_FISH_ON);
   plunkAnimationAction.reset();
   plunkAnimationAction.play().repetitions = 3;
 }
 
 function setPlunkTimer() {
   clearTimeout(plunkTimerId);
-  const min = 500;
-  const max = 700;
-  plunkTimerId = setTimeout(plunk, getRandomInt(min, max));
+  const delay = getRandomInt(500, 700);
+  plunkTimerId = setTimeout(plunk, delay);
 }
 
 function cancelPlunk() {

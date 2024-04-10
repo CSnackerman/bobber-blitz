@@ -1,9 +1,6 @@
-import {
-  ON_FISH_CAUGHT,
-  RESET,
-  receive,
-  transmit,
-} from '../events/event_manager';
+import { Signals, observe, propagate } from '../core/state';
+
+const { RESET, ON_FISH_CATCH } = Signals;
 
 const template = document.getElementById(
   'template_prize'
@@ -30,10 +27,10 @@ export function setupUI_prize() {
 
   prize_alright.onclick = () => {
     hideUI_prize();
-    transmit(RESET);
+    propagate(RESET);
   };
 
-  receive(ON_FISH_CAUGHT, showUI_prize);
+  observe(ON_FISH_CATCH, showUI_prize);
 
   hideUI_prize();
 }

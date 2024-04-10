@@ -14,3 +14,11 @@ export function getDirection(from: Vector3, to: Vector3) {
 
   return diff.normalize();
 }
+
+export function str(v: Vector3) {
+  const f = (n: number) => {
+    const negative = n < 0 ? '-' : '+';
+    return negative + Math.abs(n).toFixed(2).padStart(6, '0');
+  };
+  return `(${f(v.x)}, ${f(v.y)}, ${f(v.z)})`;
+}

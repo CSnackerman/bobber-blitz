@@ -8,16 +8,8 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { State } from '../core/state';
+import { Signals, State, observe, propagate } from '../core/state';
 import { delta } from '../core/time';
-import {
-  ON_FISHERMAN_FIGHT,
-  ON_FISH_CAUGHT,
-  ON_FISH_FIGHT,
-  RESET,
-  receive,
-  transmit,
-} from '../events/event_manager';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';
@@ -27,10 +19,10 @@ import { rootScene } from './scene';
 /* Aliases */
 
 export {
+  getPosition as getFishPosition,
+  getState as getFishState,
   setup as setupFishAsync,
   update as updateFish,
-  getState as getFishState,
-  getPosition as getFishPosition,
 };
 
 /* Initialization */
@@ -47,7 +39,7 @@ async function setup() {
 
   setupAnimation(gltf);
 
-  setupReceivers();
+  setupObservers();
 }
 
 /* State */
@@ -68,8 +60,10 @@ function update() {
   state.update();
 }
 
-function setupReceivers() {
-  receive(ON_FISH_FIGHT, () => {
+const { ON_FISH_OFFENSE, ON_FISH_DEFENSE, ON_FISH_CATCH, RESET } = Signals;
+
+function setupObservers() {
+  observe(ON_FISH_OFFENSE, () => {
     cancelChangeSwimDirections();
     moveBelowBobber();
     setSwimDirection_AwayFisherman();
@@ -78,7 +72,7 @@ function setupReceivers() {
     state.set(SWIMMING, while_SWIMMING);
   });
 
-  receive(ON_FISHERMAN_FIGHT, () => {
+  observe(ON_FISH_DEFENSE, () => {
     cancelChangeSwimDirections();
     setSwimDirection_TowardFisherman();
     changeSwimDirectionCallback = setSwimDirection_TowardFisherman;
@@ -86,14 +80,14 @@ function setupReceivers() {
     state.set(BEING_REELED, while_BEING_REELED);
   });
 
-  receive(ON_FISH_CAUGHT, () => {
+  observe(ON_FISH_CATCH, () => {
     cancelChangeSwimDirections();
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
 
     state.set(FLOPPING, while_FLOPPING);
   });
 
-  receive(RESET, () => {
+  observe(RESET, () => {
     cancelFlop();
     setRandomScale(2, 5);
     setPosition(new Vector3(0, 2, 50));
@@ -208,7 +202,7 @@ function checkDistance() {
   const catchDistance = 30;
   const distance = getPosition().distanceTo(getFishermanPosition());
   if (distance < catchDistance) {
-    transmit(ON_FISH_CAUGHT);
+    propagate(ON_FISH_CATCH);
   }
 }
 
