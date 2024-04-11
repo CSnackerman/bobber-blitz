@@ -48,4 +48,8 @@ function setupReceivers() {
   receive(ON_FISH_OFFENSE, () => {
     state.set(CAN_REEL, () => emit(ON_FISH_DEFENSE));
   });
+
+  receive(ON_FISH_DEFENSE, () => {
+    state.set(DISABLED, null);
+  });
 }
