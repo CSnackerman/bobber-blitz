@@ -7,7 +7,7 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
-import { Signals, observe, propagate } from '../core/state';
+import { Signals, emit, receive } from '../core/state';
 import { delta, getElapsedTime } from '../core/time';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
@@ -36,21 +36,21 @@ async function setup() {
 
   setupAnimation(gltf);
 
-  setupObservers();
+  setupReceivers();
 }
 
-const { RESET, ON_CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_ON } = Signals;
+const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_ON } = Signals;
 
-function setupObservers() {
-  observe(RESET, () => {
+function setupReceivers() {
+  receive(RESET, () => {
     bobber.scale.set(2, 2, 2);
     bobber.position.x = 50;
     hide();
     cancelPlunk();
   });
 
-  observe(
-    ON_CAST,
+  receive(
+    CAST,
     () => {
       cancelPlunk();
       hide();
@@ -59,12 +59,12 @@ function setupObservers() {
     2 // prio
   );
 
-  observe(ON_FISHING, () => {
+  receive(ON_FISHING, () => {
     show();
     setPlunkTimer();
   });
 
-  observe(ON_FISH_OFFENSE, () => {
+  receive(ON_FISH_OFFENSE, () => {
     hide();
     cancelPlunk();
   });
@@ -84,7 +84,7 @@ let plunkTimerId: NodeJS.Timeout;
 
 function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(bobber);
-  animationMixer.addEventListener('finished', () => propagate(RESET));
+  animationMixer.addEventListener('finished', () => emit(RESET));
 
   setupAnimation_Plunk(gltf);
 }
@@ -96,14 +96,14 @@ function setupAnimation_Plunk(gltf: GLTF) {
 }
 
 function plunk() {
-  propagate(ON_FISH_ON);
+  emit(ON_FISH_ON);
   plunkAnimationAction.reset();
   plunkAnimationAction.play().repetitions = 3;
 }
 
 function setPlunkTimer() {
   clearTimeout(plunkTimerId);
-  const delay = getRandomInt(500, 700);
+  const delay = getRandomInt(500, 1500);
   plunkTimerId = setTimeout(plunk, delay);
 }
 

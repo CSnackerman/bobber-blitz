@@ -1,7 +1,7 @@
 import { Vector3 } from 'three';
 import { renderer } from '../core/renderer';
-import { State, Signals, propagate, observe } from '../core/state';
-import { reticlePoint, isAimingAtWater } from '../scene/reticle';
+import { State, Signals, emit, receive } from '../core/state';
+import { reticlePoint } from '../scene/reticle';
 
 export { castPoint, getState as getCastState, setup as setupCast };
 
@@ -14,66 +14,38 @@ enum CastStates {
 }
 const { DISABLED, CAN_CAST, CAN_REEL } = CastStates;
 
+const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_DEFENSE } = Signals;
+
 const state = new State<CastStates>(CAN_CAST, null);
 
-const getState = () => state.get();
+const getState = state.get;
+const onClick = state.invoke;
 
 function setup() {
-  renderer.domElement.addEventListener('click', () => {
-    state.update();
-  });
+  renderer.domElement.addEventListener('click', onClick);
 
-  setupObservers();
+  setupReceivers();
 }
 
-const {
-  RESET,
-  ON_CAST,
-  ON_FISHING,
-  ON_FISH_ON,
-  ON_FISH_OFFENSE,
-  ON_FISH_DEFENSE,
-} = Signals;
-
-function setupObservers() {
-  observe(RESET, () => {
-    state.set(CAN_CAST, () => {
-      cast();
-      propagate(ON_CAST);
-    });
+function setupReceivers() {
+  receive(RESET, () => {
+    state.set(CAN_CAST, () => emit(CAST));
   });
 
-  observe(
-    ON_CAST,
+  receive(
+    CAST,
     () => {
       state.set(DISABLED, null);
-      cast();
+      castPoint.copy(reticlePoint);
     },
-    1 // prio
+    1
   );
 
-  observe(ON_FISHING, () => {
-    state.set(CAN_CAST, () => {
-      cast();
-      propagate(ON_CAST);
-    });
+  receive(ON_FISHING, () => {
+    state.set(CAN_CAST, () => emit(CAST));
   });
 
-  observe(ON_FISH_ON, () => {
-    state.set(CAN_CAST, () => {
-      cast();
-      propagate(ON_CAST);
-    });
+  receive(ON_FISH_OFFENSE, () => {
+    state.set(CAN_REEL, () => emit(ON_FISH_DEFENSE));
   });
-
-  observe(ON_FISH_OFFENSE, () => {
-    state.set(CAN_REEL, () => {
-      propagate(ON_FISH_DEFENSE);
-    });
-  });
-}
-
-function cast() {
-  if (!isAimingAtWater) return;
-  castPoint.copy(reticlePoint);
 }

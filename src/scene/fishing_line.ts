@@ -1,9 +1,11 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
-import { Signals, State, observe } from '../core/state';
+import { Signals, State, receive } from '../core/state';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { getFishingLineAnchorPoint } from './fisherman';
 import { rootScene } from './scene';
+
+export { update as updateFishingLine, getState as getFishingLineState };
 
 let fishingLine: Line;
 
@@ -14,9 +16,12 @@ enum FishingLineState {
 }
 const { HIDDEN, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
 
+const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE } = Signals;
+
 const state = new State<FishingLineState>(HIDDEN, null);
 
-export const getFishingLineState = () => state.get();
+const getState = state.get;
+const update = state.invoke;
 
 function while_ATTACHED_BOBBER() {
   fishingLine.geometry.setFromPoints([
@@ -32,26 +37,24 @@ function while_ATTACHED_FISH() {
   ]);
 }
 
-const { RESET, ON_CAST, ON_FISHING, ON_FISH_OFFENSE } = Signals;
-
-function setupObservers() {
-  observe(RESET, () => {
+function setupReceivers() {
+  receive(RESET, () => {
     fishingLine.visible = false;
     state.set(HIDDEN, null);
   });
 
-  observe(ON_CAST, () => {
+  receive(CAST, () => {
     fishingLine.visible = false;
     state.set(HIDDEN, null);
   });
 
-  observe(ON_FISHING, () => {
+  receive(ON_FISHING, () => {
     fishingLine.visible = true;
 
     state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
-  observe(ON_FISH_OFFENSE, () => {
+  receive(ON_FISH_OFFENSE, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
 }
@@ -74,11 +77,7 @@ export async function setupFishingLineAsync() {
 
   rootScene.add(fishingLine);
 
-  setupObservers();
-}
-
-export function updateFishingLine() {
-  state.update();
+  setupReceivers();
 }
 
 //todo: caternary curve & parabola

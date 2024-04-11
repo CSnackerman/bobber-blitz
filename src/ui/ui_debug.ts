@@ -1,6 +1,6 @@
 import { castPoint, getCastState } from '../controls/cast';
 import { renderer } from '../core/renderer';
-import { Signals, observe } from '../core/state';
+import { Signals, receive } from '../core/state';
 import { getBobberPosition } from '../scene/bobber';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
@@ -25,7 +25,7 @@ export function setupUI_debug() {
   debug_div.innerHTML = getDebugInnerHtml();
   document.body.appendChild(debug_div);
 
-  observe(Signals.STATE_CHANGE, refreshUpdateUI_debug);
+  receive(Signals.STATE_CHANGE, refreshUpdateUI_debug);
   window.addEventListener('resize', refreshUpdateUI_debug);
   screen.orientation.addEventListener('change', refreshUpdateUI_debug);
 }

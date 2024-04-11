@@ -4,38 +4,38 @@ import { NullableVoidFunc, PriorityFunc, VoidFunc } from './types';
  * The State class is intended be used to make a module stateful.
  * You can create an enum of state values and use them as \<T\> type in the constructor.
  *
- * Use {@link set()} to assign a callback function. Typically {@link set()} is called within a signal {@link observe()}.
- * Many of the modules in the scene directory call {@link update()} once per frame.
+ * Use {@link set()} to assign a callback function. Typically {@link set()} is called within a signal {@link receive()}.
+ * Many of the modules in the scene directory call {@link invoke()} once per frame.
  *
  * The names of the states don't really serve any purpose aside from
  * debugging. There are no conditional checks on the names--forgone in place of callback swapping.
  */
 export class State<T> {
-  #state: T;
-  #onUpdate: NullableVoidFunc;
+  #name: T;
+  #incantation: NullableVoidFunc;
 
   constructor(initialState: T, onUpdate: NullableVoidFunc) {
-    this.#state = initialState;
-    this.#onUpdate = onUpdate;
+    this.#name = initialState;
+    this.#incantation = onUpdate;
   }
 
-  get = () => this.#state;
+  get = () => this.#name;
   set = (newState: T, newOnUpdate: NullableVoidFunc) => {
-    this.#state = newState;
-    this.#onUpdate = newOnUpdate;
-    propagate(Signals.STATE_CHANGE);
+    this.#name = newState;
+    this.#incantation = newOnUpdate;
+    emit(Signals.STATE_CHANGE);
   };
-  update = () => this.#onUpdate?.();
+  invoke = () => this.#incantation?.();
 }
 
 /**
- * Signals typically {@link propagate} at the start of the transition from one state to the next;
+ * Signals typically {@link emit} at the start of the transition from one state to the next;
  * however, there are also some standalone signals e.g. {@link RESET}.
  */
 export enum Signals {
   RESET = 'RESET',
   STATE_CHANGE = 'STATE_CHANGE',
-  ON_CAST = 'ON_CAST',
+  CAST = 'CAST',
   ON_FISHING = 'ON_FISHING',
   ON_FISH_ON = 'ON_FISH_ON',
   ON_FISH_OFFENSE = 'ON_FISH_OFFENSE',
@@ -45,7 +45,7 @@ export enum Signals {
 
 const SignalRegistry = new Map<Signals, PriorityFunc[]>();
 
-export function propagate(s: Signals) {
+export function emit(s: Signals) {
   const prioFuncs = SignalRegistry.get(s);
   if (!prioFuncs) throw `Invalid emit(${s})`;
   prioFuncs.forEach((prioFunc) => {
@@ -53,7 +53,7 @@ export function propagate(s: Signals) {
   });
 }
 
-export function observe(s: Signals, func: VoidFunc, prio: number = 0) {
+export function receive(s: Signals, func: VoidFunc, prio: number = 0) {
   const prioFuncs = SignalRegistry.get(s) ?? [];
 
   prioFuncs.push([prio, func]);

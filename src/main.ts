@@ -1,7 +1,7 @@
 import { setupControls } from './controls';
 import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
-import { Signals, propagate } from './core/state';
+import { Signals, emit } from './core/state';
 import { updateTimeDelta } from './core/time';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
@@ -57,7 +57,7 @@ function setup() {
   setupLights();
   setupUI();
 
-  propagate(Signals.RESET);
+  emit(Signals.RESET);
 }
 
 function run() {

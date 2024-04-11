@@ -1,4 +1,4 @@
-import { Signals, observe } from '../core/state';
+import { Signals, receive } from '../core/state';
 import { setupUI_debug } from './ui_debug';
 import {
   hideUI_fishHealth,
@@ -20,25 +20,25 @@ import {
 } from './ui_line_tension';
 import { setupUI_prize, updateUI_prize } from './ui_prize';
 
-const { RESET, ON_CAST, ON_FISH_ON, ON_FISH_OFFENSE } = Signals;
+const { RESET, CAST, ON_FISH_ON, ON_FISH_OFFENSE } = Signals;
 
-function setupObservers() {
-  observe(RESET, () => {
+function setupReceivers() {
+  receive(RESET, () => {
     hideUI_fishHealth();
     hideUI_fishOn();
     hideUI_lineTension();
   });
 
-  observe(ON_CAST, () => {
+  receive(CAST, () => {
     hideUI_fishHealth();
     hideUI_fishOn();
   });
 
-  observe(ON_FISH_ON, () => {
+  receive(ON_FISH_ON, () => {
     showUI_fishOn();
   });
 
-  observe(ON_FISH_OFFENSE, () => {
+  receive(ON_FISH_OFFENSE, () => {
     hideUI_fishOn();
     showUI_fishHealth();
     showUI_lineTension();
@@ -52,7 +52,7 @@ export function setupUI() {
   setupUI_prize();
   setupUI_debug();
 
-  setupObservers();
+  setupReceivers();
 }
 
 export function updateUI() {

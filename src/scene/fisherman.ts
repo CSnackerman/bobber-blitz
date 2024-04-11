@@ -7,7 +7,7 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { isSpaceDown } from '../controls/reel';
-import { Signals, State, observe, propagate } from '../core/state';
+import { Signals, State, receive, emit } from '../core/state';
 import { delta } from '../core/time';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
@@ -39,7 +39,7 @@ async function setup() {
 
   setupAnimation(gltf);
 
-  setupObservers();
+  setupReceivers();
 }
 
 /* State */
@@ -56,30 +56,21 @@ enum FishermanStates {
 const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
   FishermanStates;
 
+const { RESET, CAST, ON_FISHING, ON_FISH_ON, ON_FISH_OFFENSE, ON_FISH_CATCH } =
+  Signals;
+
 let state = new State<FishermanStates>(IDLE, while_IDLE);
 
-const getState = () => state.get();
+const getState = state.get;
+const update = state.invoke;
 
-function update() {
-  state.update();
-}
-
-const {
-  RESET,
-  ON_CAST,
-  ON_FISHING,
-  ON_FISH_ON,
-  ON_FISH_OFFENSE,
-  ON_FISH_CATCH,
-} = Signals;
-
-function setupObservers() {
-  observe(RESET, () => {
+function setupReceivers() {
+  receive(RESET, () => {
     state.set(IDLE, while_IDLE);
   });
 
-  observe(
-    ON_CAST,
+  receive(
+    CAST,
     () => {
       fisherman.lookAt(getBobberTopPoint());
       playCastAnimation();
@@ -88,19 +79,19 @@ function setupObservers() {
     3 // prio
   );
 
-  observe(ON_FISHING, () => {
+  receive(ON_FISHING, () => {
     state.set(FISHING, while_FISHING);
   });
 
-  observe(ON_FISH_ON, () => {
+  receive(ON_FISH_ON, () => {
     state.set(FISH_ON, while_FISH_ON);
   });
 
-  observe(ON_FISH_OFFENSE, () => {
+  receive(ON_FISH_OFFENSE, () => {
     state.set(REELING, while_REELING);
   });
 
-  observe(ON_FISH_CATCH, () => {
+  receive(ON_FISH_CATCH, () => {
     state.set(HOLDING_PRIZE, while_HOLDING_PRIZE);
   });
 }
@@ -116,11 +107,11 @@ function while_CASTING() {
 function while_FISHING() {
   fisherman.lookAt(getBobberTopPoint());
 
-  if (isSpaceDown) propagate(RESET);
+  if (isSpaceDown) emit(RESET);
 }
 
 function while_FISH_ON() {
-  if (isSpaceDown) propagate(ON_FISH_OFFENSE);
+  if (isSpaceDown) emit(ON_FISH_OFFENSE);
 }
 
 function while_REELING() {
@@ -140,7 +131,7 @@ function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(fisherman);
 
   animationMixer.addEventListener('finished', () => {
-    propagate(ON_FISHING);
+    emit(ON_FISHING);
   });
 
   setupAnimation_Cast(gltf);

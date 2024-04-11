@@ -1,4 +1,4 @@
-import { Signals, observe, propagate } from '../core/state';
+import { Signals, receive, emit } from '../core/state';
 
 const { RESET, ON_FISH_CATCH } = Signals;
 
@@ -25,12 +25,12 @@ export function setupUI_prize() {
 
   prize_content_div.innerHTML = `You caught a <span>${fishType}</span> fish!`;
 
-  prize_alright.onclick = () => {
+  prize_alright.addEventListener('click', () => {
     hideUI_prize();
-    propagate(RESET);
-  };
+    emit(RESET);
+  });
 
-  observe(ON_FISH_CATCH, showUI_prize);
+  receive(ON_FISH_CATCH, showUI_prize);
 
   hideUI_prize();
 }

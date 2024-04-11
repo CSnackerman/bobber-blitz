@@ -6,27 +6,22 @@ import {
   Vector3,
 } from 'three';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { Signals, State, observe } from '../core/state';
+import { Signals, State, receive } from '../core/state';
 import { pointer } from '../events/pointer';
 import { camera } from './camera';
 import { rootScene } from './scene';
 import { water } from './water';
 
 export {
+  getReticlePosition,
   getState as getReticleState,
   setup as setupReticle,
   update as updateReticle,
 };
 
-// debug
-export function getReticlePosition() {
-  return reticle.position.clone();
-}
-
 /* Initialization */
 
 export const reticlePoint = new Vector3();
-export let isAimingAtWater: boolean = false;
 
 const raycaster = new Raycaster();
 const reticle = new Mesh(
@@ -39,7 +34,7 @@ function setup() {
 
   rootScene.add(reticle);
 
-  setupObservers();
+  setupReceivers();
 }
 
 /* State */
@@ -51,25 +46,21 @@ enum ReticleStates {
 }
 const { HIDDEN, TRACKING, FROZEN } = ReticleStates;
 
+const { RESET, CAST, ON_FISHING } = Signals;
+
 const state = new State<ReticleStates>(TRACKING, while_TRACKING);
 
-const getState = () => state.get();
+const getState = state.get;
+const update = state.invoke;
 
-function update() {
-  state.update();
-}
-
-const { RESET, ON_CAST, ON_FISHING } = Signals;
-
-function setupObservers() {
-  observe(RESET, () => {
+function setupReceivers() {
+  receive(RESET, () => {
     show();
-
     state.set(TRACKING, while_TRACKING);
   });
 
-  observe(
-    ON_CAST,
+  receive(
+    CAST,
     () => {
       moveToPointer();
       show();
@@ -78,7 +69,7 @@ function setupObservers() {
     0 // prio
   );
 
-  observe(ON_FISHING, () => {
+  receive(ON_FISHING, () => {
     hide();
     state.set(HIDDEN, null);
   });
@@ -94,15 +85,14 @@ function moveToPointer() {
   raycaster.setFromCamera(pointer, camera);
   const intersections = raycaster.intersectObject(water, false);
 
-  if (intersections.length) {
-    const intersection = intersections[0];
-    reticle.position.copy(intersection.point);
-    reticle.translateY(0.5);
-    reticlePoint.copy(intersection.point);
-    isAimingAtWater = true;
-  } else {
-    isAimingAtWater = false;
-  }
+  const intersection = intersections[0];
+  reticle.position.copy(intersection.point);
+  reticle.translateY(0.5);
+  reticlePoint.copy(intersection.point);
+}
+
+function getReticlePosition() {
+  return reticle.position.clone();
 }
 
 function show() {
