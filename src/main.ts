@@ -19,6 +19,7 @@ import { setupSky } from './scene/sky';
 import { setupWater, updateWater } from './scene/water';
 import { setupUI, updateUI } from './ui';
 import { setupStats, updateStats } from './ui/stats';
+import { printEnv } from './util/environment';
 
 import '/assets/styles/main.scss';
 
@@ -30,6 +31,7 @@ async function main() {
   initFirebase();
   initScene();
   await loadModels();
+  printEnv();
   setup();
   run();
 }

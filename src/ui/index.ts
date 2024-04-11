@@ -1,4 +1,5 @@
 import { Signals, receive } from '../core/state';
+import { isDev } from '../util/environment';
 import { setupUI_debug } from './ui_debug';
 import {
   hideUI_fishHealth,
@@ -50,7 +51,7 @@ export function setupUI() {
   setupUI_lineTension();
   setupUI_fishHealth();
   setupUI_prize();
-  setupUI_debug();
+  if (isDev()) setupUI_debug();
 
   setupReceivers();
 }

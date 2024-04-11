@@ -86,6 +86,9 @@ function moveToPointer() {
   const intersections = raycaster.intersectObject(water, false);
 
   const intersection = intersections[0];
+
+  if (!intersection?.point) return;
+
   reticle.position.copy(intersection.point);
   reticle.translateY(0.5);
   reticlePoint.copy(intersection.point);
