@@ -8,6 +8,7 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
   waterNormals: new TextureLoader().load('/waternormals.jpg', (texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   }),
+  alpha: 0.75,
   sunDirection: new Vector3(),
   sunColor: 0x00007f,
   waterColor: 0x001e0f,
@@ -18,6 +19,8 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
 export function setupWater() {
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -1, 0);
+
+  water.material.transparent = true;
 
   rootScene.add(water);
 }

@@ -58,6 +58,15 @@ const update = state.invoke;
 const getState = state.get;
 
 function setupReceivers() {
+  receive(RESET, () => {
+    cancelFlop();
+    setRandomScale(2, 5);
+    setPosition(new Vector3(0, -10, 50));
+    fish.lookAt(getFishermanPosition());
+
+    state.set(IDLE, null);
+  });
+
   receive(REEL_OUT, () => {
     cancelChangeSwimDirections();
     moveBelowBobber();
@@ -80,15 +89,6 @@ function setupReceivers() {
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
 
     state.set(FLOPPING, while_FLOPPING);
-  });
-
-  receive(RESET, () => {
-    cancelFlop();
-    setRandomScale(2, 5);
-    setPosition(new Vector3(0, 2, 50));
-    fish.lookAt(getFishermanPosition());
-
-    state.set(IDLE, null);
   });
 }
 
@@ -203,7 +203,7 @@ function checkDistance() {
 
 /* Swimming */
 
-const swimSpeed = 30;
+const swimSpeed = 100;
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
 let changeSwimDirectionCallback = () => {};
 
