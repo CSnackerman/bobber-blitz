@@ -46,6 +46,8 @@ export enum Signals {
 const SignalRegistry = new Map<Signals, PriorityFunc[]>();
 
 export function emit(s: Signals) {
+  if (s !== Signals.STATE_CHANGE) console.log(s); //debug
+  
   const prioFuncs = SignalRegistry.get(s);
   if (!prioFuncs) throw `Invalid emit(${s})`;
   prioFuncs.forEach((prioFunc) => {
