@@ -9,14 +9,13 @@ const castPoint = new Vector3();
 
 enum CastStates {
   DISABLED = 'DISABLED',
-  CAN_CAST = 'CAN_CAST',
-  CAN_REEL = 'CAN_REEL',
+  ENABLED = 'ENABLED',
 }
-const { DISABLED, CAN_CAST, CAN_REEL } = CastStates;
+const { DISABLED, ENABLED } = CastStates;
 
-const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_DEFENSE } = Signals;
+const { RESET, CAST, ON_FISHING } = Signals;
 
-const state = new State<CastStates>(CAN_CAST, null);
+const state = new State<CastStates>(ENABLED, null);
 
 const getState = state.get;
 const onClick = state.invoke;
@@ -29,7 +28,7 @@ function setup() {
 
 function setupReceivers() {
   receive(RESET, () => {
-    state.set(CAN_CAST, () => emit(CAST));
+    state.set(ENABLED, () => emit(CAST));
   });
 
   receive(
@@ -42,14 +41,6 @@ function setupReceivers() {
   );
 
   receive(ON_FISHING, () => {
-    state.set(CAN_CAST, () => emit(CAST));
-  });
-
-  receive(ON_FISH_OFFENSE, () => {
-    state.set(CAN_REEL, () => emit(ON_FISH_DEFENSE));
-  });
-
-  receive(ON_FISH_DEFENSE, () => {
-    state.set(DISABLED, null);
+    state.set(ENABLED, () => emit(CAST));
   });
 }
