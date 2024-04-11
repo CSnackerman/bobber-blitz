@@ -2,13 +2,15 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
+  Box3,
   Euler,
   Group,
+  Sphere,
   Vector3,
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { Signals, State, receive, emit } from '../core/state';
+import { Signals, State, emit, receive } from '../core/state';
 import { delta } from '../core/time';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
@@ -25,6 +27,8 @@ export {
 
 /* Initialization */
 let fish: Group;
+let size = 1;
+const catchDistance = 25;
 
 async function setup() {
   const gltfLoader = new GLTFLoader();
@@ -60,8 +64,8 @@ const getState = state.get;
 function setupReceivers() {
   receive(RESET, () => {
     cancelFlop();
-    setRandomScale(2, 5);
-    setPosition(new Vector3(0, -10, 50));
+    setScale(getRandomFloat(0.1, 5));
+    setPosition(0, -size, size + catchDistance);
     fish.lookAt(getFishermanPosition());
 
     state.set(IDLE, null);
@@ -86,6 +90,7 @@ function setupReceivers() {
 
   receive(CATCH_FISH, () => {
     cancelChangeSwimDirections();
+    fish.position.setY(25);
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
 
     state.set(FLOPPING, while_FLOPPING);
@@ -179,8 +184,20 @@ function getPosition() {
   return fish.position.clone();
 }
 
-function setPosition(p: Vector3) {
-  fish.position.copy(p);
+function setPosition(x: number, y: number, z: number) {
+  fish.position.set(x, y, z);
+}
+
+function setScale(s: number) {
+  fish.scale.setScalar(s);
+  recalculateSize();
+}
+
+function recalculateSize() {
+  const sphere = new Sphere();
+  new Box3().setFromObject(fish).getBoundingSphere(sphere);
+
+  size = sphere.radius * 2;
 }
 
 function moveBelowBobber() {
@@ -188,15 +205,9 @@ function moveBelowBobber() {
   fish.position.set(b.x, fish.position.y, b.z);
 }
 
-function setRandomScale(min: number, max: number) {
-  const scale = getRandomFloat(min, max);
-  fish.scale.set(scale, scale, scale);
-}
-
 function checkDistance() {
-  const catchDistance = 30;
   const distance = getPosition().distanceTo(getFishermanPosition());
-  if (distance < catchDistance) {
+  if (distance <= size + catchDistance) {
     emit(CATCH_FISH);
   }
 }

@@ -1,10 +1,13 @@
 import {
   ArrowHelper,
   AxesHelper,
-  IcosahedronGeometry,
+  Box3,
+  Group,
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  Sphere,
+  SphereGeometry,
   Vector3,
 } from 'three';
 import { getRandomColorHex } from '../util/random';
@@ -21,17 +24,23 @@ export function updateDebug() {
   updateTrackingOrbs();
 }
 
-export function createTrackingOrb(meshToTrack: undefined | Object3D) {
+export function createTrackingOrb(meshToTrack: Group) {
   if (!meshToTrack) return;
 
+  // get bounding sphere
+  const sphere = new Sphere();
+  new Box3().setFromObject(meshToTrack).getBoundingSphere(sphere);
+
   const selfMesh = new Mesh(
-    new IcosahedronGeometry(1),
-    new MeshStandardMaterial({ color: 'red' })
+    new SphereGeometry(sphere.radius),
+    new MeshStandardMaterial({ color: 'red', transparent: true, opacity: 0.5 })
   );
 
   trackingOrbs.push({ meshToTrack, selfMesh });
 
   rootScene.add(selfMesh);
+
+  return selfMesh;
 }
 
 function updateTrackingOrbs() {

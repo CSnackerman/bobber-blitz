@@ -115,6 +115,8 @@ function while_FISH_ON() {
 
 function while_REELING() {
   fisherman.lookAt(getFishPosition());
+  fisherman.rotation.x = 0;
+  fisherman.rotation.z = 0;
 }
 
 function while_HOLDING_PRIZE() {
