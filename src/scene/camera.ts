@@ -32,5 +32,6 @@ function setupOrbitControls() {
 }
 
 export function updateOrbitControls() {
+  if (camera.position.y <= 3) camera.position.setY(3);
   controls.update();
 }
