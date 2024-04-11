@@ -7,7 +7,7 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
-import { Signals, emit, receive } from '../core/state';
+import { Signals, State, emit, receive } from '../core/state';
 import { delta, getElapsedTime } from '../core/time';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
@@ -16,6 +16,7 @@ import { rootScene } from './scene';
 export {
   getPosition as getBobberPosition,
   getScreenCoords as getBobberScreenCoords,
+  getState as getBobberState,
   getTopPoint as getBobberTopPoint,
   setup as setupBobberAsync,
   update as updateBobber,
@@ -39,7 +40,19 @@ async function setup() {
   setupReceivers();
 }
 
+enum BobberStates {
+  HIDDEN = 'HIDDEN',
+  BOBBING = 'BOBBING',
+  PLUNKING = 'PLUNKING',
+}
+const { HIDDEN, BOBBING, PLUNKING } = BobberStates;
+
 const { RESET, CAST, BEGIN_FISHING, REEL_OUT, BITE } = Signals;
+
+const state = new State<BobberStates>(HIDDEN, null);
+
+const getState = state.get;
+const update = state.invoke;
 
 function setupReceivers() {
   receive(RESET, () => {
@@ -47,6 +60,8 @@ function setupReceivers() {
     bobber.position.x = 50;
     hide();
     cancelPlunk();
+
+    state.set(HIDDEN, null);
   });
 
   receive(
@@ -55,6 +70,8 @@ function setupReceivers() {
       cancelPlunk();
       hide();
       moveToCastPoint();
+
+      state.set(HIDDEN, null);
     },
     2 // prio
   );
@@ -62,22 +79,32 @@ function setupReceivers() {
   receive(BEGIN_FISHING, () => {
     show();
     setPlunkTimer();
+
+    state.set(BOBBING, while_BOBBING);
+  });
+
+  receive(BITE, () => {
+    state.set(PLUNKING, while_PLUNKING);
   });
 
   receive(REEL_OUT, () => {
     hide();
     cancelPlunk();
+
+    state.set(HIDDEN, null);
   });
 }
 
-function update() {
-  animationMixer.update(delta);
-
-  // idle bob
+function while_BOBBING() {
   bobber.position.y = Math.sin(getElapsedTime() * 3.0) * 0.4;
 }
 
+function while_PLUNKING() {
+  animationMixer.update(delta);
+}
+
 /* Animation */
+
 let animationMixer: AnimationMixer;
 let plunkAnimationAction: AnimationAction;
 let plunkTimerId: NodeJS.Timeout;

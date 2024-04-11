@@ -2,7 +2,7 @@ import { castPoint, getCastState } from '../controls/cast';
 import { getReelState } from '../controls/reel';
 import { renderer } from '../core/renderer';
 import { Signals, receive } from '../core/state';
-import { getBobberPosition } from '../scene/bobber';
+import { getBobberPosition, getBobberState } from '../scene/bobber';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
 import { getFishingLineState } from '../scene/fishing_line';
@@ -62,6 +62,7 @@ function getDebugInnerHtml() {
     `Fisherman.... ${getSpan(getFishermanState(), 'red').outerHTML} <br>` +
     `Cast......... ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
     `Reel......... ${getSpan(getReelState(), 'lavender').outerHTML} <br>` +
+    `Bobber....... ${getSpan(getBobberState(), 'greenyellow').outerHTML} <br>` +
     `Fishing Line. ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
     `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
     `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br><br>` +
