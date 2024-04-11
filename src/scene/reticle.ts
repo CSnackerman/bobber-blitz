@@ -46,7 +46,7 @@ enum ReticleStates {
 }
 const { HIDDEN, TRACKING, FROZEN } = ReticleStates;
 
-const { RESET, CAST, ON_FISHING } = Signals;
+const { RESET, CAST, BEGIN_FISHING } = Signals;
 
 const state = new State<ReticleStates>(TRACKING, while_TRACKING);
 
@@ -69,7 +69,7 @@ function setupReceivers() {
     0 // prio
   );
 
-  receive(ON_FISHING, () => {
+  receive(BEGIN_FISHING, () => {
     hide();
     state.set(HIDDEN, null);
   });

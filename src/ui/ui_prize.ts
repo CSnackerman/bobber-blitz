@@ -1,6 +1,6 @@
 import { Signals, receive, emit } from '../core/state';
 
-const { RESET, ON_FISH_CATCH } = Signals;
+const { RESET, CATCH_FISH } = Signals;
 
 const template = document.getElementById(
   'template_prize'
@@ -30,7 +30,7 @@ export function setupUI_prize() {
     emit(RESET);
   });
 
-  receive(ON_FISH_CATCH, showUI_prize);
+  receive(CATCH_FISH, showUI_prize);
 
   hideUI_prize();
 }

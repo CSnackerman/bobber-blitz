@@ -33,14 +33,14 @@ export class State<T> {
  * however, there are also some standalone signals e.g. {@link RESET}.
  */
 export enum Signals {
-  RESET = 'RESET',
   STATE_CHANGE = 'STATE_CHANGE',
+  RESET = 'RESET',
   CAST = 'CAST',
-  ON_FISHING = 'ON_FISHING',
-  ON_FISH_ON = 'ON_FISH_ON',
-  ON_FISH_OFFENSE = 'ON_FISH_OFFENSE',
-  ON_FISH_DEFENSE = 'ON_FISH_DEFENSE',
-  ON_FISH_CATCH = 'ON_FISH_CATCH',
+  BEGIN_FISHING = 'BEGIN_FISHING',
+  BITE = 'BITE',
+  REEL_OUT = 'REEL_OUT',
+  REEL_IN = 'REEL_IN',
+  CATCH_FISH = 'CATCH_FISH',
 }
 
 const SignalRegistry = new Map<Signals, PriorityFunc[]>();

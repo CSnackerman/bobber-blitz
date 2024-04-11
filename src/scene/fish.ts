@@ -50,7 +50,7 @@ enum FishStates {
 }
 const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishStates;
 
-const { ON_FISH_OFFENSE, ON_FISH_DEFENSE, ON_FISH_CATCH, RESET } = Signals;
+const { REEL_OUT, REEL_IN, CATCH_FISH, RESET } = Signals;
 
 let state = new State<FishStates>(IDLE, null);
 
@@ -58,7 +58,7 @@ const update = state.invoke;
 const getState = state.get;
 
 function setupReceivers() {
-  receive(ON_FISH_OFFENSE, () => {
+  receive(REEL_OUT, () => {
     cancelChangeSwimDirections();
     moveBelowBobber();
     setSwimDirection_AwayFisherman();
@@ -67,7 +67,7 @@ function setupReceivers() {
     state.set(SWIMMING, while_SWIMMING);
   });
 
-  receive(ON_FISH_DEFENSE, () => {
+  receive(REEL_IN, () => {
     cancelChangeSwimDirections();
     setSwimDirection_TowardFisherman();
     changeSwimDirectionCallback = setSwimDirection_TowardFisherman;
@@ -75,7 +75,7 @@ function setupReceivers() {
     state.set(BEING_REELED, while_BEING_REELED);
   });
 
-  receive(ON_FISH_CATCH, () => {
+  receive(CATCH_FISH, () => {
     cancelChangeSwimDirections();
     fish.setRotationFromEuler(new Euler(degToRad(-90), 0, 0));
 
@@ -197,7 +197,7 @@ function checkDistance() {
   const catchDistance = 30;
   const distance = getPosition().distanceTo(getFishermanPosition());
   if (distance < catchDistance) {
-    emit(ON_FISH_CATCH);
+    emit(CATCH_FISH);
   }
 }
 

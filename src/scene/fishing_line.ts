@@ -16,7 +16,7 @@ enum FishingLineState {
 }
 const { HIDDEN, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
 
-const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE } = Signals;
+const { RESET, CAST, BEGIN_FISHING, REEL_OUT } = Signals;
 
 const state = new State<FishingLineState>(HIDDEN, null);
 
@@ -48,13 +48,13 @@ function setupReceivers() {
     state.set(HIDDEN, null);
   });
 
-  receive(ON_FISHING, () => {
+  receive(BEGIN_FISHING, () => {
     fishingLine.visible = true;
 
     state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
-  receive(ON_FISH_OFFENSE, () => {
+  receive(REEL_OUT, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
 }

@@ -39,7 +39,7 @@ async function setup() {
   setupReceivers();
 }
 
-const { RESET, CAST, ON_FISHING, ON_FISH_OFFENSE, ON_FISH_ON } = Signals;
+const { RESET, CAST, BEGIN_FISHING, REEL_OUT, BITE } = Signals;
 
 function setupReceivers() {
   receive(RESET, () => {
@@ -59,12 +59,12 @@ function setupReceivers() {
     2 // prio
   );
 
-  receive(ON_FISHING, () => {
+  receive(BEGIN_FISHING, () => {
     show();
     setPlunkTimer();
   });
 
-  receive(ON_FISH_OFFENSE, () => {
+  receive(REEL_OUT, () => {
     hide();
     cancelPlunk();
   });
@@ -96,7 +96,7 @@ function setupAnimation_Plunk(gltf: GLTF) {
 }
 
 function plunk() {
-  emit(ON_FISH_ON);
+  emit(BITE);
   plunkAnimationAction.reset();
   plunkAnimationAction.play().repetitions = 3;
 }

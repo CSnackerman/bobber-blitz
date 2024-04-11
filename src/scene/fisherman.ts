@@ -56,8 +56,7 @@ enum FishermanStates {
 const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
   FishermanStates;
 
-const { RESET, CAST, ON_FISHING, ON_FISH_ON, ON_FISH_OFFENSE, ON_FISH_CATCH } =
-  Signals;
+const { RESET, CAST, BEGIN_FISHING, BITE, REEL_OUT, CATCH_FISH } = Signals;
 
 let state = new State<FishermanStates>(IDLE, while_IDLE);
 
@@ -79,19 +78,19 @@ function setupReceivers() {
     3 // prio
   );
 
-  receive(ON_FISHING, () => {
+  receive(BEGIN_FISHING, () => {
     state.set(FISHING, while_FISHING);
   });
 
-  receive(ON_FISH_ON, () => {
+  receive(BITE, () => {
     state.set(FISH_ON, while_FISH_ON);
   });
 
-  receive(ON_FISH_OFFENSE, () => {
+  receive(REEL_OUT, () => {
     state.set(REELING, while_REELING);
   });
 
-  receive(ON_FISH_CATCH, () => {
+  receive(CATCH_FISH, () => {
     state.set(HOLDING_PRIZE, while_HOLDING_PRIZE);
   });
 }
@@ -111,7 +110,7 @@ function while_FISHING() {
 }
 
 function while_FISH_ON() {
-  if (isSpaceDown) emit(ON_FISH_OFFENSE);
+  if (isSpaceDown) emit(REEL_OUT);
 }
 
 function while_REELING() {
@@ -131,7 +130,7 @@ function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(fisherman);
 
   animationMixer.addEventListener('finished', () => {
-    emit(ON_FISHING);
+    emit(BEGIN_FISHING);
   });
 
   setupAnimation_Cast(gltf);
