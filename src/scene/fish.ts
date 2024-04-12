@@ -23,12 +23,14 @@ export {
   getState as getFishState,
   setup as setupFishAsync,
   update as updateFish,
+  getFishMouthPosition,
 };
 
 /* Initialization */
 let fish: Group;
 let size = 1;
 const catchDistance = 25;
+const lostDistance = 1100;
 
 async function setup() {
   const gltfLoader = new GLTFLoader();
@@ -64,7 +66,7 @@ const getState = state.get;
 function setupReceivers() {
   receive(RESET, () => {
     cancelFlop();
-    setScale(getRandomFloat(0.1, 5));
+    setScale(getRandomFloat(0.2, 11));
     setPosition(0, -size, size + catchDistance);
     fish.lookAt(getFishermanPosition());
 
@@ -101,6 +103,8 @@ function while_SWIMMING() {
   if (swimDirectionChangeTimeoutId === null) {
     changeSwimDirections();
   }
+
+  checkDistance();
 
   swimForward();
 }
@@ -210,6 +214,15 @@ function checkDistance() {
   if (distance <= size + catchDistance) {
     emit(CATCH_FISH);
   }
+  if (distance >= lostDistance) {
+    emit(RESET);
+  }
+}
+
+function getFishMouthPosition() {
+  let p = new Vector3();
+  fish.getObjectByName('fish_mouth')?.getWorldPosition(p);
+  return p;
 }
 
 /* Swimming */

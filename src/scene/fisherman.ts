@@ -7,8 +7,9 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { isSpaceDown } from '../controls/reel';
-import { Signals, State, receive, emit } from '../core/state';
+import { Signals, State, emit, receive } from '../core/state';
 import { delta } from '../core/time';
+import { lookAtHorizontal } from '../util/vector';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { reticlePoint } from './reticle';
@@ -114,9 +115,7 @@ function while_FISH_ON() {
 }
 
 function while_REELING() {
-  fisherman.lookAt(getFishPosition());
-  fisherman.rotation.x = 0;
-  fisherman.rotation.z = 0;
+  lookAtHorizontal(fisherman, getFishPosition());
 }
 
 function while_HOLDING_PRIZE() {

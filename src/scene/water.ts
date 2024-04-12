@@ -8,7 +8,7 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
   waterNormals: new TextureLoader().load('/waternormals.jpg', (texture) => {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   }),
-  alpha: 0.75,
+  alpha: 0.65,
   sunDirection: new Vector3(),
   sunColor: 0x00007f,
   waterColor: 0x001e0f,

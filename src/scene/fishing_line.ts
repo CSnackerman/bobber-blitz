@@ -1,11 +1,11 @@
 import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
 import { Signals, State, receive } from '../core/state';
 import { getBobberTopPoint } from './bobber';
-import { getFishPosition } from './fish';
+import { getFishMouthPosition } from './fish';
 import { getFishingLineAnchorPoint } from './fisherman';
 import { rootScene } from './scene';
 
-export { update as updateFishingLine, getState as getFishingLineState };
+export { getState as getFishingLineState, update as updateFishingLine };
 
 let fishingLine: Line;
 
@@ -33,7 +33,7 @@ function while_ATTACHED_BOBBER() {
 function while_ATTACHED_FISH() {
   fishingLine.geometry.setFromPoints([
     getFishingLineAnchorPoint(),
-    getFishPosition(),
+    getFishMouthPosition(),
   ]);
 }
 

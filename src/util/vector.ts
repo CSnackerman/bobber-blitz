@@ -1,13 +1,16 @@
-import { Vector2, Vector3 } from 'three';
+import { Object3D, Vector2, Vector3 } from 'three';
 
-export function getTheta_XZ(a: Vector3, b: Vector3) {
-  const u = new Vector2(a.x, a.z);
-  const v = new Vector2(b.x, b.z);
+export { lookAtHorizontal, getDirection, str };
 
-  return Math.atan2(u.y, u.x) - Math.atan2(v.y, v.x);
+const yAxis = new Vector3(0, 1, 0);
+
+function lookAtHorizontal(looker: Object3D, at: Vector3) {
+  const at2d = new Vector2(at.z, at.x);
+
+  looker.setRotationFromAxisAngle(yAxis, at2d.angle());
 }
 
-export function getDirection(from: Vector3, to: Vector3) {
+function getDirection(from: Vector3, to: Vector3) {
   const f = from.clone();
   const t = to.clone();
   const diff = t.sub(f);
@@ -15,7 +18,7 @@ export function getDirection(from: Vector3, to: Vector3) {
   return diff.normalize();
 }
 
-export function str(v: Vector3) {
+function str(v: Vector3) {
   const f = (n: number) => {
     const negative = n < 0 ? '-' : '+';
     return negative + Math.abs(n).toFixed(2).padStart(6, '0');
