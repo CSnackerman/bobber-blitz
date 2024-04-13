@@ -7,10 +7,13 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
+import { CAST_CLOCK, delta, getClock, getElapsedTime } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
-import { delta, getElapsedTime } from '../core/time';
+import { getTrajectoryPoints } from '../util/physics';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
+import { getFishingLineAnchorPoint } from './fisherman';
+import { CAST_HEIGHT, CAST_TIME } from './fishing_line';
 import { rootScene } from './scene';
 
 export {
@@ -25,6 +28,7 @@ export {
 /* Initialization */
 
 let bobber: Group;
+const castClock = getClock(CAST_CLOCK);
 
 async function setup() {
   const gltfLoader = new GLTFLoader();
@@ -81,7 +85,8 @@ function setupReceivers() {
   receive(
     ANIMATE_CAST_TRAJECTORY,
     () => {
-      state.set(CASTING, null);
+      show();
+      state.set(CASTING, while_ANIMATE_CASTING());
     },
     2 // prio
   );
@@ -103,6 +108,24 @@ function setupReceivers() {
 
     state.set(HIDDEN, null);
   });
+}
+
+function while_ANIMATE_CASTING() {
+  const trajectoryPoints = getTrajectoryPoints(
+    getFishingLineAnchorPoint(),
+    getPosition(),
+    CAST_HEIGHT
+  );
+
+  const nPoints = trajectoryPoints.length;
+
+  return () => {
+    const timestep = Math.floor(CAST_TIME / nPoints);
+    const elapsed = castClock.getElapsedTime() * 1000;
+    const currentTimestep = Math.floor(elapsed / timestep);
+
+    bobber.position.copy(trajectoryPoints[currentTimestep]);
+  };
 }
 
 function while_BOBBING() {
@@ -140,7 +163,7 @@ function plunk() {
 
 function setPlunkTimer() {
   clearTimeout(plunkTimerId);
-  const delay = getRandomInt(500, 1500);
+  const delay = getRandomInt(1000, 3000);
   plunkTimerId = setTimeout(plunk, delay);
 }
 

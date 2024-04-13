@@ -1,6 +1,6 @@
 import { Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { getElapsedTime } from '../core/time';
+import { getElapsedTime } from '../core/clock';
 import { rootScene } from './scene';
 
 export { setup as setupBoatAsync, update as updateBoat };

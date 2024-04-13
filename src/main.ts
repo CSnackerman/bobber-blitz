@@ -2,7 +2,7 @@ import { setupControls } from './controls';
 import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { Signals, emit } from './core/state';
-import { updateTimeDelta } from './core/time';
+import { updateTimeDelta } from './core/clock';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';

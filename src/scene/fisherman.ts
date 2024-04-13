@@ -8,7 +8,7 @@ import {
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { isSpaceDown } from '../controls/reel';
 import { Signals, State, emit, receive } from '../core/state';
-import { delta } from '../core/time';
+import { delta } from '../core/clock';
 import { lookAtHorizontal } from '../util/vector';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';

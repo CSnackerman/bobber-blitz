@@ -11,7 +11,7 @@ import {
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import { Signals, State, emit, receive } from '../core/state';
-import { delta } from '../core/time';
+import { delta } from '../core/clock';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';

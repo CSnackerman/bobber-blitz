@@ -1,6 +1,10 @@
-import { BufferGeometry, Clock, Line, LineBasicMaterial } from 'three';
+import { BufferGeometry, Line, LineBasicMaterial } from 'three';
+import { CAST_CLOCK, getClock } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
-import { getTrajectoryPoints } from '../util/physics';
+import {
+  getDanglingTrajectoryPoints,
+  getTrajectoryPoints,
+} from '../util/physics';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { getFishingLineAnchorPoint } from './fisherman';
@@ -13,9 +17,10 @@ export {
 };
 
 export const CAST_HEIGHT = 22;
+export const CAST_TIME = 500; // ms
 
 let fishingLine: Line;
-let animationClock: Clock;
+const castClock = getClock(CAST_CLOCK);
 
 async function setup() {
   fishingLine = new Line(
@@ -51,23 +56,24 @@ const getState = () => state.get();
 const update = () => state.invoke();
 
 function while_ANIMATE_CASTING() {
-  const totalTime = 500; // ms
-  const timestep = Math.floor(totalTime / 32);
-  const elapsed = animationClock.getElapsedTime() * 1000;
+  const timestep = Math.floor(CAST_TIME / 32);
+  const elapsed = castClock.getElapsedTime() * 1000;
   const currentTimestep = Math.floor(elapsed / timestep);
   fishingLine.geometry.setDrawRange(0, currentTimestep);
 
-  if (elapsed >= totalTime) {
-    animationClock.stop();
+  if (elapsed >= CAST_TIME) {
+    castClock.stop();
     emit(BEGIN_FISHING);
   }
 }
 
 function while_ATTACHED_BOBBER() {
-  fishingLine.geometry.setFromPoints([
-    getFishingLineAnchorPoint(),
-    getBobberTopPoint(),
-  ]);
+  fishingLine.geometry.setFromPoints(
+    getDanglingTrajectoryPoints(
+      getFishingLineAnchorPoint(),
+      getBobberTopPoint()
+    )
+  );
 }
 
 function while_ATTACHED_FISH() {
@@ -105,7 +111,6 @@ function setupReceivers() {
       );
 
       fishingLine.geometry.setDrawRange(0, 0);
-      animationClock = new Clock(true);
       fishingLine.geometry.setDrawRange(0, 0);
       state.set(CASTING, while_ANIMATE_CASTING);
     },
