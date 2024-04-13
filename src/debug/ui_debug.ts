@@ -1,19 +1,14 @@
-import { castPoint, getCastState } from '../controls/cast';
+import { getCastState } from '../controls/cast';
 import { getReelState } from '../controls/reel';
 import { renderer } from '../core/renderer';
 import { Signals, receive } from '../core/state';
-import { getBobberPosition, getBobberState } from '../scene/bobber';
+import { getBobberState } from '../scene/bobber';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
 import { getFishingLineState } from '../scene/fishing_line';
-import {
-  getReticlePosition,
-  getReticleState,
-  reticlePoint,
-} from '../scene/reticle';
+import { getReticleState } from '../scene/reticle';
 import { getDeviceOrientation, getDeviceType } from '../util/device';
 import { getSpan } from '../util/ui_util';
-import { str } from '../util/vector';
 
 const template = document.getElementById(
   'template_debug'
@@ -59,17 +54,12 @@ function getDebugInnerHtml() {
       getSpan(`${window.innerWidth} x ${window.innerHeight}`).outerHTML
     } <br><br>` +
 
-    `Fisherman.... ${getSpan(getFishermanState(), 'red').outerHTML} <br>` +
+    `Fisherman.... ${getSpan(getFishermanState(), 'springgreen').outerHTML} <br>` +
     `Cast......... ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
     `Reel......... ${getSpan(getReelState(), 'lavender').outerHTML} <br>` +
     `Bobber....... ${getSpan(getBobberState(), 'greenyellow').outerHTML} <br>` +
     `Fishing Line. ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
     `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
-    `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br><br>` +
-
-    `Cast Point. ${getSpan(str(castPoint), 'white').outerHTML} <br>` +
-    `Bobber..... ${getSpan(str(getBobberPosition()), 'white').outerHTML} <br>` +
-    `Aim Point.. ${getSpan(str(reticlePoint), 'white').outerHTML} <br>` +
-    `Reticle.... ${getSpan(str(getReticlePosition()), 'white').outerHTML} <br>`
+    `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br>` 
   );
 }

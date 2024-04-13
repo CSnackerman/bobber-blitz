@@ -42,12 +42,14 @@ async function setup() {
 
 enum BobberStates {
   HIDDEN = 'HIDDEN',
+  CASTING = 'CASTING',
   BOBBING = 'BOBBING',
   PLUNKING = 'PLUNKING',
 }
-const { HIDDEN, BOBBING, PLUNKING } = BobberStates;
+const { HIDDEN, CASTING, BOBBING, PLUNKING } = BobberStates;
 
-const { RESET, CAST, BEGIN_FISHING, REEL_OUT, BITE } = Signals;
+const { RESET, CAST, ANIMATE_CAST_TRAJECTORY, BEGIN_FISHING, REEL_OUT, BITE } =
+  Signals;
 
 const state = new State<BobberStates>(HIDDEN, null);
 
@@ -72,6 +74,14 @@ function setupReceivers() {
       moveToCastPoint();
 
       state.set(HIDDEN, null);
+    },
+    2 // prio
+  );
+
+  receive(
+    ANIMATE_CAST_TRAJECTORY,
+    () => {
+      state.set(CASTING, null);
     },
     2 // prio
   );

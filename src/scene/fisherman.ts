@@ -57,7 +57,15 @@ enum FishermanStates {
 const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
   FishermanStates;
 
-const { RESET, CAST, BEGIN_FISHING, BITE, REEL_OUT, CATCH_FISH } = Signals;
+const {
+  RESET,
+  CAST,
+  ANIMATE_CAST_TRAJECTORY: ANIMATE_CAST_BOBBER,
+  BEGIN_FISHING,
+  BITE,
+  REEL_OUT,
+  CATCH_FISH,
+} = Signals;
 
 let state = new State<FishermanStates>(IDLE, while_IDLE);
 
@@ -131,7 +139,7 @@ function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(fisherman);
 
   animationMixer.addEventListener('finished', () => {
-    emit(BEGIN_FISHING);
+    emit(ANIMATE_CAST_BOBBER);
   });
 
   setupAnimation_Cast(gltf);

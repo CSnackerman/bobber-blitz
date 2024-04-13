@@ -1,6 +1,6 @@
 import { Signals, receive } from '../core/state';
 import { isDev } from '../util/environment';
-import { setupUI_debug } from './ui_debug';
+import { setupUI_debug } from '../debug/ui_debug';
 import {
   hideUI_fishHealth,
   setupUI_fishHealth,

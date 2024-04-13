@@ -8,7 +8,7 @@ import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera, updateOrbitControls } from './scene/camera';
-import { updateDebug } from './scene/debug_orbs';
+import { updateDebug } from './debug/debug_orbs';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
