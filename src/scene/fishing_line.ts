@@ -138,11 +138,6 @@ function while_BOBBER_LANDED() {
     const elapsed = castClock.getElapsedTime() * 1000;
     const alpha = elapsed / DESCEND_TIME;
 
-    console.log(
-      `%c${alpha.toFixed(3)}`,
-      `color: #${new Color().fromArray([alpha, 0.5, 0]).getHexString()}`
-    );
-
     const points = interpolateLine(castPoints, lineDanglingPoints, alpha);
 
     fishingLine.geometry.setFromPoints(points);
