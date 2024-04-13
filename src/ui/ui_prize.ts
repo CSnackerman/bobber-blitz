@@ -1,4 +1,5 @@
 import { Signals, receive, emit } from '../core/state';
+import { getFishCategory } from '../scene/fish';
 
 const { RESET, CATCH_FISH } = Signals;
 
@@ -18,12 +19,10 @@ const prize_alright = template.content.getElementById(
   'prize_alright'
 ) as HTMLButtonElement;
 
-let fishType = 'Bass';
-
 export function setupUI_prize() {
   document.body.appendChild(prize_card_div);
 
-  prize_content_div.innerHTML = `You caught a <span>${fishType}</span> fish!`;
+  prize_content_div.innerHTML = `You caught a <span>${getFishCategory()}</span>!`;
 
   prize_alright.addEventListener('click', () => {
     hideUI_prize();
@@ -35,12 +34,15 @@ export function setupUI_prize() {
   hideUI_prize();
 }
 
-export function updateUI_prize() {}
+function update() {
+  prize_content_div.innerHTML = `You caught a <span>${getFishCategory()}</span>!`;
+}
 
 export function hideUI_prize() {
   prize_card_div.style.visibility = 'hidden';
 }
 
 export function showUI_prize() {
+  update();
   prize_card_div.style.visibility = 'visible';
 }

@@ -21,6 +21,7 @@ import { rootScene } from './scene';
 export {
   getPosition as getFishPosition,
   getState as getFishState,
+  getCategory as getFishCategory,
   setup as setupFishAsync,
   update as updateFish,
   getFishMouthPosition,
@@ -202,6 +203,7 @@ function recalculateSize() {
   new Box3().setFromObject(fish).getBoundingSphere(sphere);
 
   size = sphere.radius * 2;
+  console.log('size', size);
 }
 
 function moveBelowBobber() {
@@ -283,4 +285,20 @@ function swimForward() {
   const v = new Vector3();
   fish.getWorldDirection(v);
   fish.position.addScaledVector(v, swimSpeed * delta);
+}
+
+/* Misc. */
+
+function getCategory() {
+  if (size > 70) return 'Whale';
+  if (size > 50) return 'Lunker';
+  if (size > 40) return 'Jumbo Shrimp';
+  if (size > 30) return 'Walleye';
+  if (size > 25) return 'Largemouth Bass';
+  if (size > 20) return 'Trout';
+  if (size > 15) return 'Smallmouth Bass';
+  if (size > 10) return 'Sunfish';
+  if (size > 5) return 'Minnow';
+
+  return 'Shrimp';
 }

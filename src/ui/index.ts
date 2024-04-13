@@ -19,7 +19,7 @@ import {
   showUI_lineTension,
   updateUI_lineTension,
 } from './ui_line_tension';
-import { setupUI_prize, updateUI_prize } from './ui_prize';
+import { setupUI_prize } from './ui_prize';
 
 const { RESET, CAST, BITE, REEL_OUT } = Signals;
 
@@ -61,7 +61,6 @@ export function updateUI() {
   updateUI_fishOn();
   updateUI_lineTension();
   updateUI_fishHealth();
-  updateUI_prize();
 
   if (isDev()) {
     updateWatches();
