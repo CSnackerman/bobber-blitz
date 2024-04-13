@@ -111,7 +111,7 @@ $line_tension_border_radius: 2em;
   top: 50%;
   left: 50%;
   transform: translate(-50%, 100%);
-  width: fit-content;
+  width: max-content;
   height: fit-content;
 
   background-color: #7373ba50;
