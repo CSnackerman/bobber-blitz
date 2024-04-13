@@ -21,6 +21,7 @@ export function setupWater() {
   water.position.set(0, -1, 0);
 
   water.material.transparent = true;
+  water.material.depthWrite = false;
 
   rootScene.add(water);
 }

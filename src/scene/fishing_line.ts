@@ -18,26 +18,20 @@ let fishingLine: Line;
 let animationClock: Clock;
 
 async function setup() {
-  const mat = new LineBasicMaterial({
-    color: '#a9d665',
-    transparent: true,
-    opacity: 0.3,
-  });
-
-  const geometry = new BufferGeometry().setFromPoints([
-    new Vector3(0, 0, 0),
-    new Vector3(50, 50, 50),
-  ]);
-
-  fishingLine = new Line(geometry, mat);
+  fishingLine = new Line(
+    new BufferGeometry(),
+    new LineBasicMaterial({
+      color: '#a9d665',
+      transparent: true,
+      opacity: 0.3,
+    })
+  );
 
   fishingLine.visible = false;
 
   rootScene.add(fishingLine);
 
   setupReceivers();
-
-  console.log(fishingLine);
 }
 
 enum FishingLineState {
@@ -95,14 +89,14 @@ function setupReceivers() {
       fishingLine.visible = false;
       state.set(HIDDEN, null);
     },
-    3
+    3 // prio
   );
 
   receive(
     ANIMATE_CAST_TRAJECTORY,
     () => {
       fishingLine.visible = true;
-      fishingLine.geometry = new BufferGeometry().setFromPoints(
+      fishingLine.geometry.setFromPoints(
         getTrajectoryPoints(
           getFishingLineAnchorPoint(),
           getBobberTopPoint(),
