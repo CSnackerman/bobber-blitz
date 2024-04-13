@@ -1,4 +1,4 @@
-import { BufferGeometry, Color, Line, LineBasicMaterial, Vector3 } from 'three';
+import { BufferGeometry, Line, LineBasicMaterial, Vector3 } from 'three';
 import { CAST_CLOCK, getClock } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
 import { interpolateLine } from '../util/line';
@@ -141,8 +141,6 @@ function while_BOBBER_LANDED() {
     const points = interpolateLine(castPoints, lineDanglingPoints, alpha);
 
     fishingLine.geometry.setFromPoints(points);
-
-    // mockClock.tick();
 
     if (elapsed >= DESCEND_TIME) {
       castClock.stop();
