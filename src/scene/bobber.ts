@@ -52,8 +52,15 @@ enum BobberStates {
 }
 const { HIDDEN, CASTING, BOBBING, PLUNKING } = BobberStates;
 
-const { RESET, CAST, ANIMATE_CAST_TRAJECTORY, BEGIN_FISHING, REEL_OUT, BITE } =
-  Signals;
+const {
+  RESET,
+  CAST,
+  LAUNCH_BOBBER,
+  BOBBER_LANDED,
+  BEGIN_FISHING,
+  REEL_OUT,
+  BITE,
+} = Signals;
 
 const state = new State<BobberStates>(HIDDEN, null);
 
@@ -83,7 +90,7 @@ function setupReceivers() {
   );
 
   receive(
-    ANIMATE_CAST_TRAJECTORY,
+    LAUNCH_BOBBER,
     () => {
       show();
       state.set(CASTING, while_ANIMATE_CASTING());
@@ -91,11 +98,12 @@ function setupReceivers() {
     2 // prio
   );
 
-  receive(BEGIN_FISHING, () => {
-    show();
-    setPlunkTimer();
-
+  receive(BOBBER_LANDED, () => {
     state.set(BOBBING, while_BOBBING);
+  });
+
+  receive(BEGIN_FISHING, () => {
+    setPlunkTimer();
   });
 
   receive(BITE, () => {
@@ -110,6 +118,8 @@ function setupReceivers() {
   });
 }
 
+/// /// ///
+
 function while_ANIMATE_CASTING() {
   const trajectoryPoints = getTrajectoryPoints(
     getFishingLineAnchorPoint(),
@@ -118,11 +128,13 @@ function while_ANIMATE_CASTING() {
   );
 
   const nPoints = trajectoryPoints.length;
+  const timestep = Math.floor(CAST_TIME / nPoints);
 
   return () => {
-    const timestep = Math.floor(CAST_TIME / nPoints);
     const elapsed = castClock.getElapsedTime() * 1000;
     const currentTimestep = Math.floor(elapsed / timestep);
+
+    if (currentTimestep > nPoints - 1) return;
 
     bobber.position.copy(trajectoryPoints[currentTimestep]);
   };

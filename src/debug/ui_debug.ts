@@ -1,5 +1,6 @@
 import { getCastState } from '../controls/cast';
 import { getReelState } from '../controls/reel';
+import { CAST_CLOCK, getClock } from '../core/clock';
 import { renderer } from '../core/renderer';
 import { Signals, receive } from '../core/state';
 import { getBobberState } from '../scene/bobber';
@@ -24,6 +25,8 @@ export function setupUI_debug() {
   receive(Signals.STATE_CHANGE, refreshUpdateUI_debug);
   window.addEventListener('resize', refreshUpdateUI_debug);
   screen.orientation.addEventListener('change', refreshUpdateUI_debug);
+
+  setupWatches();
 }
 
 export function refreshUpdateUI_debug() {
@@ -62,4 +65,50 @@ function getDebugInnerHtml() {
     `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
     `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br>` 
   );
+}
+
+interface Watch {
+  name: string;
+  value: string;
+  update?: () => void;
+}
+
+const watches: Watch[] = [];
+const watchesDiv = document.createElement('div');
+
+export function addWatch(watch: Watch) {
+  if (!watch.update) {
+    watch.update = function () {};
+  }
+  watches.push(watch);
+}
+
+export function updateWatches() {
+  let text = '';
+  for (const watch of watches) {
+    watch.update?.();
+    text += `${watch.name}: ${watch.value}\n`;
+  }
+  watchesDiv.textContent = text;
+}
+
+function setupWatches() {
+  watchesDiv.id = 'watches';
+  document.body.appendChild(watchesDiv);
+
+  // Cast Clock
+  addWatch({
+    name: 'Cast Clock',
+    value: '0.000',
+    update: function () {
+      const c = getClock(CAST_CLOCK);
+
+      if (!c.running) return;
+
+      const elapsed = c.getElapsedTime().toFixed(3);
+      this.value = elapsed;
+    },
+  });
+
+  updateWatches();
 }

@@ -1,6 +1,6 @@
 import { Signals, receive } from '../core/state';
 import { isDev } from '../util/environment';
-import { setupUI_debug } from '../debug/ui_debug';
+import { setupUI_debug, updateWatches } from '../debug/ui_debug';
 import {
   hideUI_fishHealth,
   setupUI_fishHealth,
@@ -51,6 +51,7 @@ export function setupUI() {
   setupUI_lineTension();
   setupUI_fishHealth();
   setupUI_prize();
+
   if (isDev()) setupUI_debug();
 
   setupReceivers();
@@ -61,4 +62,8 @@ export function updateUI() {
   updateUI_lineTension();
   updateUI_fishHealth();
   updateUI_prize();
+
+  if (isDev()) {
+    updateWatches();
+  }
 }

@@ -34,9 +34,27 @@ export function getClock(name: ClockName) {
 
 // receivers
 receive(
-  Signals.ANIMATE_CAST_TRAJECTORY,
+  Signals.LAUNCH_BOBBER,
   () => {
     getClock(CAST_CLOCK).start();
   },
   10 // prio
 );
+
+// Mock clock
+export class MockClock {
+  #elapsedTime: number = 0; // mock ms
+  #tickStep: number = 16; // mock ms
+
+  tick() {
+    this.#elapsedTime += this.#tickStep;
+  }
+
+  reset() {
+    this.#elapsedTime = 0;
+  }
+
+  getElapsed() {
+    return this.#elapsedTime;
+  }
+}

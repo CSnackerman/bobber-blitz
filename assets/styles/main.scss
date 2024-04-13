@@ -169,3 +169,11 @@ $line_tension_border_radius: 2em;
 
   opacity: 0.5;
 }
+
+#watches {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 3px;
+  background-color: black;
+}

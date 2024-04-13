@@ -1,6 +1,7 @@
-import { BufferGeometry, Line, LineBasicMaterial } from 'three';
+import { BufferGeometry, Color, Line, LineBasicMaterial, Vector3 } from 'three';
 import { CAST_CLOCK, getClock } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
+import { interpolateLine } from '../util/line';
 import {
   getDanglingTrajectoryPoints,
   getTrajectoryPoints,
@@ -18,9 +19,13 @@ export {
 
 export const CAST_HEIGHT = 22;
 export const CAST_TIME = 500; // ms
+const DESCEND_TIME = 1100; // ms
 
 let fishingLine: Line;
+
 const castClock = getClock(CAST_CLOCK);
+let castPoints: Vector3[] = [];
+let lineDanglingPoints: Vector3[] = [];
 
 async function setup() {
   fishingLine = new Line(
@@ -42,46 +47,20 @@ async function setup() {
 enum FishingLineState {
   HIDDEN = 'HIDDEN',
   CASTING = 'CASTING',
+  LINE_DESCENDING = 'LINE_DESCENDING',
   ATTACHED_BOBBER = 'ATTACHED_BOBBER',
   ATTACHED_FISH = 'ATTACHED_FISH',
 }
-const { HIDDEN, CASTING, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
+const { HIDDEN, CASTING, LINE_DESCENDING, ATTACHED_BOBBER, ATTACHED_FISH } =
+  FishingLineState;
 
-const { RESET, CAST, ANIMATE_CAST_TRAJECTORY, BEGIN_FISHING, REEL_OUT } =
+const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, REEL_OUT } =
   Signals;
 
 const state = new State<FishingLineState>(HIDDEN, null);
 
 const getState = () => state.get();
 const update = () => state.invoke();
-
-function while_ANIMATE_CASTING() {
-  const timestep = Math.floor(CAST_TIME / 32);
-  const elapsed = castClock.getElapsedTime() * 1000;
-  const currentTimestep = Math.floor(elapsed / timestep);
-  fishingLine.geometry.setDrawRange(0, currentTimestep);
-
-  if (elapsed >= CAST_TIME) {
-    castClock.stop();
-    emit(BEGIN_FISHING);
-  }
-}
-
-function while_ATTACHED_BOBBER() {
-  fishingLine.geometry.setFromPoints(
-    getDanglingTrajectoryPoints(
-      getFishingLineAnchorPoint(),
-      getBobberTopPoint()
-    )
-  );
-}
-
-function while_ATTACHED_FISH() {
-  fishingLine.geometry.setFromPoints([
-    getFishingLineAnchorPoint(),
-    getFishPosition(),
-  ]);
-}
 
 function setupReceivers() {
   receive(RESET, () => {
@@ -99,16 +78,17 @@ function setupReceivers() {
   );
 
   receive(
-    ANIMATE_CAST_TRAJECTORY,
+    LAUNCH_BOBBER,
     () => {
       fishingLine.visible = true;
-      fishingLine.geometry.setFromPoints(
-        getTrajectoryPoints(
-          getFishingLineAnchorPoint(),
-          getBobberTopPoint(),
-          CAST_HEIGHT
-        )
+
+      castPoints = getTrajectoryPoints(
+        getFishingLineAnchorPoint(),
+        getBobberTopPoint(),
+        CAST_HEIGHT
       );
+
+      fishingLine.geometry.setFromPoints(castPoints);
 
       fishingLine.geometry.setDrawRange(0, 0);
       fishingLine.geometry.setDrawRange(0, 0);
@@ -116,6 +96,10 @@ function setupReceivers() {
     },
     1 // prio
   );
+
+  receive(BOBBER_LANDED, () => {
+    state.set(LINE_DESCENDING, while_BOBBER_LANDED());
+  });
 
   receive(BEGIN_FISHING, () => {
     fishingLine.visible = true;
@@ -126,4 +110,59 @@ function setupReceivers() {
   receive(REEL_OUT, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
+}
+
+/// /// ///
+
+function while_ANIMATE_CASTING() {
+  const timestep = Math.floor(CAST_TIME / 32);
+  const elapsed = castClock.getElapsedTime() * 1000;
+  const currentTimestep = Math.floor(elapsed / timestep);
+  fishingLine.geometry.setDrawRange(0, currentTimestep);
+
+  if (elapsed >= CAST_TIME) {
+    castClock.stop();
+    emit(BOBBER_LANDED);
+  }
+}
+
+function while_BOBBER_LANDED() {
+  lineDanglingPoints = getDanglingTrajectoryPoints(
+    getFishingLineAnchorPoint(),
+    getBobberTopPoint()
+  );
+
+  castClock.start();
+
+  return () => {
+    const elapsed = castClock.getElapsedTime() * 1000;
+    const alpha = elapsed / DESCEND_TIME;
+
+    console.log(
+      `%c${alpha.toFixed(3)}`,
+      `color: #${new Color().fromArray([alpha, 0.5, 0]).getHexString()}`
+    );
+
+    const points = interpolateLine(castPoints, lineDanglingPoints, alpha);
+
+    fishingLine.geometry.setFromPoints(points);
+
+    // mockClock.tick();
+
+    if (elapsed >= DESCEND_TIME) {
+      castClock.stop();
+      emit(BEGIN_FISHING);
+    }
+  };
+}
+
+function while_ATTACHED_BOBBER() {
+  // todo: update end of line to follow plunking bobber
+}
+
+function while_ATTACHED_FISH() {
+  fishingLine.geometry.setFromPoints([
+    getFishingLineAnchorPoint(),
+    getFishPosition(),
+  ]);
 }

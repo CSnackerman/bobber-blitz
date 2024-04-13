@@ -60,7 +60,7 @@ const { IDLE, CASTING, FISHING, FISH_ON, REELING, HOLDING_PRIZE } =
 const {
   RESET,
   CAST,
-  ANIMATE_CAST_TRAJECTORY: ANIMATE_CAST_BOBBER,
+  LAUNCH_BOBBER,
   BEGIN_FISHING,
   BITE,
   REEL_OUT,
@@ -139,7 +139,7 @@ function setupAnimation(gltf: GLTF) {
   animationMixer = new AnimationMixer(fisherman);
 
   animationMixer.addEventListener('finished', () => {
-    emit(ANIMATE_CAST_BOBBER);
+    emit(LAUNCH_BOBBER);
   });
 
   setupAnimation_Cast(gltf);
