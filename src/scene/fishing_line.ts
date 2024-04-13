@@ -1,4 +1,4 @@
-import { BufferGeometry, Clock, Line, LineBasicMaterial, Vector3 } from 'three';
+import { BufferGeometry, Clock, Line, LineBasicMaterial } from 'three';
 import { Signals, State, emit, receive } from '../core/state';
 import { getTrajectoryPoints } from '../util/physics';
 import { getBobberTopPoint } from './bobber';
