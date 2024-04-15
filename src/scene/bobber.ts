@@ -46,11 +46,11 @@ async function setup() {
 
 enum BobberStates {
   HIDDEN = 'HIDDEN',
-  CASTING = 'CASTING',
+  LAUNCHING = 'LAUNCHING',
   BOBBING = 'BOBBING',
   PLUNKING = 'PLUNKING',
 }
-const { HIDDEN, CASTING, BOBBING, PLUNKING } = BobberStates;
+const { HIDDEN, LAUNCHING, BOBBING, PLUNKING } = BobberStates;
 
 const {
   RESET,
@@ -93,7 +93,7 @@ function setupReceivers() {
     LAUNCH_BOBBER,
     () => {
       show();
-      state.set(CASTING, while_ANIMATE_CASTING());
+      state.set(LAUNCHING, while_LAUNCHING());
     },
     2 // prio
   );
@@ -120,7 +120,7 @@ function setupReceivers() {
 
 /// /// ///
 
-function while_ANIMATE_CASTING() {
+function while_LAUNCHING() {
   const trajectoryPoints = getTrajectoryPoints(
     getFishingLineAnchorPoint(),
     getPosition(),
