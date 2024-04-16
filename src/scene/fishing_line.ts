@@ -21,7 +21,7 @@ export {
 
 export const CAST_HEIGHT = 22;
 export const CAST_TIME = 500; // ms
-const DESCEND_TIME = 1100; // ms
+const DESCEND_TIME = 3000; // ms
 
 let fishingLine: Line;
 
@@ -50,10 +50,12 @@ async function setup() {
 enum FishingLineState {
   HIDDEN = 'HIDDEN',
   CASTING = 'CASTING',
+  DESCENDING = 'DESCENDING',
   ATTACHED_BOBBER = 'ATTACHED_BOBBER',
   ATTACHED_FISH = 'ATTACHED_FISH',
 }
-const { HIDDEN, CASTING, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
+const { HIDDEN, CASTING, DESCENDING, ATTACHED_BOBBER, ATTACHED_FISH } =
+  FishingLineState;
 
 const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, REEL_OUT } =
   Signals;
@@ -72,6 +74,7 @@ function setupReceivers() {
   receive(
     CAST,
     () => {
+      fishingLine.geometry.dispose();
       fishingLine.visible = false;
 
       state.set(HIDDEN, null);
@@ -114,9 +117,11 @@ function setupReceivers() {
     1 // prio
   );
 
-  receive(BEGIN_FISHING, () => {
-    fishingLine.visible = true;
+  receive(BOBBER_LANDED, () => {
+    state.set(DESCENDING, while_LINE_DESCENDING);
+  });
 
+  receive(BEGIN_FISHING, () => {
     state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
@@ -169,7 +174,9 @@ function while_LINE_DESCENDING() {
 }
 
 function while_ATTACHED_BOBBER() {
-  // todo: update end of line to follow plunking bobber
+  const attachPoint = lineDescendedPoints[lineDescendedPoints.length - 1];
+  attachPoint.copy(getBobberTopPoint());
+  fishingLine.geometry.setFromPoints(lineDescendedPoints);
 }
 
 function while_ATTACHED_FISH() {

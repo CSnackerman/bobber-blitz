@@ -13,7 +13,7 @@ enum CastStates {
 }
 const { DISABLED, ENABLED } = CastStates;
 
-const { RESET, CAST, BEGIN_FISHING, BITE } = Signals;
+const { RESET, CAST, BOBBER_LANDED, BITE } = Signals;
 
 const state = new State<CastStates>(ENABLED, null);
 
@@ -40,7 +40,7 @@ function setupReceivers() {
     1
   );
 
-  receive(BEGIN_FISHING, () => {
+  receive(BOBBER_LANDED, () => {
     state.set(ENABLED, () => emit(CAST));
   });
 

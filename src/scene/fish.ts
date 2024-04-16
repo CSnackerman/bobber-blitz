@@ -203,7 +203,6 @@ function recalculateSize() {
   new Box3().setFromObject(fish).getBoundingSphere(sphere);
 
   size = sphere.radius * 2;
-  console.log('size', size);
 }
 
 function moveBelowBobber() {
