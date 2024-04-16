@@ -9,11 +9,13 @@ import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
 import { CAST_CLOCK, delta, getClock, getElapsedTime } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
-import { getTrajectoryPoints } from '../util/physics';
 import { getRandomInt } from '../util/random';
 import { camera } from './camera';
-import { getFishingLineAnchorPoint } from './fisherman';
-import { CAST_HEIGHT, CAST_TIME } from './fishing_line';
+import {
+  CAST_TIME,
+  interpolatedPoints,
+  launchTrajectoryPoints,
+} from './fishing_line';
 import { rootScene } from './scene';
 
 export {
@@ -121,13 +123,7 @@ function setupReceivers() {
 /// /// ///
 
 function while_LAUNCHING() {
-  const trajectoryPoints = getTrajectoryPoints(
-    getFishingLineAnchorPoint(),
-    getPosition(),
-    CAST_HEIGHT
-  );
-
-  const nPoints = trajectoryPoints.length;
+  const nPoints = launchTrajectoryPoints.length;
   const timestep = Math.floor(CAST_TIME / nPoints);
 
   return () => {
@@ -136,7 +132,7 @@ function while_LAUNCHING() {
 
     if (currentTimestep > nPoints - 1) return;
 
-    bobber.position.copy(trajectoryPoints[currentTimestep]);
+    bobber.position.copy(interpolatedPoints[currentTimestep]);
   };
 }
 

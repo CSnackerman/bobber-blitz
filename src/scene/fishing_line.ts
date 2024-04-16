@@ -13,6 +13,8 @@ import { rootScene } from './scene';
 
 export {
   getState as getFishingLineState,
+  interpolatedPoints,
+  launchTrajectoryPoints,
   setup as setupFishingLineAsync,
   update as updateFishingLine,
 };
@@ -24,8 +26,9 @@ const DESCEND_TIME = 1100; // ms
 let fishingLine: Line;
 
 const castClock = getClock(CAST_CLOCK);
-let castPoints: Vector3[] = [];
-let lineDanglingPoints: Vector3[] = [];
+let launchTrajectoryPoints: Vector3[];
+let lineDescendedPoints: Vector3[];
+let interpolatedPoints: Vector3[] = [];
 
 async function setup() {
   fishingLine = new Line(
@@ -47,12 +50,10 @@ async function setup() {
 enum FishingLineState {
   HIDDEN = 'HIDDEN',
   CASTING = 'CASTING',
-  LINE_DESCENDING = 'LINE_DESCENDING',
   ATTACHED_BOBBER = 'ATTACHED_BOBBER',
   ATTACHED_FISH = 'ATTACHED_FISH',
 }
-const { HIDDEN, CASTING, LINE_DESCENDING, ATTACHED_BOBBER, ATTACHED_FISH } =
-  FishingLineState;
+const { HIDDEN, CASTING, ATTACHED_BOBBER, ATTACHED_FISH } = FishingLineState;
 
 const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, REEL_OUT } =
   Signals;
@@ -72,6 +73,7 @@ function setupReceivers() {
     CAST,
     () => {
       fishingLine.visible = false;
+
       state.set(HIDDEN, null);
     },
     3 // prio
@@ -82,24 +84,35 @@ function setupReceivers() {
     () => {
       fishingLine.visible = true;
 
-      castPoints = getTrajectoryPoints(
+      launchTrajectoryPoints = getTrajectoryPoints(
         getFishingLineAnchorPoint(),
         getBobberTopPoint(),
         CAST_HEIGHT
       );
 
-      fishingLine.geometry.setFromPoints(castPoints);
+      lineDescendedPoints = getDanglingTrajectoryPoints(
+        getFishingLineAnchorPoint(),
+        getBobberTopPoint()
+      );
 
+      interpolateLine(
+        launchTrajectoryPoints,
+        lineDescendedPoints,
+        interpolatedPoints,
+        0
+      );
+
+      fishingLine.geometry.setFromPoints(launchTrajectoryPoints);
       fishingLine.geometry.setDrawRange(0, 0);
       fishingLine.geometry.setDrawRange(0, 0);
-      state.set(CASTING, while_ANIMATE_CASTING);
+
+      state.set(CASTING, () => {
+        while_LAUNCHING();
+        while_LINE_DESCENDING();
+      });
     },
     1 // prio
   );
-
-  receive(BOBBER_LANDED, () => {
-    state.set(LINE_DESCENDING, while_BOBBER_LANDED());
-  });
 
   receive(BEGIN_FISHING, () => {
     fishingLine.visible = true;
@@ -114,39 +127,45 @@ function setupReceivers() {
 
 /// /// ///
 
-function while_ANIMATE_CASTING() {
+let currentTimestep = 0;
+function while_LAUNCHING() {
   const timestep = Math.floor(CAST_TIME / 32);
   const elapsed = castClock.getElapsedTime() * 1000;
-  const currentTimestep = Math.floor(elapsed / timestep);
+  currentTimestep = Math.floor(elapsed / timestep);
   fishingLine.geometry.setDrawRange(0, currentTimestep);
 
   if (elapsed >= CAST_TIME) {
-    castClock.stop();
     emit(BOBBER_LANDED);
   }
 }
 
-function while_BOBBER_LANDED() {
-  lineDanglingPoints = getDanglingTrajectoryPoints(
-    getFishingLineAnchorPoint(),
-    getBobberTopPoint()
+function while_LINE_DESCENDING() {
+  const elapsed = castClock.getElapsedTime() * 1000;
+  const alpha = elapsed / DESCEND_TIME;
+
+  let stopAt =
+    currentTimestep > launchTrajectoryPoints.length
+      ? undefined
+      : currentTimestep;
+
+  if (stopAt !== undefined && stopAt < launchTrajectoryPoints.length) {
+    stopAt++;
+  }
+
+  interpolateLine(
+    launchTrajectoryPoints,
+    lineDescendedPoints,
+    interpolatedPoints,
+    alpha,
+    stopAt
   );
 
-  castClock.start();
+  fishingLine.geometry.setFromPoints(interpolatedPoints);
 
-  return () => {
-    const elapsed = castClock.getElapsedTime() * 1000;
-    const alpha = elapsed / DESCEND_TIME;
-
-    const points = interpolateLine(castPoints, lineDanglingPoints, alpha);
-
-    fishingLine.geometry.setFromPoints(points);
-
-    if (elapsed >= DESCEND_TIME) {
-      castClock.stop();
-      emit(BEGIN_FISHING);
-    }
-  };
+  if (elapsed >= DESCEND_TIME) {
+    castClock.stop();
+    emit(BEGIN_FISHING);
+  }
 }
 
 function while_ATTACHED_BOBBER() {

@@ -1,6 +1,6 @@
 import { Object3D, Vector2, Vector3 } from 'three';
 
-export { lookAtHorizontal, getDirection, str };
+export { lookAtHorizontal, getDirection, str, copyVectorArray };
 
 const yAxis = new Vector3(0, 1, 0);
 
@@ -24,4 +24,13 @@ function str(v: Vector3) {
     return negative + Math.abs(n).toFixed(2).padStart(6, '0');
   };
   return `(${f(v.x)}, ${f(v.y)}, ${f(v.z)})`;
+}
+
+function copyVectorArray(arr: Vector3[]) {
+  const out = new Array<Vector3>(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    out[i] = arr[i].clone();
+  }
+
+  return out;
 }
