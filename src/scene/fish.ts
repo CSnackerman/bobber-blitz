@@ -51,11 +51,11 @@ async function setup() {
 
 enum FishStates {
   IDLE = 'IDLE',
-  SWIMMING = 'SWIMMING',
-  BEING_REELED = 'BEING_REELED',
+  REELING_OUT = 'REELING_OUT',
+  REELING_IN = 'REELING_IN',
   FLOPPING = 'FLOPPING',
 }
-const { IDLE, SWIMMING, BEING_REELED, FLOPPING } = FishStates;
+const { IDLE, REELING_OUT, REELING_IN, FLOPPING } = FishStates;
 
 const { REEL_OUT, REEL_IN, CATCH_FISH, RESET } = Signals;
 
@@ -80,7 +80,7 @@ function setupReceivers() {
     setSwimDirection_AwayFisherman();
     changeSwimDirectionCallback = setSwimDirection_AwayFisherman;
 
-    state.set(SWIMMING, while_SWIMMING);
+    state.set(REELING_OUT, while_REELING_OUT);
   });
 
   receive(REEL_IN, () => {
@@ -88,7 +88,7 @@ function setupReceivers() {
     setSwimDirection_TowardFisherman();
     changeSwimDirectionCallback = setSwimDirection_TowardFisherman;
 
-    state.set(BEING_REELED, while_BEING_REELED);
+    state.set(REELING_IN, while_REELING_IN);
   });
 
   receive(CATCH_FISH, () => {
@@ -100,7 +100,7 @@ function setupReceivers() {
   });
 }
 
-function while_SWIMMING() {
+function while_REELING_OUT() {
   if (swimDirectionChangeTimeoutId === null) {
     changeSwimDirections();
   }
@@ -110,7 +110,7 @@ function while_SWIMMING() {
   swimForward();
 }
 
-function while_BEING_REELED() {
+function while_REELING_IN() {
   if (swimDirectionChangeTimeoutId === null) {
     changeSwimDirections();
   }
