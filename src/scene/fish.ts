@@ -10,21 +10,24 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { Signals, State, emit, receive } from '../core/state';
 import { delta } from '../core/clock';
+import { Signals, State, emit, receive } from '../core/state';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';
+import { camera } from './camera';
 import { getFishermanPosition } from './fisherman';
 import { rootScene } from './scene';
 
 export {
-  getPosition as getFishPosition,
-  getState as getFishState,
   getCategory as getFishCategory,
+  getDistanceFromFisherman as getFishDistanceFromFisherman,
+  getFishMouthPosition,
+  getPosition as getFishPosition,
+  getScreenCoords as getFishScreenCoords,
+  getState as getFishState,
   setup as setupFishAsync,
   update as updateFish,
-  getFishMouthPosition,
 };
 
 /* Initialization */
@@ -210,8 +213,12 @@ function moveBelowBobber() {
   fish.position.set(b.x, fish.position.y, b.z);
 }
 
+function getDistanceFromFisherman() {
+  return getPosition().distanceTo(getFishermanPosition());
+}
+
 function checkDistance() {
-  const distance = getPosition().distanceTo(getFishermanPosition());
+  const distance = getDistanceFromFisherman();
   if (distance <= size + catchDistance) {
     emit(CATCH_FISH);
   }
@@ -224,6 +231,19 @@ function getFishMouthPosition() {
   let p = new Vector3();
   fish.getObjectByName('fish_mouth')?.getWorldPosition(p);
   return p;
+}
+
+function getScreenCoords() {
+  const worldPosition = new Vector3();
+  fish.getWorldPosition(worldPosition);
+
+  worldPosition.project(camera);
+
+  return new Vector3(
+    ((worldPosition.x + 1) / 2) * window.innerWidth,
+    ((-worldPosition.y + 1) / 2) * window.innerHeight,
+    1
+  );
 }
 
 /* Swimming */

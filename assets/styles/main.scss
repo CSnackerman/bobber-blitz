@@ -81,23 +81,21 @@ $line_tension_border_radius: 2em;
 
 #fish_health {
   pointer-events: none;
+  opacity: 0.7;
   display: block;
   position: fixed;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-3em);
   width: 5em;
-  height: 0.4em;
+  height: 0.3em;
   background-color: #000000;
-  border: 1px solid green;
+  border: 1px solid black;
   overflow: clip;
 
   & > div {
     display: block;
     position: absolute;
     left: 0;
-    width: 75%;
-    height: 98%;
+    top: 0;
+    height: 100%;
     background-color: yellowgreen;
   }
 }

@@ -21,7 +21,7 @@ import {
 } from './ui_line_tension';
 import { setupUI_prize } from './ui_prize';
 
-const { RESET, CAST, BITE, REEL_OUT } = Signals;
+const { RESET, CAST, BITE, REEL_OUT, CATCH_FISH } = Signals;
 
 function setupReceivers() {
   receive(RESET, () => {
@@ -43,6 +43,11 @@ function setupReceivers() {
     hideUI_fishOn();
     showUI_fishHealth();
     showUI_lineTension();
+  });
+
+  receive(CATCH_FISH, () => {
+    hideUI_fishHealth();
+    hideUI_lineTension();
   });
 }
 
