@@ -7,12 +7,12 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { isSpaceDown } from '../controls/reel';
-import { Signals, State, emit, receive } from '../core/state';
 import { delta } from '../core/clock';
+import { Signals, State, emit, receive } from '../core/state';
 import { lookAtHorizontal } from '../util/vector';
 import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
-import { reticlePoint } from './reticle';
+import { getReticlePosition } from './reticle';
 import { rootScene } from './scene';
 
 export {
@@ -105,7 +105,7 @@ function setupReceivers() {
 }
 
 function while_IDLE() {
-  fisherman.lookAt(reticlePoint);
+  lookAtHorizontal(fisherman, getReticlePosition());
 }
 
 function while_CASTING() {
