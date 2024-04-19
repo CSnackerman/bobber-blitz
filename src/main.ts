@@ -1,14 +1,14 @@
 import { setupControls } from './controls';
+import { updateTimeDelta } from './core/clock';
 import { initFirebase } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { Signals, emit } from './core/state';
-import { updateTimeDelta } from './core/clock';
+import { updateDebug } from './debug/debug_orbs';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
-import { camera, setupCamera, updateOrbitControls } from './scene/camera';
-import { updateDebug } from './debug/debug_orbs';
+import { camera, setupCamera } from './scene/camera';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -66,7 +66,6 @@ function run() {
   requestAnimationFrame(run);
   updateTimeDelta();
   updateStats();
-  updateOrbitControls();
   updateWater();
   updateBoat();
   updateFisherman();

@@ -1,6 +1,5 @@
 import { PerspectiveCamera } from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { renderer } from '../core/renderer';
+import { isMobile } from '../util/device';
 
 export const camera = new PerspectiveCamera();
 
@@ -12,26 +11,23 @@ export function setupCamera() {
   camera.far = 3000;
 
   // transform
-  // camera.position.set(100, 100, 250);
-  camera.position.set(50, 150, 50);
+  if (isMobile()) {
+    camera.position.set(1, 75, 0);
+    camera.lookAt(0, 75, 0);
+    camera.translateZ(125);
+    updateCamera();
+  } else {
+    camera.position.set(1, 75, 0);
+    camera.lookAt(0, 75, 0);
+    camera.translateZ(125);
+    updateCamera();
+  }
+
   camera.updateProjectionMatrix();
-
-  setupOrbitControls();
 }
 
-// Orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
+export function updateCamera() {
+  const w = window.innerWidth;
 
-function setupOrbitControls() {
-  // controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.15;
-  // controls.enablePan = false;
-  // controls.enableRotate = false;
-  // controls.enableZoom = false;
-  controls.target.set(0, 0, 0);
-}
-
-export function updateOrbitControls() {
-  if (camera.position.y <= 3) camera.position.setY(3);
-  controls.update();
+  camera.position.z = -w / 20;
 }
