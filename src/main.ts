@@ -9,6 +9,7 @@ import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera } from './scene/camera';
+import { setupClouds, updateCloud } from './scene/cloud';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -55,6 +56,7 @@ function setup() {
   setupControls();
   setupStats();
   setupSky();
+  setupClouds();
   setupWater();
   setupLights();
   setupUI();
@@ -74,6 +76,7 @@ function run() {
   updateFish();
   updateReticle();
   updateUI();
+  updateCloud();
 
   updateDebug();
 

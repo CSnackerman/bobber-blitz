@@ -18,3 +18,7 @@ export function getRandomColorHex() {
 
   return '#' + color.getHexString();
 }
+
+export function getRandomColor() {
+  return new Color(getRandomInt(0, 16777216));
+}

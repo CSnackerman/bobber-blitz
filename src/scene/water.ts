@@ -12,7 +12,7 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
   sunDirection: new Vector3(),
   sunColor: 0x00007f,
   waterColor: 0x001e0f,
-  distortionScale: 5,
+  distortionScale: 3,
   fog: undefined,
 });
 
@@ -27,5 +27,5 @@ export function setupWater() {
 }
 
 export function updateWater() {
-  water.material.uniforms['time'].value += 1.0 / 700.0;
+  water.material.uniforms['time'].value += 1 / 700;
 }

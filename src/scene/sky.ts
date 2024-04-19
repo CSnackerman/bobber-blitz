@@ -21,15 +21,15 @@ export function setupSky() {
   // uniforms
   const skyUniforms = sky.material.uniforms;
 
-  skyUniforms['turbidity'].value = 0;
-  skyUniforms['rayleigh'].value = 0.01;
+  skyUniforms['turbidity'].value = 0.2;
+  skyUniforms['rayleigh'].value = 0.03;
   skyUniforms['mieCoefficient'].value = 0;
   skyUniforms['mieDirectionalG'].value = 0;
 
   // config
   const parameters = {
-    elevation: 5,
-    azimuth: 180,
+    elevation: 30,
+    azimuth: 250,
   };
 
   const pmremGenerator = new PMREMGenerator(renderer);

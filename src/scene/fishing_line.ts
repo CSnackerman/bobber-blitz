@@ -20,8 +20,8 @@ export {
 };
 
 export const CAST_HEIGHT = 22;
-export const CAST_TIME = 500; // ms
-const DESCEND_TIME = 3000; // ms
+export const CAST_TIME = 350; // ms
+const DESCEND_TIME = 900; // ms
 
 let fishingLine: Line;
 
@@ -34,9 +34,9 @@ async function setup() {
   fishingLine = new Line(
     new BufferGeometry(),
     new LineBasicMaterial({
-      color: '#a9d665',
+      color: '#00ff0f',
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.7,
     })
   );
 

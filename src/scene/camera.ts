@@ -8,7 +8,7 @@ export function setupCamera() {
   camera.fov = 80;
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.near = 0.1;
-  camera.far = 3000;
+  camera.far = 100000;
 
   // transform
   if (isMobile()) {
