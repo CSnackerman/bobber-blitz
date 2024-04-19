@@ -1,6 +1,5 @@
 import { Vector3 } from 'three';
-import { lerp } from 'three/src/math/MathUtils.js';
-import { delta } from '../core/clock';
+import { clamp, lerp } from 'three/src/math/MathUtils.js';
 import {
   getFishDistanceFromFisherman,
   getFishScreenCoords,
@@ -32,10 +31,11 @@ export function setupUI_fishHealth() {
   const rect = fishHealth_div.getBoundingClientRect();
   baseWidth = rect.width;
   baseHeight = rect.height;
+
+  resetAlpha();
 }
 
 export function updateUI_fishHealth() {
-  updateAlpha(0.1);
   updateBarColor();
   updateBarProgress();
   if (alpha > 1) resetAlpha();
@@ -56,12 +56,13 @@ export function updateUI_fishHealth() {
   fishHealth_div.style.height = `${baseHeight / normalizedDist}px`;
 }
 
-function updateAlpha(rate: number) {
-  alpha += rate * delta;
+function resetAlpha() {
+  alpha = 1.0;
 }
 
-function resetAlpha() {
-  alpha = 0.0;
+export function setHealth(percent: number) {
+  percent = clamp(percent, 0, 100);
+  alpha = parseFloat((percent / 100.0).toFixed(2));
 }
 
 function updateBarColor() {
