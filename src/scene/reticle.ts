@@ -6,7 +6,6 @@ import {
   Vector3,
 } from 'three';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { renderer } from '../core/renderer';
 import { Signals, State, receive } from '../core/state';
 import { pointer } from '../events/pointer';
 import { camera } from './camera';
@@ -21,7 +20,6 @@ export {
 };
 
 /* Initialization */
-let enabled = false;
 
 export const reticlePoint = new Vector3();
 
@@ -37,8 +35,6 @@ function setup() {
   rootScene.add(reticle);
 
   setupReceivers();
-
-  renderer.domElement.addEventListener('mouseenter', () => (enabled = true));
 }
 
 /* State */
@@ -90,14 +86,13 @@ function while_TRACKING() {
 /* Transformation */
 
 function moveToPointer() {
-  if (!enabled) return;
-
   raycaster.setFromCamera(pointer, camera);
   const intersections = raycaster.intersectObject(water, false);
 
   const intersection = intersections[0];
 
   if (!intersection?.point) return;
+  if (intersection.point.y > 3) return; // hack
 
   reticle.position.copy(intersection.point);
   reticle.translateY(0.5);
