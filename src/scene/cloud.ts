@@ -1,8 +1,8 @@
 import {
-  BackSide,
   BoxGeometry,
   Color,
   Data3DTexture,
+  FrontSide,
   GLSL3,
   LinearFilter,
   Mesh,
@@ -12,18 +12,26 @@ import {
   Vector3,
 } from 'three';
 import { ImprovedNoise } from 'three/examples/jsm/Addons.js';
-import { randFloat } from 'three/src/math/MathUtils.js';
+import { degToRad, randFloat } from 'three/src/math/MathUtils.js';
 import { delta } from '../core/clock';
-import { camera } from './camera';
+import { isMobile } from '../util/device';
+import { getRandomFloat, getRandomInt } from '../util/random';
 import { rootScene } from './scene';
 
 export { setupAll as setupClouds, update as updateCloud };
 
 let clouds: Mesh<BoxGeometry, RawShaderMaterial, Object3DEventMap>[] = [];
 
-function setup() {
-  // Texture
+const minScale = 5000;
+const maxScale = 50000;
+const minHeight = 2000;
+const maxHeight = 3000;
+const disappearDistance = 100000;
+const spawnWidth = 100000;
+const minElevation = maxHeight * 2 + 1000;
+const maxElevation = minElevation + 1000;
 
+function setup() {
   const size = 128;
   const data = new Uint8Array(size * size * size);
 
@@ -196,7 +204,6 @@ function setup() {
 					}
 				`;
 
-  const geometry = new BoxGeometry(1, 1, 1);
   const material = new RawShaderMaterial({
     glslVersion: GLSL3,
     uniforms: {
@@ -211,53 +218,78 @@ function setup() {
     },
     vertexShader,
     fragmentShader,
-    side: BackSide,
+    side: FrontSide,
     transparent: true,
     depthWrite: false,
   });
 
-  const parameters = {
-    threshold: randFloat(0.25, 0.5),
-    opacity: 0.25,
-    range: 0.1,
-    steps: 100,
-  };
+  material.uniforms.threshold.value = randFloat(0.25, 0.5);
+  material.uniforms.opacity.value = 0.25;
+  material.uniforms.range.value = 0.1;
+  material.uniforms.steps.value = isMobile() ? 5 : 32;
 
-  material.uniforms.threshold.value = parameters.threshold;
-  material.uniforms.opacity.value = parameters.opacity;
-  material.uniforms.range.value = parameters.range;
-  material.uniforms.steps.value = parameters.steps;
-
+  const geometry = new BoxGeometry(1, 1, 1);
   const cloud = new Mesh(geometry, material);
 
+  cloud.setRotationFromAxisAngle(new Vector3(0, 1, 0), degToRad(-11));
+
   cloud.position.set(
-    randFloat(-30000, 30000),
-    randFloat(5000, 15000),
-    randFloat(-30000, 30000)
+    getRandomFloat(-disappearDistance / 2, disappearDistance / 2),
+    getRandomFloat(minElevation, maxElevation),
+    getRandomFloat(-spawnWidth, spawnWidth)
   );
 
-  cloud.scale.set(
-    randFloat(5000, 50000),
-    randFloat(5000, 7000),
-    randFloat(5000, 50000)
-  );
+  const first = getRandomFloat(minScale, maxScale);
+  const second =
+    getRandomInt(0, 1) === 0
+      ? first + getRandomFloat(50, 1000)
+      : first - getRandomFloat(50, 1000);
+
+  cloud.scale.set(first, getRandomFloat(minHeight, maxHeight), second);
 
   rootScene.add(cloud);
   clouds.push(cloud);
+}
 
-  //
+function reset(cloud: Mesh) {
+  cloud.position.set(
+    randFloat(0, maxScale),
+    randFloat(minElevation, maxElevation),
+    randFloat(-spawnWidth, spawnWidth)
+  );
+
+  const first = getRandomFloat(minScale, maxScale);
+  const second =
+    getRandomInt(0, 1) === 0
+      ? first + getRandomFloat(50, 1000)
+      : first - getRandomFloat(50, 1000);
+
+  cloud.scale.set(first, getRandomFloat(minHeight, maxHeight), second);
+
+  cloud.visible = true;
 }
 
 export function setupAll() {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     setup();
   }
 }
 
 export function update() {
+  const speed = 300;
   for (const cloud of clouds) {
-    cloud.material.uniforms.cameraPos.value.copy(camera.position);
-    cloud.material.uniforms.frame.value++;
-    cloud.translateX(-500 * delta);
+    cloud.translateX(-7 * speed * delta);
+
+    if (cloud.position.x < -500) {
+      cloud.translateY(-1 * speed * delta);
+    }
+
+    if (cloud.position.y < -cloud.scale.y) {
+      reset(cloud);
+    }
+
+    if (cloud.position.x < -disappearDistance) {
+      cloud.visible = false;
+    }
   }
 }
