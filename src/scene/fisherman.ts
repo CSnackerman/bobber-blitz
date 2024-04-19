@@ -14,9 +14,11 @@ import { getBobberTopPoint } from './bobber';
 import { getFishPosition } from './fish';
 import { getReticlePosition } from './reticle';
 import { rootScene } from './scene';
+import { camera } from './camera';
 
 export {
   getPosition as getFishermanPosition,
+  getScreenCoords as getFishermanScreenCoords,
   getState as getFishermanState,
   getFishingLineAnchorPoint,
   setup as setupFishermanAsync,
@@ -167,4 +169,17 @@ function getFishingLineAnchorPoint() {
   let p = new Vector3();
   fisherman.getObjectByName('string_pivot')?.getWorldPosition(p);
   return p;
+}
+
+function getScreenCoords() {
+  const worldPosition = new Vector3();
+  fisherman.getWorldPosition(worldPosition);
+
+  worldPosition.project(camera);
+
+  return new Vector3(
+    ((worldPosition.x + 1) / 2) * window.innerWidth,
+    ((-worldPosition.y + 1) / 2) * window.innerHeight,
+    1
+  );
 }
