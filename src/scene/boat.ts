@@ -1,4 +1,4 @@
-import { Group } from 'three';
+import { Group, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getElapsedTime } from '../core/clock';
 import { rootScene } from './scene';
@@ -16,6 +16,7 @@ async function setup() {
 
   boat.scale.set(25, 25, 25);
   boat.position.set(0, -2, 0);
+  boat.rotateOnAxis(new Vector3(0, 1, 0), 35);
 
   rootScene.add(boat);
 }
