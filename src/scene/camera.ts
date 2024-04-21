@@ -5,7 +5,7 @@ export const camera = new PerspectiveCamera();
 
 export function setupCamera() {
   // lens
-  camera.fov = 80;
+  camera.fov = 77;
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.near = 0.1;
   camera.far = 100000;

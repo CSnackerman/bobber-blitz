@@ -1,6 +1,6 @@
 /**
  *
- * Adapted from {@link https://threejs.org/examples/?q=cloud#webgl2_volume_cloud}
+ * Credit {@link https://threejs.org/examples/?q=cloud#webgl2_volume_cloud}
  *
  */
 import {
@@ -17,7 +17,7 @@ import {
   Vector3,
 } from 'three';
 import { ImprovedNoise } from 'three/examples/jsm/Addons.js';
-import { degToRad, randFloat } from 'three/src/math/MathUtils.js';
+import { clamp, degToRad, randFloat } from 'three/src/math/MathUtils.js';
 import { delta } from '../core/clock';
 import { isMobile } from '../util/device';
 import { getRandomFloat, getRandomInt } from '../util/random';
@@ -85,10 +85,10 @@ function setup() {
       base: { value: new Color(0xe0e0e0) },
       map: { value: texture },
       cameraPos: { value: new Vector3() },
-      threshold: { value: 0.25 },
+      threshold: { value: randFloat(0.25, 0.5) },
       opacity: { value: 0.25 },
       range: { value: 0.1 },
-      steps: { value: 100 },
+      steps: { value: isMobile() ? 5 : 26 },
       frame: { value: 0 },
     },
     vertexShader,
@@ -98,14 +98,22 @@ function setup() {
     depthWrite: false,
   });
 
-  material.uniforms.threshold.value = randFloat(0.25, 0.5);
-  material.uniforms.opacity.value = 0.25;
-  material.uniforms.range.value = 0.1;
-  material.uniforms.steps.value = isMobile() ? 5 : 26;
-
   const geometry = new BoxGeometry(1, 1, 1);
   const cloud = new Mesh(geometry, material);
 
+  initTransform(cloud);
+  randomizeScale(cloud);
+
+  rootScene.add(cloud);
+  clouds.push(cloud);
+
+  // idk
+  geometry.dispose();
+  texture.dispose();
+  material.dispose();
+}
+
+function initTransform(cloud: Mesh) {
   cloud.setRotationFromAxisAngle(new Vector3(0, 1, 0), degToRad(-33));
 
   cloud.position.set(
@@ -113,7 +121,9 @@ function setup() {
     getRandomFloat(minElevation, maxElevation),
     getRandomFloat(-spawnWidth, spawnWidth)
   );
+}
 
+function randomizeScale(cloud: Mesh) {
   const first = getRandomFloat(minScale, maxScale);
   const second =
     getRandomInt(0, 1) === 0
@@ -121,9 +131,6 @@ function setup() {
       : first - getRandomFloat(50, 1000);
 
   cloud.scale.set(first, getRandomFloat(minHeight, maxHeight), second);
-
-  rootScene.add(cloud);
-  clouds.push(cloud);
 }
 
 function reset(cloud: Mesh) {
@@ -133,19 +140,11 @@ function reset(cloud: Mesh) {
     randFloat(-spawnWidth, spawnWidth)
   );
 
-  const first = getRandomFloat(minScale, maxScale);
-  const second =
-    getRandomInt(0, 1) === 0
-      ? first + getRandomFloat(50, 1000)
-      : first - getRandomFloat(50, 1000);
-
-  cloud.scale.set(first, getRandomFloat(minHeight, maxHeight), second);
-
-  cloud.visible = true;
+  randomizeScale(cloud);
 }
 
 export function setupAll() {
-  let nClouds = isMobile() ? 10 : 20;
+  let nClouds = isMobile() ? 10 : 50;
 
   for (let i = 0; i < nClouds; i++) {
     setup();
@@ -153,20 +152,35 @@ export function setupAll() {
 }
 
 export function update() {
-  const speed = 20000;
   for (const cloud of clouds) {
-    cloud.translateX(-7 * speed * delta);
+    cloud.translateX(-1000 * delta);
+    cloud.translateY(-33 * delta);
 
-    if (cloud.position.x < -500) {
-      cloud.translateY(-1 * speed * delta);
+    if (cloud.position.x < -disappearDistance / 2) {
+      shrink(cloud);
     }
 
-    if (cloud.position.y < -cloud.scale.y) {
+    if (cloud.position.y < 0 || isNegativeScale(cloud)) {
       reset(cloud);
     }
-
-    if (cloud.position.x < -disappearDistance) {
-      cloud.visible = false;
-    }
   }
+}
+
+function shrink(cloud: Mesh) {
+  const shrinkAmt = 1000 * delta;
+  const s = cloud.scale.clone();
+
+  const newX = clamp(s.x - shrinkAmt, 1, maxScale);
+  const newY = clamp(s.y - shrinkAmt, 1, maxHeight);
+  const newZ = clamp(s.z - shrinkAmt, 1, maxScale);
+
+  cloud.scale.set(newX, newY, newZ);
+}
+
+function isNegativeScale(cloud: Mesh) {
+  const s = cloud.scale;
+
+  if (s.x <= 1 && s.y <= 1 && s.z <= 1) return true;
+
+  return false;
 }
