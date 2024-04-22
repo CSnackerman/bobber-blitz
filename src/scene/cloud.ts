@@ -1,8 +1,7 @@
 /**
- *
  * Credit {@link https://threejs.org/examples/?q=cloud#webgl2_volume_cloud}
- *
  */
+
 import {
   BoxGeometry,
   Color,
@@ -40,7 +39,17 @@ const spawnWidth = 100000;
 const minElevation = maxHeight * 2 + 1000;
 const maxElevation = minElevation + 1000;
 
+function setupAll() {
+  let nClouds = isMobile() ? 25 : 36;
+
+  for (let i = 0; i < nClouds; i++) {
+    setup();
+  }
+}
+
 function setup() {
+  // Texture
+
   const size = 128;
   const data = new Uint8Array(size * size * size);
 
@@ -85,10 +94,10 @@ function setup() {
       base: { value: new Color(0xe0e0e0) },
       map: { value: texture },
       cameraPos: { value: new Vector3() },
-      threshold: { value: randFloat(0.25, 0.5) },
+      threshold: { value: randFloat(0.3, 0.5) },
       opacity: { value: 0.25 },
       range: { value: 0.1 },
-      steps: { value: isMobile() ? 5 : 26 },
+      steps: { value: isMobile() ? 10 : 26 },
       frame: { value: 0 },
     },
     vertexShader,
@@ -111,6 +120,21 @@ function setup() {
   geometry.dispose();
   texture.dispose();
   material.dispose();
+}
+
+function update() {
+  for (const cloud of clouds) {
+    cloud.translateX(-1000 * delta);
+    cloud.translateY(-50 * delta);
+
+    if (cloud.position.x < -disappearDistance / 2) {
+      shrink(cloud);
+    }
+
+    if (cloud.position.y < 0 || isNegativeScale(cloud)) {
+      reset(cloud);
+    }
+  }
 }
 
 function initTransform(cloud: Mesh) {
@@ -143,29 +167,6 @@ function reset(cloud: Mesh) {
   randomizeScale(cloud);
 }
 
-export function setupAll() {
-  let nClouds = isMobile() ? 10 : 50;
-
-  for (let i = 0; i < nClouds; i++) {
-    setup();
-  }
-}
-
-export function update() {
-  for (const cloud of clouds) {
-    cloud.translateX(-1000 * delta);
-    cloud.translateY(-33 * delta);
-
-    if (cloud.position.x < -disappearDistance / 2) {
-      shrink(cloud);
-    }
-
-    if (cloud.position.y < 0 || isNegativeScale(cloud)) {
-      reset(cloud);
-    }
-  }
-}
-
 function shrink(cloud: Mesh) {
   const shrinkAmt = 1000 * delta;
   const s = cloud.scale.clone();
@@ -180,7 +181,9 @@ function shrink(cloud: Mesh) {
 function isNegativeScale(cloud: Mesh) {
   const s = cloud.scale;
 
-  if (s.x <= 1 && s.y <= 1 && s.z <= 1) return true;
+  if (s.x <= 1 && s.y <= 1 && s.z <= 1) {
+    return true;
+  }
 
   return false;
 }
