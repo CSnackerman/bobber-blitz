@@ -19,7 +19,9 @@ export function getElapsedTime() {
 const clocks = new Map<ClockName, Clock>();
 
 export const CAST_CLOCK = 'cast_clock';
-type ClockName = typeof CAST_CLOCK;
+export const REEL_CLOCK = 'reel_clock';
+
+type ClockName = typeof CAST_CLOCK | typeof REEL_CLOCK;
 
 export function getClock(name: ClockName) {
   let clock = clocks.get(name);
@@ -38,7 +40,23 @@ receive(
   () => {
     getClock(CAST_CLOCK).start();
   },
-  10 // prio
+  10 // last prio
+);
+
+receive(
+  Signals.REEL_IN,
+  () => {
+    getClock(REEL_CLOCK).start();
+  },
+  10 // last prio
+);
+
+receive(
+  Signals.REEL_OUT,
+  () => {
+    getClock(REEL_CLOCK).stop();
+  },
+  10
 );
 
 // Mock clock
@@ -56,5 +74,9 @@ export class MockClock {
 
   getElapsed() {
     return this.#elapsedTime;
+  }
+
+  getDeltaTime() {
+    return this.#tickStep;
   }
 }

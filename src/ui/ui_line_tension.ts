@@ -55,6 +55,12 @@ function updateBarProgress() {
   barStyle.height = `${progress}%`;
 }
 
+export function setLineTension(decimal: number) {
+  if (decimal < 0 || decimal > 1) throw 'Invalid Line Tension';
+
+  alpha = decimal;
+}
+
 export function hideUI_lineTension() {
   lineTension_div.style.visibility = 'hidden';
 }

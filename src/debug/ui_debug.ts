@@ -1,5 +1,4 @@
 import { getCastState } from '../controls/cast';
-import { getReelState } from '../controls/reel';
 import { CAST_CLOCK, getClock } from '../core/clock';
 import { renderer } from '../core/renderer';
 import { Signals, receive } from '../core/state';
@@ -59,7 +58,6 @@ function getDebugInnerHtml() {
 
     `Fisherman.... ${getSpan(getFishermanState(), 'springgreen').outerHTML} <br>` +
     `Cast......... ${getSpan(getCastState(), 'yellow').outerHTML} <br>` +
-    `Reel......... ${getSpan(getReelState(), 'lavender').outerHTML} <br>` +
     `Bobber....... ${getSpan(getBobberState(), 'greenyellow').outerHTML} <br>` +
     `Fishing Line. ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
     `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +

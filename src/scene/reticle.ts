@@ -27,7 +27,7 @@ const raycaster = new Raycaster();
 const reticle = new Mesh(
   new TorusGeometry(3, 0.3).rotateX(degToRad(90)),
   new MeshStandardMaterial({
-    color: 'purple',
+    color: 'darkorange',
     transparent: true,
     opacity: 0.9,
   })

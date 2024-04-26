@@ -34,9 +34,9 @@ async function setup() {
   fishingLine = new Line(
     new BufferGeometry(),
     new LineBasicMaterial({
-      color: '#00ff0f',
+      color: 'silver',
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.66,
     })
   );
 
@@ -57,7 +57,7 @@ enum FishingLineState {
 const { HIDDEN, CASTING, DESCENDING, ATTACHED_BOBBER, ATTACHED_FISH } =
   FishingLineState;
 
-const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, REEL_OUT } =
+const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, HOOK } =
   Signals;
 
 const state = new State<FishingLineState>(HIDDEN, null);
@@ -125,7 +125,7 @@ function setupReceivers() {
     state.set(ATTACHED_BOBBER, while_ATTACHED_BOBBER);
   });
 
-  receive(REEL_OUT, () => {
+  receive(HOOK, () => {
     state.set(ATTACHED_FISH, while_ATTACHED_FISH);
   });
 }

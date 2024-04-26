@@ -4,14 +4,15 @@ import {
   AnimationMixer,
   Box3,
   Euler,
-  Group,
+  Object3D,
   Sphere,
   Vector3,
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { degToRad } from 'three/src/math/MathUtils.js';
-import { delta } from '../core/clock';
+import { clamp, degToRad } from 'three/src/math/MathUtils.js';
+import { MockClock, delta } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
+import { setStamina } from '../ui/ui_fish_stamina';
 import { getRandomFloat, getRandomInt } from '../util/random';
 import { getDirection } from '../util/vector';
 import { getBobberPosition } from './bobber';
@@ -31,10 +32,16 @@ export {
 };
 
 /* Initialization */
-let fish: Group;
-let size = 1;
-const catchDistance = 25;
-const lostDistance = 1100;
+let fish: Object3D;
+
+const mockClock = new MockClock(); //! temp-debug
+let size = 0;
+const CatchDistance = 25;
+const LostDistance = 1500;
+const MaxStamina = 100;
+const StaminaDecay = -5;
+
+let stamina = MaxStamina;
 
 async function setup() {
   const gltfLoader = new GLTFLoader();
@@ -60,7 +67,7 @@ enum FishStates {
 }
 const { IDLE, REELING_OUT, REELING_IN, FLOPPING } = FishStates;
 
-const { REEL_OUT, REEL_IN, CATCH_FISH, RESET } = Signals;
+const { RESET, HOOK, REEL_OUT, REEL_IN, CATCH_FISH } = Signals;
 
 let state = new State<FishStates>(IDLE, null);
 
@@ -71,13 +78,14 @@ function setupReceivers() {
   receive(RESET, () => {
     cancelFlop();
     setScale(getRandomFloat(0.2, 11));
-    setPosition(0, -size, size + catchDistance);
+    setPosition(0, -size, size + CatchDistance);
     fish.lookAt(getFishermanPosition());
+    stamina = MaxStamina;
 
     state.set(IDLE, null);
   });
 
-  receive(REEL_OUT, () => {
+  receive(HOOK, () => {
     cancelChangeSwimDirections();
     moveBelowBobber();
     setSwimDirection_AwayFisherman();
@@ -86,10 +94,16 @@ function setupReceivers() {
     state.set(REELING_OUT, while_REELING_OUT);
   });
 
-  receive(REEL_IN, () => {
+  receive(REEL_OUT, () => {
     cancelChangeSwimDirections();
-    setSwimDirection_TowardFisherman();
-    changeSwimDirectionCallback = setSwimDirection_TowardFisherman;
+    setSwimDirection_AwayFisherman();
+    changeSwimDirectionCallback = setSwimDirection_AwayFisherman;
+
+    state.set(REELING_OUT, while_REELING_OUT);
+  });
+
+  receive(REEL_IN, () => {
+    mockClock.reset(); //! temp-debug
 
     state.set(REELING_IN, while_REELING_IN);
   });
@@ -114,12 +128,18 @@ function while_REELING_OUT() {
 }
 
 function while_REELING_IN() {
+  mockClock.tick();
   if (swimDirectionChangeTimeoutId === null) {
     changeSwimDirections();
   }
 
+  const towardFisherman = getDirection(getPosition(), getFishermanPosition());
+  move(towardFisherman, 100);
+
   swimForward();
   checkDistance();
+  // adjustStamina(StaminaDecay * (mockClock.getDeltaTime() / 1000));   //! temp-debug
+  adjustStamina(StaminaDecay * delta);
 }
 
 function while_FLOPPING() {
@@ -219,10 +239,10 @@ function getDistanceFromFisherman() {
 
 function checkDistance() {
   const distance = getDistanceFromFisherman();
-  if (distance <= size + catchDistance) {
+  if (distance <= size + CatchDistance) {
     emit(CATCH_FISH);
   }
-  if (distance >= lostDistance) {
+  if (distance >= LostDistance) {
     emit(RESET);
   }
 }
@@ -248,25 +268,13 @@ function getScreenCoords() {
 
 /* Swimming */
 
-const swimSpeed = 100;
+const SwimSpeed = 110;
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
 let changeSwimDirectionCallback = () => {};
 
 function cancelChangeSwimDirections() {
   clearTimeout(swimDirectionChangeTimeoutId as NodeJS.Timeout);
   swimDirectionChangeTimeoutId = null;
-}
-
-function setSwimDirection_TowardFisherman() {
-  const halfAngleOffset = degToRad(45 / 2);
-
-  const angleOffset = getRandomFloat(-halfAngleOffset, halfAngleOffset);
-
-  const direction = new Vector3().copy(
-    getDirection(getPosition(), getFishermanPosition())
-  );
-
-  setDirectionFrom(direction, angleOffset);
 }
 
 function setSwimDirection_AwayFisherman() {
@@ -301,12 +309,27 @@ function changeSwimDirections() {
 }
 
 function swimForward() {
-  const v = new Vector3();
-  fish.getWorldDirection(v);
-  fish.position.addScaledVector(v, swimSpeed * delta);
+  const speed = SwimSpeed * getStaminaDecimal() * delta;
+  const direction = new Vector3();
+  fish.getWorldDirection(direction);
+  fish.position.addScaledVector(direction, speed);
 }
 
-/* Misc. */
+function move(toward: Vector3, speed: number) {
+  toward.y = 0;
+  fish.position.addScaledVector(toward, speed * delta);
+}
+
+/* Gameplay */
+function syncStaminaUi() {
+  setStamina((stamina / MaxStamina) * 100);
+}
+
+function adjustStamina(percent: number) {
+  stamina += MaxStamina * (percent / 100.0);
+  stamina = clamp(stamina, 0, MaxStamina);
+  syncStaminaUi();
+}
 
 function getCategory() {
   if (size > 70) return 'Whale';
@@ -320,4 +343,8 @@ function getCategory() {
   if (size > 5) return 'Minnow';
 
   return 'Shrimp';
+}
+
+function getStaminaDecimal() {
+  return stamina / MaxStamina;
 }

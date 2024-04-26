@@ -22,11 +22,11 @@ let alpha = 0.0;
 let baseWidth: number;
 let baseHeight: number;
 
-export function setupUI_fishHealth() {
+export function setupUI_fishStamina() {
   document.body.appendChild(fishHealth_div);
   updateBarColor();
   updateBarProgress();
-  hideUI_fishHealth();
+  hideUI_fishStamina();
 
   const rect = fishHealth_div.getBoundingClientRect();
   baseWidth = rect.width;
@@ -35,7 +35,7 @@ export function setupUI_fishHealth() {
   resetAlpha();
 }
 
-export function updateUI_fishHealth() {
+export function updateUI_fishStamina() {
   updateBarColor();
   updateBarProgress();
   if (alpha > 1) resetAlpha();
@@ -60,7 +60,7 @@ function resetAlpha() {
   alpha = 1.0;
 }
 
-export function setHealth(percent: number) {
+export function setStamina(percent: number) {
   percent = clamp(percent, 0, 100);
   alpha = parseFloat((percent / 100.0).toFixed(2));
 }
@@ -81,10 +81,10 @@ function updateBarProgress() {
   barStyle.width = `${progress}%`;
 }
 
-export function hideUI_fishHealth() {
+export function hideUI_fishStamina() {
   fishHealth_div.style.visibility = 'hidden';
 }
 
-export function showUI_fishHealth() {
+export function showUI_fishStamina() {
   fishHealth_div.style.visibility = 'visible';
 }

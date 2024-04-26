@@ -30,6 +30,9 @@ import vertexShader from '../shaders/cloud.vert.glsl?raw';
 
 let clouds: Mesh<BoxGeometry, RawShaderMaterial, Object3DEventMap>[] = [];
 
+const N_CLOUDS_MOBILE = 10;
+const N_CLOUDS_DESKTOP = 36;
+
 const minScale = 5000;
 const maxScale = 50000;
 const minHeight = 2000;
@@ -40,7 +43,7 @@ const minElevation = maxHeight * 2 + 1000;
 const maxElevation = minElevation + 1000;
 
 function setupAll() {
-  let nClouds = isMobile() ? 25 : 36;
+  let nClouds = isMobile() ? N_CLOUDS_MOBILE : N_CLOUDS_DESKTOP;
 
   for (let i = 0; i < nClouds; i++) {
     setup();
@@ -97,7 +100,7 @@ function setup() {
       threshold: { value: randFloat(0.3, 0.5) },
       opacity: { value: 0.25 },
       range: { value: 0.1 },
-      steps: { value: isMobile() ? 10 : 26 },
+      steps: { value: isMobile() ? 10 : 25 }, // performance
       frame: { value: 0 },
     },
     vertexShader,

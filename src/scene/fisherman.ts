@@ -2,19 +2,20 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
-  Group,
+  Object3D,
   Vector3,
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { isSpaceDown } from '../controls/reel';
+import { clamp, degToRad } from 'three/src/math/MathUtils.js';
 import { delta } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
+import { setLineTension } from '../ui/ui_line_tension';
 import { lookAtHorizontal } from '../util/vector';
 import { getBobberTopPoint } from './bobber';
+import { camera } from './camera';
 import { getFishPosition } from './fish';
 import { getReticlePosition } from './reticle';
 import { rootScene } from './scene';
-import { camera } from './camera';
 
 export {
   getPosition as getFishermanPosition,
@@ -27,7 +28,13 @@ export {
 
 /* Initialization */
 
-let fisherman: Group;
+let fisherman: Object3D;
+
+let leanToggle = true;
+let leanAmount = 0;
+const MaxLean = 33;
+const LeanBackRate = 33;
+const LeanForwardRate = 133;
 
 async function setup() {
   const loader = new GLTFLoader();
@@ -65,6 +72,8 @@ const {
   LAUNCH_BOBBER,
   BEGIN_FISHING,
   BITE,
+  HOOK,
+  REEL_IN,
   REEL_OUT,
   CATCH_FISH,
 } = Signals;
@@ -76,6 +85,7 @@ const update = state.invoke;
 
 function setupReceivers() {
   receive(RESET, () => {
+    leanAmount = 0;
     state.set(IDLE, while_IDLE);
   });
 
@@ -94,14 +104,22 @@ function setupReceivers() {
   });
 
   receive(BITE, () => {
-    state.set(FISH_ON, while_FISH_ON);
+    state.set(FISH_ON, null);
   });
 
-  receive(REEL_OUT, () => {
+  receive(HOOK, () => {
     state.set(REELING, while_REELING);
   });
 
+  receive(REEL_IN, () => {
+    leanToggle = true;
+  });
+  receive(REEL_OUT, () => {
+    leanToggle = false;
+  });
+
   receive(CATCH_FISH, () => {
+    lookAtHorizontal(fisherman, getFishPosition());
     state.set(HOLDING_PRIZE, while_HOLDING_PRIZE);
   });
 }
@@ -116,16 +134,22 @@ function while_CASTING() {
 
 function while_FISHING() {
   fisherman.lookAt(getBobberTopPoint());
-
-  if (isSpaceDown) emit(RESET);
-}
-
-function while_FISH_ON() {
-  if (isSpaceDown) emit(REEL_OUT);
 }
 
 function while_REELING() {
   lookAtHorizontal(fisherman, getFishPosition());
+
+  if (leanToggle) {
+    leanAmount += LeanBackRate * delta;
+  } else {
+    leanAmount -= LeanForwardRate * delta;
+  }
+
+  leanAmount = clamp(leanAmount, 0, MaxLean);
+
+  lean(leanAmount);
+
+  setLineTension(leanAmount / MaxLean);
 }
 
 function while_HOLDING_PRIZE() {
@@ -182,4 +206,10 @@ function getScreenCoords() {
     ((-worldPosition.y + 1) / 2) * window.innerHeight,
     1
   );
+}
+
+function lean(deg: number) {
+  const rad = degToRad(deg);
+  const xAxis = new Vector3(1, 0, 0);
+  fisherman.rotateOnAxis(xAxis, -rad);
 }
