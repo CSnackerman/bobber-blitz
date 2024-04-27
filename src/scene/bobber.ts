@@ -9,7 +9,6 @@ import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { castPoint } from '../controls/cast';
 import { CAST_CLOCK, delta, getClock, getElapsedTime } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
-import { getRandomInt } from '../util/random';
 import { camera } from './camera';
 import {
   CAST_TIME,
@@ -164,7 +163,6 @@ function plunk() {
 
 function setPlunkTimer() {
   clearTimeout(plunkTimerId);
-  const delay = getRandomInt(1000, 3000);
   plunkTimerId = setTimeout(plunk, 500); // temp
 }
 
