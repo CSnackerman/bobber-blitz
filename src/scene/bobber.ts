@@ -54,15 +54,8 @@ enum BobberStates {
 }
 const { HIDDEN, LAUNCHING, BOBBING, PLUNKING } = BobberStates;
 
-const {
-  RESET,
-  CAST,
-  LAUNCH_BOBBER,
-  BOBBER_LANDED,
-  BEGIN_FISHING,
-  REEL_OUT,
-  BITE,
-} = Signals;
+const { RESET, CAST, LAUNCH_BOBBER, BOBBER_LANDED, BEGIN_FISHING, HOOK, BITE } =
+  Signals;
 
 const state = new State<BobberStates>(HIDDEN, null);
 
@@ -112,7 +105,7 @@ function setupReceivers() {
     state.set(PLUNKING, while_PLUNKING);
   });
 
-  receive(REEL_OUT, () => {
+  receive(HOOK, () => {
     hide();
     cancelPlunk();
 
@@ -172,7 +165,7 @@ function plunk() {
 function setPlunkTimer() {
   clearTimeout(plunkTimerId);
   const delay = getRandomInt(1000, 3000);
-  plunkTimerId = setTimeout(plunk, delay);
+  plunkTimerId = setTimeout(plunk, 500); // temp
 }
 
 function cancelPlunk() {

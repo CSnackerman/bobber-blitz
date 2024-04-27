@@ -1,6 +1,7 @@
-import { PlaneGeometry, RepeatWrapping, TextureLoader, Vector3 } from 'three';
+import { PlaneGeometry, RepeatWrapping, TextureLoader } from 'three';
 import { Water } from 'three/addons/objects/Water.js';
 import { rootScene } from './scene';
+import { getSunColor } from './sun';
 
 export const water = new Water(new PlaneGeometry(10000, 10000), {
   textureWidth: 512,
@@ -9,8 +10,7 @@ export const water = new Water(new PlaneGeometry(10000, 10000), {
     texture.wrapS = texture.wrapT = RepeatWrapping;
   }),
   alpha: 0.75,
-  sunDirection: new Vector3(),
-  sunColor: 0x00007f,
+  sunColor: getSunColor(),
   waterColor: 0x001e0f,
   distortionScale: 3,
   fog: undefined,

@@ -16,7 +16,7 @@ import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
 import { setupLights } from './scene/lights';
 import { setupReticle, updateReticle } from './scene/reticle';
 import { initScene, rootScene } from './scene/scene';
-import { setupSky } from './scene/sky';
+import { setupSky, updateSun } from './scene/sky';
 import { setupWater, updateWater } from './scene/water';
 import { setupUI, updateUI } from './ui';
 import { setupStats, updateStats } from './ui/stats';
@@ -77,6 +77,7 @@ function run() {
   updateReticle();
   updateUI();
   updateCloud();
+  updateSun();
 
   updateDebug();
 
