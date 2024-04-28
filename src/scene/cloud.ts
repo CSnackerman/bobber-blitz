@@ -35,8 +35,8 @@ const N_CLOUDS_DESKTOP = 36;
 
 const minScale = 5000;
 const maxScale = 50000;
-const minHeight = 2000;
-const maxHeight = 3000;
+const minHeight = 5000;
+const maxHeight = 7000;
 const disappearDistance = 100000;
 const spawnWidth = 100000;
 const minElevation = maxHeight * 2 + 1000;
