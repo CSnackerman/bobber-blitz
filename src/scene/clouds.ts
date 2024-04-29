@@ -1,7 +1,3 @@
-/**
- * Credit {@link https://threejs.org/examples/?q=cloud#webgl2_volume_cloud}
- */
-
 import {
   BoxGeometry,
   Color,
@@ -15,23 +11,34 @@ import {
   RedFormat,
   Vector3,
 } from 'three';
-import { ImprovedNoise } from 'three/examples/jsm/Addons.js';
 import { clamp, degToRad, randFloat } from 'three/src/math/MathUtils.js';
 import { delta } from '../core/clock';
 import { isMobile } from '../util/device';
 import { getRandomFloat, getRandomInt } from '../util/random';
+
 import { rootScene } from './scene';
 
-export { setupAll as setupClouds, update as updateCloud };
+export {
+  TextureSize as CloudTextureSize,
+  preCalcTextures as preCalcCloudTextures,
+  setupAll as setupClouds,
+  update as updateClouds,
+};
+
+// worker
+import CloudTextureWorker from '../workers/cloud_worker?worker';
 
 // shaders
 import fragmentShader from '../shaders/cloud.frag.glsl?raw';
 import vertexShader from '../shaders/cloud.vert.glsl?raw';
 
-let clouds: Mesh<BoxGeometry, RawShaderMaterial, Object3DEventMap>[] = [];
+const clouds: Mesh<BoxGeometry, RawShaderMaterial, Object3DEventMap>[] = [];
+const cloudTextures: Data3DTexture[] = [];
+const TextureSize = 128;
 
 const N_CLOUDS_MOBILE = 10;
-const N_CLOUDS_DESKTOP = 36;
+const N_CLOUDS_DESKTOP = 42;
+const N_CLOUDS = isMobile() ? N_CLOUDS_MOBILE : N_CLOUDS_DESKTOP;
 
 const minScale = 5000;
 const maxScale = 50000;
@@ -43,59 +50,37 @@ const minElevation = maxHeight * 2 + 1000;
 const maxElevation = minElevation + 1000;
 
 function setupAll() {
-  let nClouds = isMobile() ? N_CLOUDS_MOBILE : N_CLOUDS_DESKTOP;
-
-  for (let i = 0; i < nClouds; i++) {
-    setup();
+  for (let t = 0; t < N_CLOUDS; t++) {
+    setup(t);
   }
 }
 
-function setup() {
-  // Texture
-
-  const size = 128;
-  const data = new Uint8Array(size * size * size);
-
-  let i = 0;
-  const scale = randFloat(0.04, 0.07);
-  const perlin = new ImprovedNoise();
-  const vector = new Vector3();
-
-  for (let z = 0; z < size; z++) {
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const L = vector
-          .set(x, y, z)
-          .subScalar(size / 2)
-          .divideScalar(size)
-          .length();
-        const noise = perlin.noise(
-          (x * scale) / 1.5,
-          y * scale,
-          (z * scale) / 1.5
-        );
-        const d = 1.0 - L;
-        data[i] = (128 + 128 * noise) * d * d;
-
-        i++;
-      }
-    }
+async function preCalcTextures() {
+  const promises: Promise<void>[] = [];
+  for (let i = 0; i < N_CLOUDS; i++) {
+    promises.push(
+      new Promise((resolve) => {
+        const cloudTextureWorker = new CloudTextureWorker();
+        cloudTextureWorker.postMessage(null);
+        cloudTextureWorker.onmessage = (e: MessageEvent<Uint8Array>) => {
+          const texture = createTexture(e.data);
+          cloudTextures.push(texture);
+          resolve();
+          cloudTextureWorker.terminate();
+        };
+      })
+    );
   }
 
-  const texture = new Data3DTexture(data, size, size, size);
-  texture.format = RedFormat;
-  texture.minFilter = LinearFilter;
-  texture.magFilter = LinearFilter;
-  texture.unpackAlignment = 1;
-  texture.needsUpdate = true;
+  await Promise.all(promises);
+}
 
-  // Material
-
+function setup(t: number) {
   const material = new RawShaderMaterial({
     glslVersion: GLSL3,
     uniforms: {
       base: { value: new Color(0xe0e0e0) },
-      map: { value: texture },
+      map: { value: cloudTextures[t] },
       cameraPos: { value: new Vector3() },
       threshold: { value: randFloat(0.3, 0.5) },
       opacity: { value: 0.25 },
@@ -118,11 +103,6 @@ function setup() {
 
   rootScene.add(cloud);
   clouds.push(cloud);
-
-  // idk
-  geometry.dispose();
-  texture.dispose();
-  material.dispose();
 }
 
 function update() {
@@ -189,4 +169,20 @@ function isNegativeScale(cloud: Mesh) {
   }
 
   return false;
+}
+
+function createTexture(data: Uint8Array) {
+  const texture = new Data3DTexture(
+    data,
+    TextureSize,
+    TextureSize,
+    TextureSize
+  );
+  texture.format = RedFormat;
+  texture.minFilter = LinearFilter;
+  texture.magFilter = LinearFilter;
+  texture.unpackAlignment = 1;
+  texture.needsUpdate = true;
+
+  return texture;
 }

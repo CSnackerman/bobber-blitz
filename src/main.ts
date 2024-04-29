@@ -9,7 +9,11 @@ import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera } from './scene/camera';
-import { setupClouds, updateCloud } from './scene/cloud';
+import {
+  preCalcCloudTextures,
+  setupClouds,
+  updateClouds,
+} from './scene/clouds';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -31,6 +35,7 @@ main().catch((e: Error) => {
 async function main() {
   initFirebase();
   initScene();
+  await preCalcCloudTextures();
   await loadModels();
   printEnv();
   setup();
@@ -76,7 +81,7 @@ function run() {
   updateFish();
   updateReticle();
   updateUI();
-  updateCloud();
+  updateClouds();
   updateSun();
 
   updateDebug();
