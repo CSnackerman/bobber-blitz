@@ -46,8 +46,10 @@ export function updateUI_fishStamina() {
 
   // position over fish
   const fishPosition = getFishScreenCoords();
-  fishHealth_div.style.top = `${fishPosition.y - height * 7}px`;
-  fishHealth_div.style.left = `${fishPosition.x - width / 2}px`;
+  const y = clamp(fishPosition.y - height * 7, 0, window.innerHeight - height);
+  const x = clamp(fishPosition.x - width / 2, 0, window.innerWidth - width);
+  fishHealth_div.style.top = `${y}px`;
+  fishHealth_div.style.left = `${x}px`;
 
   // scale by distance
   const dist = getFishDistanceFromFisherman();
