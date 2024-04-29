@@ -76,6 +76,8 @@ export function setupSky() {
 
   sunMesh = new Mesh(decalGeometry, decalMat);
 
+  sunMesh.frustumCulled = false;
+
   sunMesh.position.setFromSphericalCoords(100000, phi, theta);
 
   sunMesh.lookAt(camera.position);
