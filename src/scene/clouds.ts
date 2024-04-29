@@ -49,30 +49,13 @@ const spawnWidth = 100000;
 const minElevation = maxHeight * 2 + 1000;
 const maxElevation = minElevation + 1000;
 
+const FloatSpeed = 1000;
+const DescentSpeed = 100;
+
 function setupAll() {
   for (let t = 0; t < N_CLOUDS; t++) {
     setup(t);
   }
-}
-
-async function preCalcTextures() {
-  const promises: Promise<void>[] = [];
-  for (let i = 0; i < N_CLOUDS; i++) {
-    promises.push(
-      new Promise((resolve) => {
-        const cloudTextureWorker = new CloudTextureWorker();
-        cloudTextureWorker.postMessage(null);
-        cloudTextureWorker.onmessage = (e: MessageEvent<Uint8Array>) => {
-          const texture = createTexture(e.data);
-          cloudTextures.push(texture);
-          resolve();
-          cloudTextureWorker.terminate();
-        };
-      })
-    );
-  }
-
-  await Promise.all(promises);
 }
 
 function setup(t: number) {
@@ -80,7 +63,7 @@ function setup(t: number) {
     glslVersion: GLSL3,
     uniforms: {
       base: { value: new Color(0xe0e0e0) },
-      map: { value: cloudTextures[t] },
+      map: { value: cloudTextures[t] }, // precalculated
       cameraPos: { value: new Vector3() },
       threshold: { value: randFloat(0.3, 0.5) },
       opacity: { value: 0.25 },
@@ -107,8 +90,8 @@ function setup(t: number) {
 
 function update() {
   for (const cloud of clouds) {
-    cloud.translateX(-1000 * delta);
-    cloud.translateY(-50 * delta);
+    cloud.translateX(-FloatSpeed * delta);
+    cloud.translateY(-DescentSpeed * delta);
 
     if (cloud.position.x < -disappearDistance / 2) {
       shrink(cloud);
@@ -169,6 +152,26 @@ function isNegativeScale(cloud: Mesh) {
   }
 
   return false;
+}
+
+async function preCalcTextures() {
+  const promises: Promise<void>[] = [];
+  for (let i = 0; i < N_CLOUDS; i++) {
+    promises.push(
+      new Promise((resolve) => {
+        const cloudTextureWorker = new CloudTextureWorker();
+        cloudTextureWorker.postMessage(null);
+        cloudTextureWorker.onmessage = (e: MessageEvent<Uint8Array>) => {
+          const texture = createTexture(e.data);
+          cloudTextures.push(texture);
+          resolve();
+          cloudTextureWorker.terminate();
+        };
+      })
+    );
+  }
+
+  await Promise.all(promises);
 }
 
 function createTexture(data: Uint8Array) {

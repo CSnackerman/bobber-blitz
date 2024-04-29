@@ -68,6 +68,7 @@ export function setupSky() {
     map: sunDecal,
     side: FrontSide,
     transparent: true,
+    opacity: 3,
     color: getSunColor(),
   });
 
