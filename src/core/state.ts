@@ -45,6 +45,7 @@ export enum Signals {
   REEL_OUT = 'REEL_OUT',
   REEL_IN = 'REEL_IN',
   CATCH_FISH = 'CATCH_FISH',
+  SWEET_SPOT = 'SWEET_SPOT',
 }
 
 const SignalRegistry = new Map<Signals, PriorityFunc[]>();

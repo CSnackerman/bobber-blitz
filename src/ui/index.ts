@@ -20,6 +20,12 @@ import {
   updateUI_lineTension,
 } from './ui_line_tension';
 import { setupUI_prize } from './ui_prize';
+import {
+  disableUI_reel,
+  enableUI_reel,
+  setupUI_reel,
+  updateUI_reel,
+} from './ui_reel';
 
 const { RESET, CAST, BITE, HOOK, CATCH_FISH } = Signals;
 
@@ -28,6 +34,7 @@ export function setupUI() {
   setupUI_lineTension();
   setupUI_fishStamina();
   setupUI_prize();
+  setupUI_reel();
 
   if (isDev()) setupUI_debug();
 
@@ -39,6 +46,7 @@ function setupReceivers() {
     hideUI_fishStamina();
     hideUI_fishOn();
     hideUI_lineTension();
+    disableUI_reel();
   });
 
   receive(CAST, () => {
@@ -54,11 +62,13 @@ function setupReceivers() {
     hideUI_fishOn();
     showUI_fishStamina();
     showUI_lineTension();
+    enableUI_reel();
   });
 
   receive(CATCH_FISH, () => {
     hideUI_fishStamina();
     hideUI_lineTension();
+    disableUI_reel();
   });
 }
 
@@ -66,6 +76,7 @@ export function updateUI() {
   updateUI_fishOn();
   updateUI_lineTension();
   updateUI_fishStamina();
+  updateUI_reel();
 
   if (isDev()) {
     updateWatches();

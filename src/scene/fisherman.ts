@@ -32,9 +32,9 @@ let fisherman: Object3D;
 
 let leanToggle = true;
 let leanAmount = 0;
-const MaxLean = 33;
-const LeanBackRate = 33;
-const LeanForwardRate = 200;
+const MaxLean = 30;
+const LeanBackRate = 10;
+const LeanForwardRate = 11;
 
 async function setup() {
   const loader = new GLTFLoader();

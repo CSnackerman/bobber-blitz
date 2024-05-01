@@ -1,6 +1,5 @@
 import { Vector3 } from 'three';
 import { lerp } from 'three/src/math/MathUtils.js';
-import { delta } from '../core/clock';
 
 // dom
 const template = document.getElementById(
@@ -25,24 +24,18 @@ export function setupUI_lineTension() {
 }
 
 export function updateUI_lineTension() {
-  updateAlpha(0.1);
   updateBarColor();
   updateBarProgress();
-  if (alpha > 1) resetAlpha();
 }
 
-function updateAlpha(rate: number) {
-  alpha += rate * delta;
-}
-
-function resetAlpha() {
-  alpha = 0.0;
+export function getLineTensionAlpha() {
+  return alpha;
 }
 
 function updateBarColor() {
   const barStyle = lineTensionBar_div.style;
-  const colorStart = new Vector3(0, 255, 50);
-  const colorEnd = new Vector3(255, 0, 0);
+  const colorStart = new Vector3(0, 255, 0);
+  const colorEnd = new Vector3(255, 255, 0);
   const color = colorStart.lerp(colorEnd, alpha);
   barStyle.backgroundColor = `rgb(${color.x}, ${color.y}, ${color.z})`;
 }

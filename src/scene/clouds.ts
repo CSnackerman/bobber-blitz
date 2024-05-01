@@ -37,7 +37,7 @@ const cloudTextures: Data3DTexture[] = [];
 const TextureSize = 128;
 
 const N_CLOUDS_MOBILE = 10;
-const N_CLOUDS_DESKTOP = 42;
+const N_CLOUDS_DESKTOP = 20; //!42;
 const N_CLOUDS = isMobile() ? N_CLOUDS_MOBILE : N_CLOUDS_DESKTOP;
 
 const minScale = 5000;

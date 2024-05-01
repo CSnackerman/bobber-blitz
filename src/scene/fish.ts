@@ -10,7 +10,7 @@ import {
 } from 'three';
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clamp, degToRad } from 'three/src/math/MathUtils.js';
-import { MockClock, delta } from '../core/clock';
+import { delta } from '../core/clock';
 import { Signals, State, emit, receive } from '../core/state';
 import { setStamina } from '../ui/ui_fish_stamina';
 import { getRandomFloat, getRandomInt } from '../util/random';
@@ -34,12 +34,13 @@ export {
 /* Initialization */
 let fish: Object3D;
 
-const mockClock = new MockClock(); //! temp-debug
 let size = 0;
 const CatchDistance = 25;
 const LostDistance = 1500;
 const MaxStamina = 100;
-const StaminaDecay = -5;
+const StaminaDecay = 0.3;
+const SwimSpeed = 0; //  115;
+const ReelSpeed = 0; // 100;
 
 let stamina = MaxStamina;
 
@@ -103,8 +104,6 @@ function setupReceivers() {
   });
 
   receive(REEL_IN, () => {
-    mockClock.reset(); //! temp-debug
-
     state.set(REELING_IN, while_REELING_IN);
   });
 
@@ -128,18 +127,15 @@ function while_REELING_OUT() {
 }
 
 function while_REELING_IN() {
-  mockClock.tick();
   if (swimDirectionChangeTimeoutId === null) {
     changeSwimDirections();
   }
 
   const towardFisherman = getDirection(getPosition(), getFishermanPosition());
-  move(towardFisherman, 100);
+  move(towardFisherman, ReelSpeed);
 
   swimForward();
-  checkDistance();
-  // adjustStamina(StaminaDecay * (mockClock.getDeltaTime() / 1000));   //! temp-debug
-  adjustStamina(StaminaDecay * delta);
+  adjustStamina(-StaminaDecay * delta);
 }
 
 function while_FLOPPING() {
@@ -268,7 +264,6 @@ function getScreenCoords() {
 
 /* Swimming */
 
-const SwimSpeed = 110;
 let swimDirectionChangeTimeoutId: NodeJS.Timeout | null = null;
 let changeSwimDirectionCallback = () => {};
 
