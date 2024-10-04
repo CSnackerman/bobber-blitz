@@ -1,0 +1,46 @@
+#loading {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgb(19, 19, 40);
+  z-index: 500;
+
+  & > h1 {
+    user-select: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 6rem;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-45%, -50%);
+    z-index: 600;
+    color: greenyellow;
+    text-shadow: 2px 2px 1px darkgreen;
+    background-blend-mode: color-burn;
+    opacity: 0.8;
+  }
+
+  & > div {
+    display: block;
+    width: max-content;
+    padding-bottom: 20px;
+    text-align: center;
+    color: black;
+    text-decoration: underline;
+    text-decoration-color: cyan;
+    text-decoration-thickness: 1px;
+    text-decoration-style: wavy;
+    text-underline-offset: -3px;
+    user-select: none;
+    scale: 10 5;
+    overflow: visible;
+    animation: slide ease-in-out infinite alternate, bob ease-in-out infinite alternate;
+  }
+}

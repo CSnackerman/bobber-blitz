@@ -1,9 +1,8 @@
-import { Analytics, getAnalytics } from 'firebase/analytics';
-import { FirebaseApp, initializeApp } from 'firebase/app';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-const firebaseConfig = {
+const firebaseConfig: FirebaseOptions = {
   apiKey: 'AIzaSyAnOHKVoMh1T-RFoJegrCjBRoYzZDAu2UQ',
   authDomain: 'resume-fishing.firebaseapp.com',
   projectId: 'resume-fishing',
@@ -13,12 +12,6 @@ const firebaseConfig = {
   measurementId: 'G-PQ4S36SQPD',
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-let analytics: Analytics;
-
-export function initFirebase() {
-  app = initializeApp(firebaseConfig);
-  analytics = getAnalytics(app);
-  analytics.app.automaticDataCollectionEnabled = true;
+export function initFirebaseApp() {
+  initializeApp(firebaseConfig);
 }

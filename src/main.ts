@@ -1,19 +1,16 @@
 import { setupControls } from './controls';
 import { updateTimeDelta } from './core/clock';
-import { initFirebase } from './core/firebase';
+import { initFirebaseApp } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { Signals, emit } from './core/state';
+import { initSupabaseSession } from './core/supabase.ts';
 import { updateDebug } from './debug/debug_orbs';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera } from './scene/camera';
-import {
-  preCalcCloudTextures,
-  setupClouds,
-  updateClouds,
-} from './scene/clouds';
+import { preCalcCloudTextures, setupClouds, updateClouds } from './scene/clouds';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -23,7 +20,8 @@ import { initScene, rootScene } from './scene/scene';
 import { setupSky, updateSun } from './scene/sky';
 import { setupWater, updateWater } from './scene/water';
 import { setupUI, updateUI } from './ui';
-import { setupStats, updateStats } from './ui/stats';
+import { removeUI_loading, setupUI_loading } from './ui/ui_loading.ts';
+import { setupStats, updateStats } from './ui/ui_stats.ts';
 import { printEnv } from './util/environment';
 
 import '/assets/styles/main.scss';
@@ -33,10 +31,13 @@ main().catch((e: Error) => {
 });
 
 async function main() {
-  initFirebase();
+  setupUI_loading();
+  initFirebaseApp();
+  await initSupabaseSession();
   initScene();
   await preCalcCloudTextures();
   await loadModels();
+  removeUI_loading();
   printEnv();
   setup();
   run();

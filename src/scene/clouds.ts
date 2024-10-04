@@ -52,7 +52,10 @@ const maxElevation = minElevation + 1000;
 const FloatSpeed = 1000;
 const DescentSpeed = 100;
 
+const ENABLED = true;
+
 function setupAll() {
+  if (!ENABLED) return;
   for (let t = 0; t < N_CLOUDS; t++) {
     setup(t);
   }
@@ -155,6 +158,7 @@ function isNegativeScale(cloud: Mesh) {
 }
 
 async function preCalcTextures() {
+  if (!ENABLED) return;
   const promises: Promise<void>[] = [];
   for (let i = 0; i < N_CLOUDS; i++) {
     promises.push(
