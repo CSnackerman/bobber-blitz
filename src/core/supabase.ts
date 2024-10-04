@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { logError } from './error.ts';
 
-const { VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY } = import.meta.env;
+const {
+  VITE_SUPABASE_URL = process.env.SUPABASE_URL,
+  VITE_SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY,
+} = import.meta.env;
 
 const supabase = createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY);
 
@@ -20,7 +23,8 @@ export async function initSupabaseSession() {
       const parenthetical = session.user.is_anonymous ? '(anonymously)' : '';
       console.log(`already signed in ${parenthetical}...`, session.user);
     } else {
-      const { data: anonymousUser, error } = await supabase.auth.signInAnonymously();
+      const { data: anonymousUser, error } =
+        await supabase.auth.signInAnonymously();
 
       if (error) throw error;
 
