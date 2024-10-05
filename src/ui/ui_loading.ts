@@ -21,8 +21,10 @@ export function setupUI_loading() {
     loadingElement.appendChild(waveDiv);
   }
   domElement = document.body.appendChild(loadingElement);
+  console.time('load-time');
 }
 
 export function removeUI_loading() {
+  console.timeEnd('load-time');
   domElement?.remove();
 }
