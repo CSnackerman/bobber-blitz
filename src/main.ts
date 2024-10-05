@@ -1,6 +1,5 @@
 import { setupControls } from './controls';
 import { updateTimeDelta } from './core/clock';
-import { initFirebaseApp } from './core/firebase';
 import { renderer, setupRenderer } from './core/renderer';
 import { Signals, emit } from './core/state';
 import { initSupabaseSession } from './core/supabase.ts';
@@ -10,7 +9,11 @@ import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera } from './scene/camera';
-import { preCalcCloudTextures, setupClouds, updateClouds } from './scene/clouds';
+import {
+  preCalcCloudTextures,
+  setupClouds,
+  updateClouds,
+} from './scene/clouds';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -32,7 +35,6 @@ main().catch((e: Error) => {
 
 async function main() {
   setupUI_loading();
-  initFirebaseApp();
   await initSupabaseSession();
   initScene();
   await preCalcCloudTextures();

@@ -12,7 +12,6 @@
     "test:browser": "vitest --workspace=vitest.workspace.ts"
   },
   "devDependencies": {
-    "@types/firebase": "^3.2.1",
     "@types/three": "^0.162.0",
     "eslint": "^9.8.0",
     "typescript": "^5.2.2",
@@ -21,7 +20,6 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
-    "firebase": "^10.9.0",
     "sass": "^1.72.0",
     "three": "^0.162.0"
   }
