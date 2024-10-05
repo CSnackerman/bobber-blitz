@@ -41,6 +41,17 @@
     user-select: none;
     scale: 10 5;
     overflow: visible;
-    animation: slide ease-in-out infinite alternate, bob ease-in-out infinite alternate;
+    animation: slide ease-in-out infinite alternate,
+      bob ease-in-out infinite alternate;
+  }
+
+  @media (width < 500px) {
+    & > h1 {
+      font-size: 3rem;
+    }
+
+    & > div {
+      scale: 5 2.5;
+    }
   }
 }
