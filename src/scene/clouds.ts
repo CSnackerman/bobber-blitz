@@ -29,6 +29,7 @@ export {
 import CloudTextureWorker from '../workers/cloud_worker?worker';
 
 // shaders
+import { logError } from '../core/error.ts';
 import fragmentShader from '../shaders/cloud.frag.glsl?raw';
 import vertexShader from '../shaders/cloud.vert.glsl?raw';
 
@@ -52,10 +53,26 @@ const maxElevation = minElevation + 1000;
 const FloatSpeed = 1000;
 const DescentSpeed = 100;
 
-const ENABLED = true;
+const CLOUDS_ENABLED = true;
+
+// caching
+const CACHE_ENABLED = true;
+const CLOUD_TEXTURE_DATA_CACHE = 'cloud-texture-data-cache';
+const CacheLog: {
+  cached: number[];
+  fetched: number[];
+  error: { cached: number[]; fetched: number[] };
+} = {
+  cached: [],
+  fetched: [],
+  error: {
+    cached: [],
+    fetched: [],
+  },
+};
 
 function setupAll() {
-  if (!ENABLED) return;
+  if (!CLOUDS_ENABLED) return;
   for (let t = 0; t < N_CLOUDS; t++) {
     setup(t);
   }
@@ -157,17 +174,72 @@ function isNegativeScale(cloud: Mesh) {
   return false;
 }
 
+async function cacheTextureData(cloudId: number, data: Uint8Array) {
+  const key = `/cloud-texture-data-${cloudId}`;
+
+  try {
+    const cache = await caches.open(CLOUD_TEXTURE_DATA_CACHE);
+    await cache.put(key, new Response(data));
+    CacheLog.cached.push(cloudId);
+  } catch (err) {
+    CacheLog.error.cached.push(cloudId);
+    logError(err);
+  }
+}
+
+async function fetchCachedTextureData(cloudId: number) {
+  const key = `/cloud-texture-data-${cloudId}`;
+
+  try {
+    const cache = await caches.open(CLOUD_TEXTURE_DATA_CACHE);
+    const response = await cache.match(key);
+
+    if (response) {
+      CacheLog.fetched.push(cloudId);
+      const arrayBuffer = await response.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    }
+  } catch (err) {
+    CacheLog.error.fetched.push(cloudId);
+    logError(err);
+  }
+
+  return null;
+}
+
+function logCache() {
+  console.log(`caches: ${CacheLog.cached.join(' ')}`);
+  console.log(`cache fetches: ${CacheLog.fetched.join(' ')}`);
+  if (CacheLog.error.cached.length) {
+    console.log(`caching errors: ${CacheLog.error.cached.join(' ')}`);
+  }
+  if (CacheLog.error.fetched.length) {
+    console.log(`cache fetch errors: ${CacheLog.error.fetched.join(' ')}`);
+  }
+}
+
 async function preCalcTextures() {
-  if (!ENABLED) return;
+  if (!CLOUDS_ENABLED) return;
+
   const promises: Promise<void>[] = [];
   for (let i = 0; i < N_CLOUDS; i++) {
     promises.push(
-      new Promise((resolve) => {
+      new Promise(async (resolve) => {
+        if (CACHE_ENABLED) {
+          const cached = await fetchCachedTextureData(i);
+          if (cached) {
+            const texture = createTexture(cached);
+            cloudTextures.push(texture);
+            resolve();
+            return;
+          }
+        }
         const cloudTextureWorker = new CloudTextureWorker();
         cloudTextureWorker.postMessage(null);
-        cloudTextureWorker.onmessage = (e: MessageEvent<Uint8Array>) => {
+        cloudTextureWorker.onmessage = async (e: MessageEvent<Uint8Array>) => {
           const texture = createTexture(e.data);
           cloudTextures.push(texture);
+          await cacheTextureData(i, e.data);
           resolve();
           cloudTextureWorker.terminate();
         };
@@ -176,6 +248,8 @@ async function preCalcTextures() {
   }
 
   await Promise.all(promises);
+
+  logCache();
 }
 
 function createTexture(data: Uint8Array) {
