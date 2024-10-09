@@ -3,6 +3,7 @@
 * {
   font-family: sans-serif;
   color: rgb(179, 179, 179);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -37,7 +38,8 @@ body {
   padding: 0;
   color: orangered;
 
-  animation: glimmer 1.5s linear infinite alternate, pulse 300ms linear infinite alternate;
+  animation: glimmer 1.5s linear infinite alternate,
+    pulse 300ms linear infinite alternate;
 }
 
 $line_tension_border_radius: 2em;
