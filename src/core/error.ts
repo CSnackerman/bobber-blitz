@@ -7,7 +7,9 @@ export function logError(err: unknown) {
     console.error(
       `[auth-error] (${err.code}) (${err.status}) ${err.name}: ${err.message}`
     );
+  } else if (typeof err === 'object') {
+    console.error(`[obj-error] ${JSON.stringify(err)}`);
   } else {
-    console.error(`[err?] ${err}`);
+    console.error(`[???-error] ${err}`);
   }
 }
