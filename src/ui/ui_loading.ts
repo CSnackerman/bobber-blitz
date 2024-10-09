@@ -7,7 +7,6 @@ const loadingElement = document
 let domElement: Element;
 
 export function setupUI_loading() {
-  console.log('loadingEl', loadingElement);
   let manySpaces = '';
   for (let i = 0; i < 1000; i++) {
     manySpaces += '&nbsp;';
