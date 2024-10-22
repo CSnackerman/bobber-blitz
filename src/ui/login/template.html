@@ -1,7 +1,7 @@
 <div id="login-widget">
   <h5 id="login-title">login</h5>
   <button id="root-button" class="root-button">
-    <img id="root-button-img" src="avatar-default.svg" alt="log in" width="28" height="28" />
+    <img id="root-button-img" src="avatar-default.svg" alt="login menu" width="28" height="28" />
   </button>
   <div id="providers">
     <button id="email-login-button" class="provider-button">
@@ -75,6 +75,7 @@
     transition: opacity 100ms ease-in-out;
     aspect-ratio: 1/1;
     user-select: none;
+    overflow: hidden;
   }
 
   button.provider-button:hover,
@@ -84,7 +85,7 @@
 
   button.provider-button:active,
   button.root-button:active {
-    filter: saturate(3) brightness(1.2);
+    filter: saturate(1.5) brightness(1.2);
   }
 
   img {
