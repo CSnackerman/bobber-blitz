@@ -3,7 +3,7 @@ import { getErrorDisplayMessage, logError } from '../../core/error.ts';
 import supabase, {
   getUserAvatar,
   getUserLoginStatus,
-  SupabaseEvent,
+  initSupabaseSession,
   UserStatus,
 } from '../../core/supabase.ts';
 import template from './template.html?raw';
@@ -39,6 +39,11 @@ customElements.define(
       this.attachShadow({ mode: 'open' });
     }
 
+    async connectedCallback() {
+      await initSupabaseSession();
+      await this.render();
+    }
+
     private el<T extends HTMLElement>(query: string) {
       return this.shadowRoot!.querySelector<T>(query) as T;
     }
@@ -60,10 +65,6 @@ customElements.define(
       await this.syncState();
       this.syncShadowRoot();
       this.addEventListeners();
-    }
-
-    async connectedCallback() {
-      await this.render();
     }
 
     private async syncState() {
@@ -113,8 +114,6 @@ customElements.define(
     }
 
     private addEventListeners() {
-      SupabaseEvent.sessionStart.addReceiver(() => {});
-
       if (this.state.offlineExpanded !== undefined) {
         this.rootButton().onclick = () => {
           if (this.state.offlineExpanded !== undefined) {

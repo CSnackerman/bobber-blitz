@@ -9,27 +9,20 @@ const supabase = createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY);
 
 export default supabase;
 
-export const SupabaseEvent = Object.freeze({
-  sessionStart: {
-    dispatch: () => dispatchEvent(new Event('session-start')),
-    addReceiver: (callback: () => void) => addEventListener('session-start', callback),
-  },
-});
-
 export async function initSupabaseSession() {
   try {
     const session = await getSession();
 
     if (session && session.user) {
-      const parenthetical = session.user.is_anonymous ? '(anonymously)' : '';
-      console.log(`already signed in ${parenthetical}...`, session.user);
+      const parenthetical = session.user.is_anonymous
+        ? '(anonymously)'
+        : `(${session.user.app_metadata.provider})`;
+      console.log(`signed in ${parenthetical}...`, session.user);
     } else {
       const { data: anonymousUser, error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
-      console.log('signed in anonymously...', anonymousUser);
+      console.log('signed in anonymously (new)...', anonymousUser);
     }
-
-    SupabaseEvent.sessionStart.dispatch();
   } catch (err) {
     logError(err);
   }
