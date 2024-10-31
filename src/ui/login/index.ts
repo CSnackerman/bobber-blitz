@@ -3,13 +3,17 @@ import { getErrorDisplayMessage, logError } from '../../core/error.ts';
 import supabase, {
   getUserAvatar,
   getUserLoginStatus,
+  GoogleAvatar,
   initSupabaseSession,
+  logout,
   UserStatus,
 } from '../../core/supabase.ts';
 import template from './template.html?raw';
 
+const { VITE_OAUTH_REDIRECT_URL: OAUTH_REDIRECT = 'https://bobber-blitz.netlify.app' } = import.meta.env;
+
 type Provider = 'anonymous' | 'google' | 'email-password';
-type AvatarSrc = 'avatar-default.svg' | 'google-g-logo.svg' | 'propeller.svg' | string;
+type AvatarSrc = 'avatar-default.svg' | 'google-g-logo.svg' | 'propeller.svg' | GoogleAvatar;
 type Expanded = undefined | false | true;
 
 interface UiLoginState {
@@ -52,7 +56,9 @@ customElements.define(
     private rootButton = () => this.el<HTMLButtonElement>('#root-button');
     private rootImage = () => this.el<HTMLImageElement>('#root-button-img');
     private emailLoginButton = () => this.el<HTMLButtonElement>('#email-login-button');
+    private emailLoginButtonImage = () => this.el<HTMLImageElement>('#provider-email');
     private googleLoginButton = () => this.el<HTMLButtonElement>('#google-login-button');
+    private googleLoginButtonImage = () => this.el<HTMLImageElement>('#provider-google');
     private emailLoginDialog = () => this.el<HTMLDialogElement>('dialog');
     private emailDialogExitButton = () => this.el<HTMLButtonElement>('#exit-dialog');
     private emailInput = () => this.el<HTMLInputElement>('input[type="email"]');
@@ -64,21 +70,25 @@ customElements.define(
       this.shadowRoot!.innerHTML = template;
       await this.syncState();
       this.syncShadowRoot();
-      this.addEventListeners();
+
+      if (this.isOfflineOrAnonymous()) {
+        this.addLoggedOffEventListeners();
+      } else {
+        this.addLoggedOnEventListeners();
+      }
     }
 
     private async syncState() {
-      const userStatus = await getUserLoginStatus();
+      this.state.userStatus = await getUserLoginStatus();
 
-      if (userStatus === 'offline' || userStatus === 'anonymous') {
+      if (this.isOfflineOrAnonymous()) {
         this.state.provider = 'anonymous';
         this.state.avatarSrc = 'avatar-default.svg';
-        return;
+      } else {
+        this.state.offlineExpanded = undefined;
+        this.state.showTitle = false;
+        this.state.avatarSrc = (await getUserAvatar()) ?? 'propeller.svg';
       }
-
-      this.state.offlineExpanded = undefined;
-      this.state.showTitle = false;
-      this.state.avatarSrc = (await getUserAvatar()) ?? 'propeller.svg';
     }
 
     private syncShadowRoot() {
@@ -93,6 +103,19 @@ customElements.define(
       const hasOpen = this.emailLoginDialog().hasAttribute('open');
       if (expanded && !hasOpen) this.emailLoginDialog().setAttribute('open', '');
       else if (!expanded && hasOpen) this.emailLoginDialog().removeAttribute('open');
+
+      if (this.isOnline()) {
+        this.emailLoginButtonImage().src = 'gear.svg';
+        this.googleLoginButtonImage().src = 'logout-icon.svg';
+      }
+    }
+
+    private isOfflineOrAnonymous() {
+      return this.state.userStatus === 'offline' || this.state.userStatus === 'anonymous';
+    }
+
+    private isOnline() {
+      return this.state.userStatus === 'online';
     }
 
     private toggleExpanded() {
@@ -113,7 +136,23 @@ customElements.define(
         : this.emailLoginDialog().setAttribute('open', '');
     }
 
-    private addEventListeners() {
+    private addLoggedOnEventListeners() {
+      // root button
+      this.rootButton().onclick = () => {
+        this.toggleExpanded();
+      };
+
+      // options button
+      // TODO
+
+      // logout button
+      this.googleLoginButton().onclick = async () => {
+        await logout();
+        window.location.reload();
+      };
+    }
+
+    private addLoggedOffEventListeners() {
       if (this.state.offlineExpanded !== undefined) {
         this.rootButton().onclick = () => {
           if (this.state.offlineExpanded !== undefined) {
@@ -167,7 +206,7 @@ customElements.define(
           this.state.avatarSrc = 'propeller.svg';
           this.state.offlineExpanded = undefined;
           this.loginTitle().style.display = 'none';
-          this.render();
+          await this.render();
         } catch (err) {
           logError(err);
           alert(getErrorDisplayMessage(err));
@@ -196,7 +235,7 @@ customElements.define(
         const response = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: 'http://localhost:/5173',
+            redirectTo: OAUTH_REDIRECT,
           },
         });
 
@@ -207,10 +246,10 @@ customElements.define(
         this.state.avatarSrc = 'google-g-logo.svg';
         this.state.offlineExpanded = undefined;
         this.loginTitle().style.display = 'none';
-        this.render();
+        await this.render();
       } catch (err) {
         logError(err);
       }
     }
-  }
+  },
 );

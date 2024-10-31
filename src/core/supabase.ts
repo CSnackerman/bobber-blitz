@@ -74,16 +74,26 @@ async function getUser() {
   return null;
 }
 
-export async function getUserAvatar() {
+export type GoogleAvatar = string;
+
+export async function getUserAvatar(): Promise<GoogleAvatar | null> {
   try {
     const user = await getUser();
 
     if (!user) return null;
 
-    return user.user_metadata?.avatar_url as string;
+    return user.user_metadata?.avatar_url as GoogleAvatar;
   } catch (err) {
     logError(err);
   }
 
   return null;
+}
+
+export async function logout() {
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    logError(err);
+  }
 }

@@ -1,13 +1,13 @@
 <div id="login-widget">
   <h5 id="login-title">login</h5>
   <button id="root-button" class="root-button">
-    <img id="root-button-img" src="avatar-default.svg" alt="login menu" width="28" height="28" />
+    <img id="root-button-img" src="/avatar-default.svg" alt="login menu" width="28" height="28" />
   </button>
   <div id="providers">
     <button id="email-login-button" class="provider-button">
       <img
         id="provider-email"
-        src="email-login.svg"
+        src="/email-login.svg"
         alt="Log in with email"
         width="28"
         height="28"
@@ -16,7 +16,7 @@
     <button id="google-login-button" class="provider-button">
       <img
         id="provider-google"
-        src="google-g-logo.svg"
+        src="/google-g-logo.svg"
         alt="Log in with Google"
         width="28"
         height="28"
@@ -43,139 +43,132 @@
 </div>
 
 <style>
-  #login-widget {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
+    #login-widget {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
 
-    display: flex;
-    flex-direction: column;
-    place-items: center;
-  }
+        display: flex;
+        flex-direction: column;
+        place-items: center;
+    }
 
-  h5 {
-    margin: 0 0 3px 0;
-    color: white;
-    text-shadow: 1px 1px black;
-    font-weight: normal;
-    opacity: 0.6;
-  }
+    h5 {
+        margin: 0 0 3px 0;
+        color: white;
+        text-shadow: 1px 1px black;
+        font-weight: normal;
+        opacity: 0.6;
+    }
 
-  button.provider-button,
-  button.root-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    border-radius: 50%;
-    background-color: whitesmoke;
-    border: none;
-    padding: 0;
-    opacity: 0.5;
-    transition: opacity 100ms ease-in-out;
-    aspect-ratio: 1/1;
-    user-select: none;
-    overflow: hidden;
-  }
+    button.provider-button,
+    button.root-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 50%;
+        background-color: whitesmoke;
+        border: none;
+        padding: 0;
+        opacity: 0.5;
+        transition: opacity 100ms ease-in-out;
+        aspect-ratio: 1/1;
+        user-select: none;
+        overflow: hidden;
+    }
 
-  button.provider-button:hover,
-  button.root-button:hover {
-    opacity: 1;
-  }
+    button.provider-button:hover,
+    button.root-button:hover {
+        opacity: 1;
+    }
 
-  button.provider-button:active,
-  button.root-button:active {
-    filter: saturate(1.5) brightness(1.2);
-  }
+    button.provider-button:active,
+    button.root-button:active {
+        filter: saturate(1.5) brightness(1.2);
+    }
 
-  img {
-    vertical-align: middle;
-  }
-
-  .login-avatar {
-    border-radius: 100%;
-    padding: 0;
-    opacity: 1;
-    width: 40px;
-    aspect-ratio: 1/1;
-  }
-
-  @media (width <= 500px) {
-    button,
     img {
-      opacity: initial;
-      transition: none;
+        vertical-align: middle;
     }
-    button:hover {
-      opacity: initial;
+
+    @media (width <= 500px) {
+        button,
+        img {
+            opacity: initial;
+            transition: none;
+        }
+
+        button:hover {
+            opacity: initial;
+        }
     }
-  }
 
-  #providers {
-    position: absolute;
-    top: 100%;
-    display: flex;
-    flex-direction: column;
-    place-items: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    width: 100%;
-  }
+    #providers {
+        position: absolute;
+        top: 100%;
+        display: flex;
+        flex-direction: column;
+        place-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        width: 100%;
+    }
 
-  .provider-button {
-    visibility: hidden;
-  }
+    .provider-button {
+        visibility: hidden;
+    }
 
-  dialog {
-    position: fixed;
-    inset: 0;
-    margin: auto;
-    border: 1px solid gray;
-    border-radius: 4px;
-    padding: 1.2rem;
-    background-color: #f5f5f582;
-    font-size: 0.9rem;
-  }
+    dialog {
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        border: 1px solid gray;
+        border-radius: 4px;
+        padding: 1.2rem;
+        background-color: #f5f5f582;
+        font-size: 0.9rem;
+    }
 
-  dialog * {
-    opacity: 0.95;
-  }
+    dialog * {
+        opacity: 0.95;
+    }
 
-  button#exit-dialog {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    aspect-ratio: 1;
-    font-size: 0.7rem;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    filter: brightness(0.9);
-    opacity: 0.604;
-    padding: 3px;
-  }
+    button#exit-dialog {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        aspect-ratio: 1;
+        font-size: 0.7rem;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        filter: brightness(0.9);
+        opacity: 0.604;
+        padding: 3px;
+    }
 
-  button#exit-dialog:hover {
-    filter: brightness(1);
-    opacity: 1;
-  }
+    button#exit-dialog:hover {
+        filter: brightness(1);
+        opacity: 1;
+    }
 
-  button#exit-dialog:active {
-    filter: brightness(0.5);
-    opacity: 1;
-  }
+    button#exit-dialog:active {
+        filter: brightness(0.5);
+        opacity: 1;
+    }
 
-  dialog > form {
-    display: grid;
-    gap: 7px;
-  }
+    dialog > form {
+        display: grid;
+        gap: 7px;
+    }
 
-  dialog > form > label {
-    display: grid;
-  }
+    dialog > form > label {
+        display: grid;
+    }
 
-  div#submit-buttons {
-    width: fit-content;
-    justify-self: end;
-  }
+    div#submit-buttons {
+        width: fit-content;
+        justify-self: end;
+    }
 </style>
