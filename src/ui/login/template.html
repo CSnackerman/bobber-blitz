@@ -1,0 +1,58 @@
+<button>
+  <img src="google-g-logo.svg" alt="Login With Google" />
+</button>
+
+<style>
+  button {
+    user-select: none;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    height: max-content;
+    border-radius: 100%;
+    background-color: whitesmoke;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.5;
+    transition: opacity 100ms ease-in-out;
+  }
+
+  button:hover {
+    opacity: 1;
+  }
+
+  button:active {
+    filter: saturate(3) brightness(1.2);
+  }
+
+  img {
+    filter: drop-shadow(0 0 1px black);
+  }
+
+  .login-avatar {
+    border-radius: 100%;
+    padding: 0;
+    opacity: 1;
+    width: 40px;
+    aspect-ratio: 1/1;
+  }
+
+  button.login-avatar:active {
+    filter: saturate(0.3);
+  }
+
+  @media (width <= 500px) {
+    button,
+    img {
+      opacity: initial;
+      transition: none;
+    }
+    button:hover {
+      opacity: initial;
+    }
+  }
+</style>

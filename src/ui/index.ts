@@ -17,6 +17,8 @@ import {
   updateUI_lineTension,
 } from './ui_line_tension';
 
+import './login';
+
 const { RESET, CAST, BITE, HOOK, CATCH_FISH } = Signals;
 
 export function setupUI() {
