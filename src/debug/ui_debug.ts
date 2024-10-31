@@ -1,7 +1,7 @@
 import { getCastState } from '../controls/cast';
 import { CAST_CLOCK, getClock } from '../core/clock';
 import { renderer } from '../core/renderer';
-import { Signals, receive } from '../core/state';
+import { receive, Signals } from '../core/state';
 import { getBobberState } from '../scene/bobber';
 import { getFishState } from '../scene/fish';
 import { getFishermanState } from '../scene/fisherman';
@@ -10,9 +10,7 @@ import { getReticleState } from '../scene/reticle';
 import { getDeviceOrientation, getDeviceType } from '../util/device';
 import { getSpan } from '../util/ui_util';
 
-const template = document.getElementById(
-  'template_debug'
-) as HTMLTemplateElement;
+const template = document.getElementById('template_debug') as HTMLTemplateElement;
 
 const debug_div = template.content.querySelector('div') as HTMLDivElement;
 
@@ -61,7 +59,7 @@ function getDebugInnerHtml() {
     `Bobber....... ${getSpan(getBobberState(), 'greenyellow').outerHTML} <br>` +
     `Fishing Line. ${getSpan(getFishingLineState(), 'orange').outerHTML} <br>` +
     `Fish......... ${getSpan(getFishState(), 'pink').outerHTML} <br>` +
-    `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br>` 
+    `Reticle...... ${getSpan(getReticleState(), 'lightgreen').outerHTML} <br>`
   );
 }
 
@@ -103,8 +101,7 @@ function setupWatches() {
 
       if (!c.running) return;
 
-      const elapsed = c.getElapsedTime().toFixed(3);
-      this.value = elapsed;
+      this.value = c.getElapsedTime().toFixed(3);
     },
   });
 

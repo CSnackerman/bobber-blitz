@@ -5,7 +5,7 @@ export { renderer, setup as setupRenderer };
 
 const renderer = new WebGLRenderer({
   canvas: document.getElementById('c') as HTMLCanvasElement,
-  antialias: isMobile() ? false : true,
+  antialias: !isMobile(),
 });
 
 function setup() {

@@ -17,14 +17,6 @@ import { isMobile } from '../util/device';
 import { getRandomFloat, getRandomInt } from '../util/random';
 
 import { rootScene } from './scene';
-
-export {
-  TextureSize as CloudTextureSize,
-  preCalcTextures as preCalcCloudTextures,
-  setupAll as setupClouds,
-  update as updateClouds,
-};
-
 // worker
 import CloudTextureWorker from '../workers/cloud_worker?worker';
 
@@ -32,6 +24,13 @@ import CloudTextureWorker from '../workers/cloud_worker?worker';
 import { logError } from '../core/error.ts';
 import fragmentShader from '../shaders/cloud.frag.glsl?raw';
 import vertexShader from '../shaders/cloud.vert.glsl?raw';
+
+export {
+  TextureSize as CloudTextureSize,
+  preCalcTextures as preCalcCloudTextures,
+  setupAll as setupClouds,
+  update as updateClouds,
+};
 
 const clouds: Mesh<BoxGeometry, RawShaderMaterial, Object3DEventMap>[] = [];
 const cloudTextures: Data3DTexture[] = [];
@@ -136,9 +135,7 @@ function initTransform(cloud: Mesh) {
 function randomizeScale(cloud: Mesh) {
   const first = getRandomFloat(minScale, maxScale);
   const second =
-    getRandomInt(0, 1) === 0
-      ? first + getRandomFloat(50, 1000)
-      : first - getRandomFloat(50, 1000);
+    getRandomInt(0, 1) === 0 ? first + getRandomFloat(50, 1000) : first - getRandomFloat(50, 1000);
 
   cloud.scale.set(first, getRandomFloat(minHeight, maxHeight), second);
 }
@@ -167,11 +164,7 @@ function shrink(cloud: Mesh) {
 function isNegativeScale(cloud: Mesh) {
   const s = cloud.scale;
 
-  if (s.x <= 1 && s.y <= 1 && s.z <= 1) {
-    return true;
-  }
-
-  return false;
+  return s.x <= 1 && s.y <= 1 && s.z <= 1;
 }
 
 async function cacheTextureData(cloudId: number, data: Uint8Array) {
@@ -253,12 +246,7 @@ async function preCalcTextures() {
 }
 
 function createTexture(data: Uint8Array) {
-  const texture = new Data3DTexture(
-    data,
-    TextureSize,
-    TextureSize,
-    TextureSize
-  );
+  const texture = new Data3DTexture(data, TextureSize, TextureSize, TextureSize);
   texture.format = RedFormat;
   texture.minFilter = LinearFilter;
   texture.magFilter = LinearFilter;
