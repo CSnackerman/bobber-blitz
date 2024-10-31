@@ -2,18 +2,13 @@ import { setupControls } from './controls';
 import { updateTimeDelta } from './core/clock';
 import { renderer, setupRenderer } from './core/renderer';
 import { Signals, emit } from './core/state';
-import { initSupabaseSession } from './core/supabase.ts';
 import { updateDebug } from './debug/debug_orbs';
 import { setupPointer } from './events/pointer';
 import { setupResizeHandler } from './events/resize';
 import { setupBoatAsync, updateBoat } from './scene/boat';
 import { setupBobberAsync, updateBobber } from './scene/bobber';
 import { camera, setupCamera } from './scene/camera';
-import {
-  preCalcCloudTextures,
-  setupClouds,
-  updateClouds,
-} from './scene/clouds';
+import { preCalcCloudTextures, setupClouds, updateClouds } from './scene/clouds';
 import { setupFishAsync, updateFish } from './scene/fish';
 import { setupFishermanAsync, updateFisherman } from './scene/fisherman';
 import { setupFishingLineAsync, updateFishingLine } from './scene/fishing_line';
@@ -35,7 +30,6 @@ main().catch((e: Error) => {
 
 async function main() {
   setupUI_loading();
-  await initSupabaseSession();
   initScene();
   await preCalcCloudTextures();
   await loadModels();
